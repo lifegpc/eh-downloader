@@ -4,7 +4,7 @@ export type GalleryMetadataTorrentInfo = {
     name: string;
     tsize: string;
     fsize: string;
-}
+};
 
 export type GalleryMetadataSingle = {
     gid: number;
@@ -27,7 +27,7 @@ export type GalleryMetadataSingle = {
     parent_key: string | undefined;
     first_gid: string | undefined;
     first_key: string | undefined;
-}
+};
 
 class GalleryMetadata {
     obj;

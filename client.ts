@@ -90,7 +90,7 @@ export class Client {
     /**
      * Fetch metadata via API
      * @param gids A list of Gallery ID and token
-     * @returns 
+     * @returns
      */
     async fetchGalleryMetadataByAPI(...gids: GID[]) {
         if (gids.length > 25) throw Error("Load limiting is reached.");
