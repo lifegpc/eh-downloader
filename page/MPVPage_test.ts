@@ -5,7 +5,7 @@ import { API_PERMISSION } from "../test_base.ts";
 import { assert } from "https://deno.land/std@0.188.0/_util/asserts.ts";
 
 Deno.test({
-    name: "GalleryPage_test",
+    name: "MPVPage_test",
     permissions: API_PERMISSION,
 }, async () => {
     const cfg = await load_settings("./config.json");
