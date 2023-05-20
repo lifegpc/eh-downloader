@@ -1,7 +1,7 @@
 import { parse } from "https://deno.land/std@0.188.0/flags/mod.ts";
 import { load_settings } from "./config.ts";
 import { check_file_permissions } from "./permissons.ts";
-import { TaskManager } from "./task_manager.ts";
+import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import { ParsedUrl, parseUrl, UrlType } from "./url.ts";
 import { sure_dir } from "./utils.ts";
 
@@ -75,10 +75,12 @@ async function run() {
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
-        download();
+        await download();
     } else if (cmd == CMD.Run) {
-        run();
+        await run();
     }
 }
 
-main();
+main().catch((e) => {
+    if (!(e instanceof AlreadyClosedError)) throw e;
+});

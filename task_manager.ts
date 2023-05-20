@@ -2,11 +2,16 @@ import { Client } from "./client.ts";
 import { Config } from "./config.ts";
 import { EhDb } from "./db.ts";
 import { check_running } from "./pid_check.ts";
+import { add_exit_handler } from "./signal_handler.ts";
 import { Task, TaskType } from "./task.ts";
 import { download_task } from "./tasks/download.ts";
 import { promiseState, PromiseStatus, sleep } from "./utils.ts";
 
+export class AlreadyClosedError extends Error {
+}
+
 export class TaskManager {
+    #closed = false;
     client;
     db;
     running_tasks: Map<number, Promise<Task>>;
@@ -16,8 +21,13 @@ export class TaskManager {
         this.db = new EhDb(cfg.base);
         this.running_tasks = new Map();
         this.max_task_count = cfg.max_task_count;
+        add_exit_handler(this);
+    }
+    #check_closed() {
+        if (this.#closed) throw new AlreadyClosedError();
     }
     async add_download_task(gid: number, token: string) {
+        this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
         if (otask !== undefined) {
             console.log("The task is already in list.");
@@ -34,6 +44,7 @@ export class TaskManager {
         return await this.db.add_task(task);
     }
     async check_task(task: Task) {
+        this.#check_closed();
         if (await this.check_task_is_running(task)) return;
         let t = task;
         if (task.pid !== Deno.pid) {
@@ -44,6 +55,7 @@ export class TaskManager {
         return t;
     }
     async check_task_is_running(task: Task) {
+        this.#check_closed();
         if (task.pid == Deno.pid) {
             return this.running_tasks.has(task.id);
         } else {
@@ -52,6 +64,7 @@ export class TaskManager {
         }
     }
     async check_running_tasks() {
+        this.#check_closed();
         const removed_task: number[] = [];
         for (const [id, task] of this.running_tasks) {
             const status = await promiseState(task);
@@ -68,9 +81,12 @@ export class TaskManager {
         }
     }
     close() {
+        if (this.#closed) return;
+        this.#closed = true;
         this.db.close();
     }
     async run() {
+        this.#check_closed();
         while (1) {
             await this.check_running_tasks();
             if (this.running_tasks.size == this.max_task_count) {
@@ -94,6 +110,7 @@ export class TaskManager {
         }
     }
     run_task(task: Task) {
+        this.#check_closed();
         if (task.type == TaskType.Download) {
             this.running_tasks.set(
                 task.id,
