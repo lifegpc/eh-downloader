@@ -33,9 +33,9 @@ Deno.test("MPVPage_test", async () => {
     assertEquals(p2.origin_xres, 3351);
     assertEquals(p2.origin_yres, 4894);
     console.log(p2.data.i);
-    console.log(p2.original_imgurl);
+    /* console.log(p2.original_imgurl);
     const r = await p2.load_original_image();
     assert(r);
     r.body?.cancel();
-    console.log(p2.redirected_url);
+    console.log(p2.redirected_url); */
 });
