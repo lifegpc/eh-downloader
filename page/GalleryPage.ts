@@ -11,6 +11,9 @@ class GalleryPage {
     client;
     #tags: Set<string> | undefined = undefined;
     #gdd_data: Map<string, Element> | undefined = undefined;
+    #meta_script: string | undefined = undefined;
+    #gid: number | undefined = undefined;
+    #token: string | undefined = undefined;
     constructor(html: string, client: Client) {
         const dom = (new DOMParser()).parseFromString(html, "text/html");
         if (!dom) {
@@ -47,6 +50,14 @@ class GalleryPage {
             return g;
         } else return this.#gdd_data;
     }
+    get gid() {
+        if (this.#gid === undefined) {
+            const gid: number = eval(`${this.meta_script};gid`);
+            this.#gid = gid;
+            return gid;
+        }
+        return this.#gid;
+    }
     get language() {
         const o = this.gdd_data.get("Language")?.innerText;
         if (!o) return undefined;
@@ -59,6 +70,19 @@ class GalleryPage {
         if (!o) throw Error("Unknown length.");
         const p = o.slice(0, o.length - 6);
         return parseInt(p);
+    }
+    get meta_script() {
+        if (this.#meta_script === undefined) {
+            const c = this.doc.getElementsByTagName("script");
+            for (const e of c) {
+                const t = e.innerHTML.trim();
+                if (t.startsWith("var ")) {
+                    this.#meta_script = t;
+                    return t;
+                }
+            }
+            throw Error("Failed to locate meta script.");
+        } else return this.#meta_script;
     }
     get name() {
         const ele = this.doc.getElementById("gn");
@@ -77,6 +101,14 @@ class GalleryPage {
             this.#tags = tags;
             return tags;
         } else return this.#tags;
+    }
+    get token() {
+        if (this.#token === undefined) {
+            const token: string = eval(`${this.meta_script};token`);
+            this.#token = token;
+            return token;
+        }
+        return this.#token;
     }
     get visible() {
         const s = this.gdd_data.get("Visible")?.innerText;

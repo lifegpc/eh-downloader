@@ -1,3 +1,5 @@
+import { GMeta } from "../db.ts";
+
 export type GalleryMetadataTorrentInfo = {
     hash: string;
     added: string;
@@ -31,8 +33,32 @@ export type GalleryMetadataSingle = {
 
 class GalleryMetadata {
     obj;
+    map: Map<number, GalleryMetadataSingle | string>;
     constructor(text: string) {
         this.obj = JSON.parse(text);
+        this.map = new Map();
+        for (const m of this.obj["gmetadata"]) {
+            this.map.set(m.gid, m.error ? m.error : m);
+        }
+    }
+    convert(g: GalleryMetadataSingle): GMeta {
+        return {
+            gid: g.gid,
+            token: g.token,
+            title: g.title,
+            title_jpn: g.title_jpn,
+            category: g.category,
+            uploader: g.uploader,
+            posted: parseInt(g.posted),
+            filecount: parseInt(g.filecount),
+            filesize: g.filesize,
+            expunged: g.expunged,
+            rating: parseFloat(g.rating),
+            parent_gid: g.parent_gid ? parseInt(g.parent_gid) : null,
+            parent_key: g.parent_key ? g.parent_key : null,
+            first_gid: g.first_gid ? parseInt(g.first_gid) : null,
+            first_key: g.first_key ? g.first_key : null,
+        };
     }
 }
 

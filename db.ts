@@ -18,6 +18,40 @@ export enum SqliteTransactionType {
     IMMEDIATE = "IMMEDIATE",
     EXCLUSIVE = "EXCLUSIVE",
 }
+export type GMeta = {
+    gid: number;
+    token: string;
+    title: string;
+    title_jpn: string;
+    category: string;
+    uploader: string;
+    posted: number;
+    filecount: number;
+    filesize: number;
+    expunged: boolean;
+    rating: number;
+    parent_gid: number | null;
+    parent_key: string | null;
+    first_gid: number | null;
+    first_key: string | null;
+};
+export type GMetaRaw = {
+    gid: number;
+    token: string;
+    title: string;
+    title_jpn: string;
+    category: string;
+    uploader: string;
+    posted: number;
+    filecount: number;
+    filesize: number;
+    expunged: number;
+    rating: number;
+    parent_gid: number | null;
+    parent_key: string | null;
+    first_gid: number | null;
+    first_key: string | null;
+};
 const ALL_TABLES = ["version"];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
@@ -31,6 +65,24 @@ const TASK_TABLE = `CREATE TABLE task (
     token TEXT,
     pn INT,
     pid INT
+);`;
+const GMETA_TABLE = `CREATE TABLE gmeta (
+    gid INT,
+    token TEXT,
+    title TEXT,
+    title_jpn TEXT,
+    category TEXT,
+    uploader TEXT,
+    posted INT,
+    filecount INT,
+    filesize INT,
+    expunged BOOLEAN,
+    rating REAL,
+    parent_gid INT,
+    parent_key TEXT,
+    first_gid INT,
+    first_key TEXT,
+    PRIMARY KEY (gid)
 );`;
 
 export class EhDb {
@@ -73,6 +125,9 @@ export class EhDb {
         if (!this._exist_table.has("task")) {
             this.db.execute(TASK_TABLE);
         }
+        if (!this._exist_table.has("gmeta")) {
+            this.db.execute(GMETA_TABLE);
+        }
         this._updateExistsTable();
     }
     _read_version() {
@@ -104,6 +159,12 @@ export class EhDb {
                 this.version.toString(),
             ]);
         });
+    }
+    add_gmeta(gmeta: GMeta) {
+        this.db.queryEntries(
+            "INSERT OR REPLACE INTO gmeta VALUES (:gid, :token, :title, :title_jpn, :category, :uploader, :posted, :filecount, :filesize, :expunged, :rating, :parent_gid, :parent_key, :first_gid, :first_key);",
+            gmeta,
+        );
     }
     add_task(task: Task) {
         return this.transaction(() => {
@@ -157,6 +218,14 @@ export class EhDb {
             }
         }
     }
+    convert_gmeta(m: GMetaRaw[]): GMeta[] {
+        return m.map((m) => {
+            const b = m.expunged === 1;
+            const t = <GMeta> <unknown> m;
+            t.expunged = b;
+            return t;
+        });
+    }
     delete_task(task: Task) {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
@@ -169,6 +238,15 @@ export class EhDb {
     async funlock() {
         if (!this.file) return;
         await eval(`Deno.funlock(${this.file.rid});`);
+    }
+    get_gmeta_by_gid(gid: number) {
+        const s = this.convert_gmeta(
+            this.db.queryEntries<GMetaRaw>(
+                "SELECT * FROM gmeta WHERE gid = ?;",
+                [gid],
+            ),
+        );
+        return s.length ? s[0] : undefined;
     }
     get_tasks_by_pid(pid: number) {
         return this.transaction(() =>

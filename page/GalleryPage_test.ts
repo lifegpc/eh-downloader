@@ -37,4 +37,6 @@ Deno.test({
     console.log(re.favorited);
     assert(typeof re.favorited === "number");
     assertEquals(re.language, "Chinese");
+    assertEquals(re.gid, 2552611);
+    assertEquals(re.token, "3132307627");
 });
