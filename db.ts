@@ -90,13 +90,15 @@ export class EhDb {
     flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
     file: Deno.FsFile | undefined;
     _exist_table: Set<string> = new Set();
+    #lock_file: string | undefined;
     readonly version = new SemVer("1.0.0-0");
     constructor(base_path: string) {
         this.db = new DB(join(base_path, "data.db"));
         this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
         if (!this._check_database()) this._create_table();
         if (this.flock_enabled) {
-            this.file = Deno.openSync(join(base_path, "db.lock"), {
+            this.#lock_file = join(base_path, "db.lock");
+            this.file = Deno.openSync(this.#lock_file, {
                 create: true,
                 write: true,
             });
@@ -200,7 +202,10 @@ export class EhDb {
     }
     close() {
         this.db.close();
-        if (this.file) this.file.close();
+        if (this.file) {
+            this.file.close();
+            if (this.#lock_file) Deno.remove(this.#lock_file);
+        }
     }
     async commit() {
         while (1) {

@@ -67,6 +67,9 @@ export class TaskManager {
             this.running_tasks.delete(id);
         }
     }
+    close() {
+        this.db.close();
+    }
     async run() {
         while (1) {
             await this.check_running_tasks();

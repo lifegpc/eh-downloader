@@ -45,22 +45,32 @@ if (!check_file_permissions(settings.base)) {
 }
 async function download() {
     const manager = new TaskManager(settings);
-    const urls: ParsedUrl[] = [];
-    for (const i of args._.slice(1)) {
-        const r = parseUrl(i.toString());
-        if (r) urls.push(r);
-    }
-    for (const u of urls) {
-        if (u.type == UrlType.Gallery || u.type == UrlType.MPV) {
-            await manager.add_download_task(u.gid, u.token);
+    try {
+        const urls: ParsedUrl[] = [];
+        for (const i of args._.slice(1)) {
+            const r = parseUrl(i.toString());
+            if (r) urls.push(r);
         }
+        for (const u of urls) {
+            if (u.type == UrlType.Gallery || u.type == UrlType.MPV) {
+                await manager.add_download_task(u.gid, u.token);
+            }
+        }
+        if (args.add_only) {
+            return;
+        }
+        await manager.run();
+    } finally {
+        manager.close();
     }
-    if (args.add_only) return;
-    await manager.run();
 }
 async function run() {
     const manager = new TaskManager(settings);
-    await manager.run();
+    try {
+        await manager.run();
+    } finally {
+        manager.close();
+    }
 }
 async function main() {
     await sure_dir(settings.base);
