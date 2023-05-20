@@ -22,7 +22,7 @@ export type MPVDispatchData = {
     ll: string;
     /**File search url. full url is `${base_url}${lo}` */
     lo: string;
-    /**`ori` or `Download original ${width} x ${height} ${file_size} source`*/
+    /**`org` or `Download original ${width} x ${height} ${file_size} source`*/
     o: string;
     /**Reload token*/
     s: string;
@@ -32,19 +32,58 @@ export type MPVDispatchData = {
     yres: string;
 };
 
+const ORG_REG = /^download original (\d+) x (\d+) (.*) source$/i;
+
 class MPVImage {
     base;
     /**Page number*/
     index;
     #mpv;
     data: MPVDispatchData | undefined;
+    #oxres: number | undefined;
+    #oyres: number | undefined;
+    redirected_url: string | undefined;
     constructor(base: MPVRawImage, index: number, mpv: MPVPage) {
         this.base = base;
         this.index = index;
         this.#mpv = mpv;
     }
+    get is_original() {
+        const t = this.data?.o;
+        if (!t) return undefined;
+        return t === "org";
+    }
     get name() {
         return this.base.n;
+    }
+    get original_imgurl() {
+        const t = this.data?.lf;
+        if (!t) return undefined;
+        return `${this.#mpv.base_url}${t}`;
+    }
+    get origin_xres() {
+        if (this.is_original) return this.xres;
+        if (this.#oxres === undefined) {
+            const o = this.data?.o;
+            if (!o) return undefined;
+            const m = o.match(ORG_REG);
+            if (!m) return undefined;
+            const oxres = parseInt(m[1]);
+            this.#oxres = oxres;
+            return oxres;
+        } else return this.#oxres;
+    }
+    get origin_yres() {
+        if (this.is_original) return this.yres;
+        if (this.#oyres === undefined) {
+            const o = this.data?.o;
+            if (!o) return undefined;
+            const m = o.match(ORG_REG);
+            if (!m) return undefined;
+            const oyres = parseInt(m[2]);
+            this.#oyres = oyres;
+            return oyres;
+        } else return this.#oyres;
     }
     get page_number() {
         return this.index;
@@ -71,7 +110,31 @@ class MPVImage {
                 this.index,
                 this.page_token,
             );
+        } else {
+            this.data = await this.#mpv.image_dispatch(
+                this.index,
+                this.page_token,
+                this.data.s,
+            );
         }
+    }
+    async #load_image(u: string) {
+        const re = await this.#mpv.client.get(u);
+        if (re.status !== 200) {
+            re.body?.cancel();
+            return undefined;
+        }
+        return re;
+    }
+    async load_original_image() {
+        if (this.redirected_url) {
+            const re = await this.#load_image(this.redirected_url);
+            if (re) return re;
+        }
+        const url = this.original_imgurl;
+        if (!url) return undefined;
+        this.redirected_url = await this.#mpv.client.redirect(url);
+        return await this.#load_image(this.redirected_url || url);
     }
 }
 

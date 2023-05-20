@@ -33,6 +33,14 @@ export class Client {
             hostname.endsWith(".e-hentai.org") ||
             hostname.endsWith(".exhentai.org");
     }
+    async redirect(url: string) {
+        const re = await this.get(url, { redirect: "manual" });
+        if (re.status == 301 || re.status == 302) {
+            const t = re.headers.get("location");
+            re.body?.cancel();
+            return t ? t : undefined;
+        } else return undefined;
+    }
     request(
         url: string | Request | URL,
         method: string | undefined = undefined,
