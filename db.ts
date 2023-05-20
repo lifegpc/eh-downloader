@@ -1,8 +1,8 @@
-const { DB } = await import("https://deno.land/x/sqlite@v3.7.2/mod.ts");
-import { SemVer } from "https://deno.land/std@0.188.0/semver/mod.ts";
-import { join } from "https://deno.land/std@0.188.0/path/mod.ts";
-import { SqliteError } from "https://deno.land/x/sqlite@v3.7.2/mod.ts";
-import { Status } from "https://deno.land/x/sqlite@v3.7.2/src/constants.ts";
+const { DB } = await import("sqlite/mod.ts");
+import { SemVer } from "std/semver/mod.ts";
+import { join } from "std/path/mod.ts";
+import { SqliteError } from "sqlite/mod.ts";
+import { Status } from "sqlite/src/constants.ts";
 import { sleep } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 

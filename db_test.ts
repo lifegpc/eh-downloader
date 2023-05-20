@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.188.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import { EhDb, GMeta } from "./db.ts";
 import { TaskType } from "./task.ts";
 import { remove_if_exists } from "./test_base.ts";

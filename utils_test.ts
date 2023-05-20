@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.188.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import { check_running } from "./pid_check.ts";
 import { promiseState, sleep } from "./utils.ts";
 

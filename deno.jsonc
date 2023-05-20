@@ -1,8 +1,14 @@
 {
+    "imports": {
+        "std/": "https://deno.land/std@0.188.0/",
+        "deno_dom/": "https://deno.land/x/deno_dom@v0.1.38/",
+        "sqlite/": "https://deno.land/x/sqlite@v3.7.2/"
+    },
     "tasks": {
         "dev": "deno run --watch main.ts",
         "test": "deno test --allow-read=./config.json,./test --allow-net --allow-write=./test --allow-run=tasklist.exe --unstable",
-        "run": "deno run --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --unstable"
+        "run": "deno run --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --unstable",
+        "compile": "deno compile --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --unstable"
     },
     "fmt": {
         "indentWidth": 4,

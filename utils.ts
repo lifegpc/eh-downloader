@@ -1,5 +1,5 @@
-import { exists } from "https://deno.land/std@0.188.0/fs/exists.ts";
-import { initParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm-noinit.ts";
+import { exists } from "std/fs/exists.ts";
+import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 
 export function sleep(time: number): Promise<undefined> {
     return new Promise((r) => {
