@@ -204,7 +204,7 @@ export class EhDb {
         this.db.close();
         if (this.file) {
             this.file.close();
-            if (this.#lock_file) Deno.remove(this.#lock_file);
+            if (this.#lock_file) Deno.removeSync(this.#lock_file);
         }
     }
     async commit() {
