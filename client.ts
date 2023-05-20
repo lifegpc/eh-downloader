@@ -1,6 +1,7 @@
 import { Config } from "./config.ts";
 import { load_gallery_metadata } from "./page/GalleryMetadata.ts";
 import { load_gallery_page } from "./page/GalleryPage.ts";
+import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
 
 export type GID = [number, string];
@@ -27,6 +28,11 @@ export class Client {
     ) {
         return this.request(url, "POST", options);
     }
+    is_eh(hostname: string) {
+        return hostname == "e-hentai.org" || hostname == "exhentai.org" ||
+            hostname.endsWith(".e-hentai.org") ||
+            hostname.endsWith(".exhentai.org");
+    }
     request(
         url: string | Request | URL,
         method: string | undefined = undefined,
@@ -37,23 +43,16 @@ export class Client {
         if (this.cookies) {
             if (typeof url === "string") {
                 const u = new URL(url);
-                if (
-                    u.hostname == "e-hentai.org" || u.hostname == "exhentai.org"
-                ) {
+                if (this.is_eh(u.hostname)) {
                     headers.set("Cookie", this.cookies);
                 }
             } else if (url instanceof Request) {
                 const u = new URL(url.url);
-                if (
-                    u.hostname == "e-hentai.org" || u.hostname == "exhentai.org"
-                ) {
+                if (this.is_eh(u.hostname)) {
                     headers.set("Cookie", this.cookies);
                 }
             } else if (url instanceof URL) {
-                if (
-                    url.hostname == "e-hentai.org" ||
-                    url.hostname == "exhentai.org"
-                ) {
+                if (this.is_eh(url.hostname)) {
                     headers.set("Cookie", this.cookies);
                 }
             }
@@ -64,10 +63,17 @@ export class Client {
             }
             return fetch(url);
         } else {
-            return fetch(
-                url,
-                Object.assign({ headers, method: method || "GET" }, options),
-            );
+            const d = Object.assign({ method: method || "GET" }, options);
+            if (d.headers) {
+                const nheaders = new Headers(d.headers);
+                for (const v of headers) {
+                    nheaders.set(v[0], v[1]);
+                }
+                d.headers = nheaders;
+            } else {
+                d.headers = headers;
+            }
+            return fetch(url, d);
         }
     }
     /**
@@ -121,5 +127,21 @@ export class Client {
             );
         }
         return load_gallery_page(await re.text(), this);
+    }
+    /**
+     * Fetch a Multi-Page Viewer page
+     * @param gid Gallery ID
+     * @param token Token
+     * @returns
+     */
+    async fetchMPVPage(gid: number, token: string) {
+        const url = `https://${this.host}/mpv/${gid}/${token}/`;
+        const re = await this.get(url);
+        if (re.status != 200) {
+            throw new Error(
+                `Fetch ${url} failed, status ${re.status} ${re.statusText}`,
+            );
+        }
+        return load_mpv_page(await re.text(), this);
     }
 }

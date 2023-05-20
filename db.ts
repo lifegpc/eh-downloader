@@ -1,4 +1,4 @@
-const { DB } = await import("sqlite/mod.ts");
+import { DB } from "sqlite/mod.ts";
 import { SemVer } from "std/semver/mod.ts";
 import { join } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";

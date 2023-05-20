@@ -2,7 +2,12 @@ import { exists } from "std/fs/exists.ts";
 
 export const API_PERMISSION: Deno.PermissionOptions = {
     read: ["./config.json"],
-    net: ["e-hentai.org", "exhentai.org"],
+    net: [
+        "e-hentai.org",
+        "exhentai.org",
+        "api.e-hentai.org",
+        "api.exhentai.org",
+    ],
 };
 
 export async function remove_if_exists(f: string) {
