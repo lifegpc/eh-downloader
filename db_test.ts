@@ -1,5 +1,5 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { EhDb, GMeta } from "./db.ts";
+import { EhDb, GMeta, PMeta } from "./db.ts";
 import { TaskType } from "./task.ts";
 import { remove_if_exists } from "./test_base.ts";
 import { sure_dir } from "./utils.ts";
@@ -40,5 +40,17 @@ Deno.test("DbTest", async () => {
         gmeta,
         db.get_gmeta_by_gid(1),
     );
+    const pmeta: PMeta = {
+        gid: 1,
+        index: 1,
+        token: "sddd",
+        name: "a.png",
+        width: 1280,
+        height: 720,
+        is_original: true,
+    };
+    db.add_pmeta(pmeta);
+    assertEquals(pmeta, db.get_pmeta_by_token(pmeta.gid, pmeta.token));
+    assertEquals(pmeta, db.get_pmeta_by_index(pmeta.gid, pmeta.index));
     db.close();
 });

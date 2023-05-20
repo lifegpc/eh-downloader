@@ -91,6 +91,9 @@ class MPVImage {
     get page_token() {
         return this.base.k;
     }
+    get src() {
+        return this.data?.i;
+    }
     get thumbnail() {
         return this.base.t;
     }
