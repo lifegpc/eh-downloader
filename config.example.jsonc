@@ -8,5 +8,7 @@
     // Maximum task count
     "max_task_count": 1,
     // Fetch page data from Multi-Page Viewer
-    "mpv": false
+    "mpv": false,
+    // The folder that to store database.
+    "db_path": "./downloads"
 }

@@ -20,7 +20,7 @@ export class TaskManager {
     constructor(cfg: Config) {
         this.cfg = cfg;
         this.client = new Client(cfg);
-        this.db = new EhDb(cfg.base);
+        this.db = new EhDb(cfg.db_path || cfg.base);
         this.running_tasks = new Map();
         this.max_task_count = cfg.max_task_count;
         add_exit_handler(this);

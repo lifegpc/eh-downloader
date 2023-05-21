@@ -3,7 +3,7 @@ import { SemVer } from "std/semver/mod.ts";
 import { join } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
-import { sleep } from "./utils.ts";
+import { sleep, sure_dir_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 
 type SqliteMaster = {
@@ -157,7 +157,9 @@ export class EhDb {
     #_tags: Map<string, number> | undefined;
     readonly version = new SemVer("1.0.0-1");
     constructor(base_path: string) {
-        this.db = new DB(join(base_path, "data.db"));
+        const db_path = join(base_path, "data.db");
+        sure_dir_sync(base_path);
+        this.db = new DB(db_path);
         this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
         if (!this.#check_database()) this.#create_table();
         if (this.#flock_enabled) {

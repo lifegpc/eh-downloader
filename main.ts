@@ -81,16 +81,17 @@ async function run() {
     }
 }
 function optimize() {
-    const db = new EhDb(settings.base);
+    const db = new EhDb(settings.db_path || settings.base);
     db.optimize();
     db.close();
 }
 async function update_tag_translation() {
-    const db = new EhDb(settings.base);
+    const db = new EhDb(settings.db_path || settings.base);
     const f = await load_eht_file(
         args._.length > 1 ? args._[1].toString() : undefined,
     );
     update_database_tag(db, f);
+    db.close();
 }
 async function main() {
     await sure_dir(settings.base);

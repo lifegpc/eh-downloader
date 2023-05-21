@@ -44,6 +44,9 @@ export class Config {
     get cookies() {
         return this._return_string("cookies");
     }
+    get db_path() {
+        return this._return_string("db_path");
+    }
     get ua() {
         return this._return_string("ua");
     }

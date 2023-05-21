@@ -1,4 +1,4 @@
-import { exists } from "std/fs/exists.ts";
+import { exists, existsSync } from "std/fs/exists.ts";
 import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 
 export function sleep(time: number): Promise<undefined> {
@@ -12,6 +12,12 @@ export function sleep(time: number): Promise<undefined> {
 export async function sure_dir(f = "./test") {
     if (!await exists(f)) {
         await Deno.mkdir(f, { "recursive": true });
+    }
+}
+
+export function sure_dir_sync(f = "./test") {
+    if (!existsSync(f)) {
+        Deno.mkdirSync(f, { "recursive": true });
     }
 }
 
