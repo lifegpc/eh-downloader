@@ -64,7 +64,25 @@ type Tag = {
     id: number;
     tag: string;
 };
-const ALL_TABLES = ["version", "task", "gmeta", "pmeta", "tag", "gtag"];
+export type EhFile = {
+    id: number;
+    gid: number;
+    token: string;
+    path: string;
+    width: number;
+    height: number;
+    is_original: boolean;
+};
+export type EhFileRaw = {
+    id: number;
+    gid: number;
+    token: string;
+    path: string;
+    width: number;
+    height: number;
+    is_original: number;
+};
+const ALL_TABLES = ["version", "task", "gmeta", "pmeta", "tag", "gtag", "file"];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
     ver TEXT,
@@ -113,6 +131,15 @@ const GTAG_TABLE = `CREATE TABLE gtag (
     gid INT,
     id INT,
     PRIMARY KEY (gid, id)
+);`;
+const FILE_TABLE = `CREATE TABLE file (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gid INT,
+    token TEXT,
+    path TEXT,
+    width INT,
+    height INT,
+    is_original BOOLEAN
 );`;
 
 export class EhDb {
@@ -189,6 +216,9 @@ export class EhDb {
         if (!this.#exist_table.has("gtag")) {
             this.db.execute(GTAG_TABLE);
         }
+        if (!this.#exist_table.has("file")) {
+            this.db.execute(FILE_TABLE);
+        }
         this.#updateExistsTable();
     }
     #read_version() {
@@ -260,6 +290,32 @@ export class EhDb {
             this.db.query("INSERT INTO gtag VALUES (?, ?);", [gid, id]);
         }
     }
+    add_file(f: EhFile, overwrite = true) {
+        if (overwrite) {
+            const ofiles = this.get_files(f.gid, f.token);
+            if (ofiles.length) {
+                const o = ofiles[0];
+                f.id = o.id;
+                ofiles.slice(1).forEach((o) => {
+                    this.delete_file(o);
+                });
+            }
+        }
+        if (f.id) {
+            this.db.query(
+                "INSERT OR REPLACE INTO file VALUES (:id, :gid, :token, :path, :width, :height, :is_original);",
+                f,
+            );
+            return structuredClone(f);
+        } else {
+            this.db.query(
+                "INSERT INTO file (gid, token, path, width, height, is_original) VALUES (?, ?, ?, ?, ?, ?);",
+                [f.gid, f.token, f.path, f.width, f.height, f.is_original],
+            );
+            const s = this.get_files(f.gid, f.token);
+            return s[s.length - 1];
+        }
+    }
     add_pmeta(pmeta: PMeta) {
         this.db.queryEntries(
             "INSERT OR REPLACE INTO pmeta VALUES (:gid, :index, :token, :name, :width, :height)",
@@ -324,6 +380,14 @@ export class EhDb {
             }
         }
     }
+    convert_file(f: EhFileRaw[]) {
+        return f.map((m) => {
+            const b = m.is_original !== 0;
+            const t = <EhFile> <unknown> m;
+            t.is_original = b;
+            return t;
+        });
+    }
     convert_gmeta(m: GMetaRaw[]): GMeta[] {
         return m.map((m) => {
             const b = m.expunged !== 0;
@@ -331,6 +395,9 @@ export class EhDb {
             t.expunged = b;
             return t;
         });
+    }
+    delete_file(f: EhFile) {
+        this.db.query("DELETE FROM file WHERE id = ?;", [f.id]);
     }
     delete_task(task: Task) {
         return this.transaction(() => {
@@ -352,6 +419,12 @@ export class EhDb {
     dbunlock() {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
+    }
+    get_files(gid: number, token: string) {
+        return this.convert_file(this.db.queryEntries<EhFileRaw>(
+            "SELECT * FROM file WHERE gid = ? AND token = ?;",
+            [gid, token],
+        ));
     }
     get_gmeta_by_gid(gid: number) {
         const s = this.convert_gmeta(
