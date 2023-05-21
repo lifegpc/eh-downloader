@@ -7,8 +7,8 @@
     "tasks": {
         "dev": "deno run --watch main.ts",
         "test": "deno test --allow-read=./config.json,./test --allow-net --allow-write=./test --allow-run=tasklist.exe --unstable",
-        "run": "deno run --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --unstable",
-        "compile": "deno compile --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --unstable"
+        "run": "deno run --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --allow-net --unstable",
+        "compile": "deno compile --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --allow-net --unstable"
     },
     "fmt": {
         "indentWidth": 4,

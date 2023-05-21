@@ -51,5 +51,8 @@ Deno.test("DbTest", async () => {
     db.add_pmeta(pmeta);
     assertEquals(pmeta, db.get_pmeta_by_token(pmeta.gid, pmeta.token));
     assertEquals(pmeta, db.get_pmeta_by_index(pmeta.gid, pmeta.index));
+    const tags = new Set(["std", "df2", "ef3"]);
+    await db.add_gtag(1, tags);
+    assertEquals(tags, db.get_gtags(1));
     db.close();
 });

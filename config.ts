@@ -51,6 +51,9 @@ export class Config {
     get max_task_count() {
         return this._return_number("max_task_count") || 1;
     }
+    get mpv() {
+        return this._return_bool("mpv") || false;
+    }
 }
 
 export async function load_settings(path: string) {

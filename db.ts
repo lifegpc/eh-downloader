@@ -60,7 +60,11 @@ export type PMeta = {
     width: number;
     height: number;
 };
-const ALL_TABLES = ["version", "task", "gmeta", "pmeta"];
+type Tag = {
+    id: number;
+    tag: string;
+};
+const ALL_TABLES = ["version", "task", "gmeta", "pmeta", "tag", "gtag"];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
     ver TEXT,
@@ -101,21 +105,31 @@ const PMETA_TABLE = `CREATE TABLE pmeta (
     height INT,
     PRIMARY KEY (gid, token)
 );`;
+const TAG_TABLE = `CREATE TABLE tag (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tag TEXT
+);`;
+const GTAG_TABLE = `CREATE TABLE gtag (
+    gid INT,
+    id INT,
+    PRIMARY KEY (gid, id)
+);`;
 
 export class EhDb {
     db;
-    flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
+    #flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
     #file: Deno.FsFile | undefined;
     #dblock: Deno.FsFile | undefined;
-    _exist_table: Set<string> = new Set();
+    #exist_table: Set<string> = new Set();
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
+    #_tags: Map<string, number> | undefined;
     readonly version = new SemVer("1.0.0-0");
     constructor(base_path: string) {
         this.db = new DB(join(base_path, "data.db"));
         this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
-        if (!this._check_database()) this._create_table();
-        if (this.flock_enabled) {
+        if (!this.#check_database()) this.#create_table();
+        if (this.#flock_enabled) {
             this.#lock_file = join(base_path, "db.lock");
             this.#dblock_file = join(base_path, "eh.locked");
             this.#file = Deno.openSync(this.#lock_file, {
@@ -134,34 +148,51 @@ export class EhDb {
             );
         }
     }
-    _check_database() {
-        this._updateExistsTable();
-        const v = this._read_version();
+    #add_tag(s: string) {
+        return this.transaction(() => {
+            this.db.query("INSERT INTO tag (tag) VALUES (?);", [s]);
+            const r = this.db.queryEntries<Tag>(
+                "SELECT * FROM tag WHERE tag = ?;",
+                [s],
+            );
+            this.#tags.set(s, r[0].id);
+            return r[0].id;
+        });
+    }
+    #check_database() {
+        this.#updateExistsTable();
+        const v = this.#read_version();
         if (!v) return false;
         if (
-            ALL_TABLES.length !== this._exist_table.size ||
-            !ALL_TABLES.every((x) => this._exist_table.has(x))
+            ALL_TABLES.length !== this.#exist_table.size ||
+            !ALL_TABLES.every((x) => this.#exist_table.has(x))
         ) return false;
         return true;
     }
-    _create_table() {
-        if (!this._exist_table.has("version")) {
+    #create_table() {
+        if (!this.#exist_table.has("version")) {
             this.db.execute(VERSION_TABLE);
-            this._write_version();
+            this.#write_version();
         }
-        if (!this._exist_table.has("task")) {
+        if (!this.#exist_table.has("task")) {
             this.db.execute(TASK_TABLE);
         }
-        if (!this._exist_table.has("gmeta")) {
+        if (!this.#exist_table.has("gmeta")) {
             this.db.execute(GMETA_TABLE);
         }
-        if (!this._exist_table.has("pmeta")) {
+        if (!this.#exist_table.has("pmeta")) {
             this.db.execute(PMETA_TABLE);
         }
-        this._updateExistsTable();
+        if (!this.#exist_table.has("tag")) {
+            this.db.execute(TAG_TABLE);
+        }
+        if (!this.#exist_table.has("gtag")) {
+            this.db.execute(GTAG_TABLE);
+        }
+        this.#updateExistsTable();
     }
-    _read_version() {
-        if (!this._exist_table.has("version")) return null;
+    #read_version() {
+        if (!this.#exist_table.has("version")) return null;
         const cur = this.db.query<[string]>(
             "SELECT ver FROM version WHERE id = ?;",
             ["eh"],
@@ -171,18 +202,27 @@ export class EhDb {
         }
         return null;
     }
-    _updateExistsTable() {
+    get #tags() {
+        if (this.#_tags === undefined) {
+            const tags = this.db.queryEntries<Tag>("SELECT * FROM tag;");
+            const re = new Map<string, number>();
+            tags.forEach((v) => re.set(v.tag, v.id));
+            this.#_tags = re;
+            return re;
+        } else return this.#_tags;
+    }
+    #updateExistsTable() {
         const cur = this.db.queryEntries<SqliteMaster>(
             "SELECT * FROM main.sqlite_master;",
         );
-        this._exist_table.clear();
+        this.#exist_table.clear();
         for (const i of cur) {
             if (i.type == "table") {
-                this._exist_table.add(i.name);
+                this.#exist_table.add(i.name);
             }
         }
     }
-    _write_version() {
+    #write_version() {
         this.db.transaction(() => {
             this.db.query("INSERT OR REPLACE INTO version VALUES (?, ?);", [
                 "eh",
@@ -195,6 +235,30 @@ export class EhDb {
             "INSERT OR REPLACE INTO gmeta VALUES (:gid, :token, :title, :title_jpn, :category, :uploader, :posted, :filecount, :filesize, :expunged, :rating, :parent_gid, :parent_key, :first_gid, :first_key);",
             gmeta,
         );
+    }
+    async add_gtag(gid: number, tags: Set<string>) {
+        const otags = this.get_gtags(gid);
+        const deleted: string[] = [];
+        const added: string[] = [];
+        for (const o of otags) {
+            if (!tags.has(o)) deleted.push(o);
+        }
+        for (const o of tags) {
+            if (!otags.has(o)) added.push(o);
+        }
+        for (const d of deleted) {
+            const id = this.#tags.get(d);
+            if (id === undefined) throw Error("id not found.");
+            this.db.query("DELETE FROM gtag WHERE gid = ? AND id = ?;", [
+                gid,
+                id,
+            ]);
+        }
+        for (const a of added) {
+            let id = this.#tags.get(a);
+            if (id === undefined) id = await this.#add_tag(a);
+            this.db.query("INSERT INTO gtag VALUES (?, ?);", [gid, id]);
+        }
     }
     add_pmeta(pmeta: PMeta) {
         this.db.queryEntries(
@@ -298,6 +362,14 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_gtags(gid: number) {
+        return new Set(
+            this.db.query<[string]>(
+                "SELECT tag.tag FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
+                [gid],
+            ).map((v) => v[0]),
+        );
+    }
     get_pmeta_by_index(gid: number, index: number) {
         const s = this.db.queryEntries<PMeta>(
             'SELECT * FROM pmeta WHERE gid = ? AND "index" = ?;',
@@ -325,6 +397,9 @@ export class EhDb {
                 Deno.pid,
             ])
         );
+    }
+    optimize() {
+        this.db.execute("VACUUM;");
     }
     rollback() {
         this.db.execute("ROLLBACK TRANSACTION;");

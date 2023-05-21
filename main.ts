@@ -4,6 +4,7 @@ import { check_file_permissions } from "./permissons.ts";
 import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import { ParsedUrl, parseUrl, UrlType } from "./url.ts";
 import { sure_dir } from "./utils.ts";
+import { EhDb } from "./db.ts";
 
 function show_help() {
     console.log("Usage: main.ts [options]");
@@ -17,6 +18,7 @@ enum CMD {
     Unknown,
     Download,
     Run,
+    Optimize,
 }
 
 const args = parse(Deno.args, {
@@ -35,6 +37,7 @@ const rcmd = args._[0];
 let cmd = CMD.Unknown;
 if (rcmd == "d" || rcmd == "download") cmd = CMD.Download;
 if (rcmd == "r" || rcmd == "run") cmd = CMD.Run;
+if (rcmd == "optimize") cmd = CMD.Optimize;
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -72,12 +75,19 @@ async function run() {
         manager.close();
     }
 }
+function optimize() {
+    const db = new EhDb(settings.base);
+    db.optimize();
+    db.close();
+}
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
         await download();
     } else if (cmd == CMD.Run) {
         await run();
+    } else if (cmd == CMD.Optimize) {
+        optimize();
     }
 }
 

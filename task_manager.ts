@@ -12,11 +12,13 @@ export class AlreadyClosedError extends Error {
 
 export class TaskManager {
     #closed = false;
+    cfg;
     client;
     db;
     running_tasks: Map<number, Promise<Task>>;
     max_task_count;
     constructor(cfg: Config) {
+        this.cfg = cfg;
         this.client = new Client(cfg);
         this.db = new EhDb(cfg.base);
         this.running_tasks = new Map();
@@ -114,7 +116,7 @@ export class TaskManager {
         if (task.type == TaskType.Download) {
             this.running_tasks.set(
                 task.id,
-                download_task(task, this.client, this.db),
+                download_task(task, this.client, this.db, this.cfg),
             );
         }
     }
