@@ -47,7 +47,6 @@ Deno.test("DbTest", async () => {
         name: "a.png",
         width: 1280,
         height: 720,
-        is_original: true,
     };
     db.add_pmeta(pmeta);
     assertEquals(pmeta, db.get_pmeta_by_token(pmeta.gid, pmeta.token));

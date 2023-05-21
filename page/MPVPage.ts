@@ -1,6 +1,7 @@
 import { DOMParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
 import { initDOMParser } from "../utils.ts";
+import { PMeta } from "../db.ts";
 
 export type MPVRawImage = {
     /**Image name*/
@@ -138,6 +139,18 @@ class MPVImage {
         if (!url) return undefined;
         this.redirected_url = await this.#mpv.client.redirect(url);
         return await this.#load_image(this.redirected_url || url);
+    }
+    to_pmeta(): PMeta | undefined {
+        if (!this.data) return undefined;
+        const gid = this.#mpv.gid;
+        const index = this.index;
+        const token = this.page_token;
+        const name = this.name;
+        const width = this.origin_xres;
+        if (width === undefined) return undefined;
+        const height = this.origin_yres;
+        if (height === undefined) return undefined;
+        return { gid, index, token, name, width, height };
     }
 }
 

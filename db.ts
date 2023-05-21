@@ -59,16 +59,6 @@ export type PMeta = {
     name: string;
     width: number;
     height: number;
-    is_original: boolean;
-};
-export type PMetaRaw = {
-    gid: number;
-    index: number;
-    token: string;
-    name: string;
-    width: number;
-    height: number;
-    is_original: number;
 };
 const ALL_TABLES = ["version", "task", "gmeta", "pmeta"];
 const VERSION_TABLE = `CREATE TABLE version (
@@ -109,7 +99,6 @@ const PMETA_TABLE = `CREATE TABLE pmeta (
     name TEXT,
     width INT,
     height INT,
-    is_original BOOLEAN,
     PRIMARY KEY (gid, token)
 );`;
 
@@ -201,7 +190,7 @@ export class EhDb {
     }
     add_pmeta(pmeta: PMeta) {
         this.db.queryEntries(
-            "INSERT OR REPLACE INTO pmeta VALUES (:gid, :index, :token, :name, :width, :height, :is_original)",
+            "INSERT OR REPLACE INTO pmeta VALUES (:gid, :index, :token, :name, :width, :height)",
             pmeta,
         );
     }
@@ -268,14 +257,6 @@ export class EhDb {
             return t;
         });
     }
-    convert_pmeta(m: PMetaRaw[]): PMeta[] {
-        return m.map((m) => {
-            const b = m.is_original !== 0;
-            const t = <PMeta> <unknown> m;
-            t.is_original = b;
-            return t;
-        });
-    }
     delete_task(task: Task) {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
@@ -299,20 +280,16 @@ export class EhDb {
         return s.length ? s[0] : undefined;
     }
     get_pmeta_by_index(gid: number, index: number) {
-        const s = this.convert_pmeta(
-            this.db.queryEntries<PMetaRaw>(
-                'SELECT * FROM pmeta WHERE gid = ? AND "index" = ?;',
-                [gid, index],
-            ),
+        const s = this.db.queryEntries<PMeta>(
+            'SELECT * FROM pmeta WHERE gid = ? AND "index" = ?;',
+            [gid, index],
         );
         return s.length ? s[0] : undefined;
     }
     get_pmeta_by_token(gid: number, token: string) {
-        const s = this.convert_pmeta(
-            this.db.queryEntries<PMetaRaw>(
-                "SELECT * FROM pmeta WHERE gid = ? AND token = ?;",
-                [gid, token],
-            ),
+        const s = this.db.queryEntries<PMeta>(
+            "SELECT * FROM pmeta WHERE gid = ? AND token = ?;",
+            [gid, token],
         );
         return s.length ? s[0] : undefined;
     }
