@@ -10,7 +10,7 @@ import {
     sleep,
     sure_dir,
 } from "../utils.ts";
-import { join } from "std/path/mod.ts";
+import { join, resolve } from "std/path/mod.ts";
 import { exists } from "std/fs/exists.ts";
 
 class DownloadManager {
@@ -111,7 +111,7 @@ export async function download_task(
                 const download_original = cfg.download_original_img &&
                     !i.is_original;
                 if (download_original) console.log(i.index, i.data.o);
-                const path = join(base_path, i.name);
+                const path = resolve(join(base_path, i.name));
                 function download_img() {
                     return new Promise<void>((resolve, reject) => {
                         async function download() {

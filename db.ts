@@ -1,6 +1,6 @@
 import { DB } from "sqlite/mod.ts";
 import { SemVer } from "std/semver/mod.ts";
-import { join } from "std/path/mod.ts";
+import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
 import { sleep, sure_dir_sync } from "./utils.ts";
@@ -155,7 +155,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-1");
+    readonly version = new SemVer("1.0.0-2");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -200,6 +200,14 @@ export class EhDb {
             if (v.compare("1.0.0-1") === -1) {
                 this.db.execute("ALTER TABLE tag ADD translated TEXT;");
                 this.db.execute("ALTER TABLE tag ADD intro TEXT;");
+            }
+            if (v.compare("1.0.0-2") === -1) {
+                this.convert_file(
+                    this.db.queryEntries<EhFileRaw>("SELECT * FROM file;"),
+                ).forEach((f) => {
+                    f.path = resolve(f.path);
+                    this.add_file(f, false);
+                });
             }
             this.#write_version();
         }

@@ -6,9 +6,9 @@
     },
     "tasks": {
         "dev": "deno run --watch main.ts",
-        "test": "deno test --allow-read=./config.json,./test --allow-net --allow-write=./test --allow-run=tasklist.exe --unstable",
-        "run": "deno run --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --allow-net --unstable",
-        "compile": "deno compile --allow-read=./config.json,./downloads --allow-write=./downloads --allow-run=tasklist.exe --allow-net --unstable",
+        "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
+        "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
+        "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
         "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-net --unstable"
     },
     "fmt": {
