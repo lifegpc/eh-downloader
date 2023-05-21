@@ -62,6 +62,15 @@ export class Config {
     get mpv() {
         return this._return_bool("mpv") || false;
     }
+    get max_retry_count() {
+        return this._return_number("max_retry_count") || 3;
+    }
+    get max_download_img_count() {
+        return this._return_number("max_download_img_count") || 3;
+    }
+    get download_original_img() {
+        return this._return_bool("download_original_img") || false;
+    }
 }
 
 export async function load_settings(path: string) {

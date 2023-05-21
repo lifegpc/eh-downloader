@@ -1,7 +1,6 @@
-import { assertEquals } from "https://deno.land/std@0.188.0/testing/asserts.ts";
+import { assert, assertEquals } from "std/testing/asserts.ts";
 import { Client } from "../client.ts";
 import { load_settings } from "../config.ts";
-import { assert } from "https://deno.land/std@0.188.0/_util/asserts.ts";
 
 Deno.test("MPVPage_test", async () => {
     const cfg = await load_settings("./config.json");

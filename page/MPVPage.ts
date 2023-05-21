@@ -1,7 +1,7 @@
 import { DOMParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
 import { initDOMParser } from "../utils.ts";
-import { PMeta } from "../db.ts";
+import { EhFile, PMeta } from "../db.ts";
 
 export type MPVRawImage = {
     /**Image name*/
@@ -48,6 +48,38 @@ class MPVImage {
         this.base = base;
         this.index = index;
         this.#mpv = mpv;
+    }
+    get_file(path: string): EhFile | undefined {
+        const width = this.xres;
+        if (width === undefined) return undefined;
+        const height = this.yres;
+        if (height === undefined) return undefined;
+        const is_original = this.is_original;
+        if (is_original === undefined) return undefined;
+        return {
+            id: 0,
+            gid: this.#mpv.gid,
+            token: this.page_token,
+            path,
+            width,
+            height,
+            is_original,
+        };
+    }
+    get_original_file(path: string): EhFile | undefined {
+        const width = this.origin_xres;
+        if (width === undefined) return undefined;
+        const height = this.origin_yres;
+        if (height === undefined) return undefined;
+        return {
+            id: 0,
+            gid: this.#mpv.gid,
+            token: this.page_token,
+            path,
+            width,
+            height,
+            is_original: true,
+        };
     }
     get is_original() {
         const t = this.data?.o;
@@ -129,6 +161,17 @@ class MPVImage {
             return undefined;
         }
         return re;
+    }
+    async load_image(reload = true) {
+        const src = this.src;
+        if (src) {
+            const re = await this.#load_image(src);
+            if (re) return re;
+        }
+        if (!reload) return;
+        await this.load();
+        const src2 = this.src;
+        if (src2) return await this.#load_image(src2);
     }
     async load_original_image() {
         if (this.redirected_url) {

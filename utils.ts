@@ -77,3 +77,16 @@ export function try_remove_sync(
         return;
     }
 }
+
+export async function asyncFilter<T>(
+    arr: T[],
+    callback: (element: T, index: number, array: T[]) => Promise<boolean>,
+): Promise<T[]> {
+    const fail = Symbol();
+    const t = <[T][]> (await Promise.all(
+        arr.map(async (item, index, array) =>
+            (await callback(item, index, array)) ? [item] : fail
+        ),
+    )).filter((i) => i !== fail);
+    return t.map((t) => t[0]);
+}

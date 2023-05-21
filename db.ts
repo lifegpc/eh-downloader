@@ -303,7 +303,7 @@ export class EhDb {
             this.db.query("INSERT INTO gtag VALUES (?, ?);", [gid, id]);
         }
     }
-    add_file(f: EhFile, overwrite = true) {
+    add_file(f: EhFile, overwrite = true): EhFile {
         if (overwrite) {
             const ofiles = this.get_files(f.gid, f.token);
             if (ofiles.length) {
