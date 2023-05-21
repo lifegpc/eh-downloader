@@ -1,7 +1,12 @@
+import { JsonValue, parse } from "std/jsonc/mod.ts";
+
 export class Config {
     _data;
-    constructor(data: { [x: string]: unknown }) {
-        this._data = Object.assign({}, data);
+    constructor(data: JsonValue) {
+        this._data = <{ [x: string]: unknown }> <unknown> Object.assign(
+            {},
+            data,
+        );
     }
     _return_string(key: string) {
         const v = this._data[key];
@@ -58,5 +63,5 @@ export class Config {
 
 export async function load_settings(path: string) {
     const s = (new TextDecoder()).decode(await Deno.readFile(path));
-    return new Config(JSON.parse(s));
+    return new Config(parse(s));
 }
