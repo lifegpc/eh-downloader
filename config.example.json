@@ -1,0 +1,12 @@
+{
+    "cookies": "ipb_member_id = xxxx; ipb_pass_hash = xxxx; sk = xxx; sp = x",
+    "ua": "User-Agent",
+    // Whether to use exhentai.org
+    "ex": false,
+    // The download location.
+    "base": "./downloads",
+    // Maximum task count
+    "max_task_count": 1,
+    // Fetch page data from Multi-Page Viewer
+    "mpv": false,
+}
