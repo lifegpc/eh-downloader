@@ -60,3 +60,14 @@ export function parse_bool(s: string) {
     const l = s.toLowerCase();
     return l === "true" || l === "yes";
 }
+
+export function try_remove_sync(
+    s: string,
+    o: Deno.RemoveOptions | undefined = undefined,
+) {
+    try {
+        Deno.removeSync(s, o);
+    } catch (_) {
+        return;
+    }
+}

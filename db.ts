@@ -106,8 +106,10 @@ export class EhDb {
     db;
     flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
     #file: Deno.FsFile | undefined;
+    #dblock: Deno.FsFile | undefined;
     _exist_table: Set<string> = new Set();
     #lock_file: string | undefined;
+    #dblock_file: string | undefined;
     readonly version = new SemVer("1.0.0-0");
     constructor(base_path: string) {
         this.db = new DB(join(base_path, "data.db"));
@@ -115,10 +117,16 @@ export class EhDb {
         if (!this._check_database()) this._create_table();
         if (this.flock_enabled) {
             this.#lock_file = join(base_path, "db.lock");
+            this.#dblock_file = join(base_path, "eh.locked");
             this.#file = Deno.openSync(this.#lock_file, {
                 create: true,
                 write: true,
             });
+            this.#dblock = Deno.openSync(this.#dblock_file, {
+                create: true,
+                write: true,
+            });
+            this.dblock();
         } else {
             console.log(
                 "%cFile locking is disabled. Use --unstable to enable file locking.",
@@ -230,7 +238,10 @@ export class EhDb {
         this.db.close();
         if (this.#file) {
             this.#file.close();
-            if (this.#lock_file) Deno.removeSync(this.#lock_file);
+        }
+        if (this.#dblock) {
+            this.dbunlock();
+            this.#dblock.close();
         }
     }
     async commit() {
@@ -266,9 +277,17 @@ export class EhDb {
         if (!this.#file) return;
         await eval(`Deno.flock(${this.#file.rid}, true);`);
     }
+    dblock() {
+        if (!this.#dblock) return;
+        eval(`Deno.flockSync(${this.#dblock.rid}, true);`);
+    }
     async funlock() {
         if (!this.#file) return;
         await eval(`Deno.funlock(${this.#file.rid});`);
+    }
+    dbunlock() {
+        if (!this.#dblock) return;
+        eval(`Deno.funlockSync(${this.#dblock.rid});`);
     }
     get_gmeta_by_gid(gid: number) {
         const s = this.convert_gmeta(
