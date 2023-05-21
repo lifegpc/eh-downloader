@@ -63,6 +63,8 @@ export type PMeta = {
 type Tag = {
     id: number;
     tag: string;
+    translated: string | undefined;
+    intro: string | undefined;
 };
 export type EhFile = {
     id: number;
@@ -125,7 +127,9 @@ const PMETA_TABLE = `CREATE TABLE pmeta (
 );`;
 const TAG_TABLE = `CREATE TABLE tag (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tag TEXT
+    tag TEXT,
+    translated TEXT,
+    intro TEXT
 );`;
 const GTAG_TABLE = `CREATE TABLE gtag (
     gid INT,
@@ -151,7 +155,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-0");
+    readonly version = new SemVer("1.0.0-1");
     constructor(base_path: string) {
         this.db = new DB(join(base_path, "data.db"));
         this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
@@ -190,6 +194,13 @@ export class EhDb {
         this.#updateExistsTable();
         const v = this.#read_version();
         if (!v) return false;
+        if (v.compare(this.version) === -1) {
+            if (v.compare("1.0.0-1") === -1) {
+                this.db.execute("ALTER TABLE tag ADD translated TEXT;");
+                this.db.execute("ALTER TABLE tag ADD intro TEXT;");
+            }
+            this.#write_version();
+        }
         if (
             ALL_TABLES.length !== this.#exist_table.size ||
             !ALL_TABLES.every((x) => this.#exist_table.has(x))
@@ -509,6 +520,27 @@ export class EhDb {
             this.rollback();
             await this.funlock();
             throw e;
+        }
+    }
+    update_tags(tag: string, translated: string, intro: string) {
+        const id = this.#tags.get(tag);
+        if (id === undefined) {
+            this.db.query(
+                "INSERT INTO tag (tag, translated, intro) VALUES (?, ?, ?);",
+                [tag, translated, intro],
+            );
+            const r = this.db.queryEntries<Tag>(
+                "SELECT * FROM tag WHERE tag = ?;",
+                [tag],
+            );
+            this.#tags.set(tag, r[0].id);
+        } else {
+            this.db.query("INSERT OR REPLACE INTO tag VALUES (?, ?, ?, ?)", [
+                id,
+                tag,
+                translated,
+                intro,
+            ]);
         }
     }
 }

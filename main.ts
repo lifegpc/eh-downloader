@@ -5,6 +5,7 @@ import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import { ParsedUrl, parseUrl, UrlType } from "./url.ts";
 import { sure_dir } from "./utils.ts";
 import { EhDb } from "./db.ts";
+import { load_eht_file, update_database_tag } from "./eh_translation.ts";
 
 function show_help() {
     console.log("Usage: main.ts [options]");
@@ -19,6 +20,7 @@ enum CMD {
     Download,
     Run,
     Optimize,
+    UpdateTagTranslation,
 }
 
 const args = parse(Deno.args, {
@@ -38,6 +40,9 @@ let cmd = CMD.Unknown;
 if (rcmd == "d" || rcmd == "download") cmd = CMD.Download;
 if (rcmd == "r" || rcmd == "run") cmd = CMD.Run;
 if (rcmd == "optimize") cmd = CMD.Optimize;
+if (rcmd == "utt" || rcmd == "update_tag_translation") {
+    cmd = CMD.UpdateTagTranslation;
+}
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -80,6 +85,13 @@ function optimize() {
     db.optimize();
     db.close();
 }
+async function update_tag_translation() {
+    const db = new EhDb(settings.base);
+    const f = await load_eht_file(
+        args._.length > 1 ? args._[1].toString() : undefined,
+    );
+    update_database_tag(db, f);
+}
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
@@ -88,6 +100,8 @@ async function main() {
         await run();
     } else if (cmd == CMD.Optimize) {
         optimize();
+    } else if (cmd == CMD.UpdateTagTranslation) {
+        await update_tag_translation();
     }
 }
 
