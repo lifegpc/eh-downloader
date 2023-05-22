@@ -10,11 +10,13 @@ export class Client {
     cookies;
     host;
     ua;
-    constructor(cfg: Config) {
+    signal;
+    constructor(cfg: Config, signal?: AbortSignal) {
         this.cookies = cfg.cookies;
         this.ua = cfg.ua ||
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
         this.host = cfg.ex ? "exhentai.org" : "e-hentai.org";
+        this.signal = signal;
     }
     get(
         url: string | Request | URL,
@@ -80,6 +82,9 @@ export class Client {
                 d.headers = nheaders;
             } else {
                 d.headers = headers;
+            }
+            if (!d.signal && this.signal) {
+                d.signal = this.signal;
             }
             return fetch(url, d);
         }

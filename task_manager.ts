@@ -17,9 +17,13 @@ export class TaskManager {
     db;
     running_tasks: Map<number, Promise<Task>>;
     max_task_count;
+    #abort;
+    #force_abort;
     constructor(cfg: Config) {
         this.cfg = cfg;
-        this.client = new Client(cfg);
+        this.#abort = new AbortController();
+        this.#force_abort = new AbortController();
+        this.client = new Client(cfg, this.#force_abort.signal);
         this.db = new EhDb(cfg.db_path || cfg.base);
         this.running_tasks = new Map();
         this.max_task_count = cfg.max_task_count;
@@ -27,6 +31,12 @@ export class TaskManager {
     }
     #check_closed() {
         if (this.#closed) throw new AlreadyClosedError();
+    }
+    abort(reason?: unknown) {
+        this.#abort.abort(reason);
+    }
+    get aborted() {
+        return this.#abort.signal.aborted;
     }
     async add_download_task(gid: number, token: string) {
         this.#check_closed();
@@ -74,7 +84,7 @@ export class TaskManager {
                 removed_task.push(id);
                 await this.db.delete_task(status.value);
             } else if (status.status == PromiseStatus.Rejected) {
-                if (status.reason) console.log(status.reason);
+                if (status.reason && !this.aborted) console.log(status.reason);
                 removed_task.push(id);
             }
         }
@@ -87,7 +97,14 @@ export class TaskManager {
         this.#closed = true;
         this.db.close();
     }
+    force_abort(reason?: unknown) {
+        this.#force_abort.abort(reason);
+    }
+    get force_aborted() {
+        return this.#force_abort.signal.aborted;
+    }
     async run() {
+        if (this.aborted || this.force_aborted) throw new AlreadyClosedError();
         this.#check_closed();
         while (1) {
             await this.check_running_tasks();
@@ -116,8 +133,22 @@ export class TaskManager {
         if (task.type == TaskType.Download) {
             this.running_tasks.set(
                 task.id,
-                download_task(task, this.client, this.db, this.cfg),
+                download_task(
+                    task,
+                    this.client,
+                    this.db,
+                    this.cfg,
+                    this.#abort.signal,
+                    this.#force_abort.signal,
+                ),
             );
+        }
+    }
+    async waiting_unfinished_task() {
+        while (1) {
+            await this.check_running_tasks();
+            if (this.running_tasks.size == 0) break;
+            await sleep(10);
         }
     }
 }

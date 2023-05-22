@@ -1,7 +1,22 @@
 import { TaskManager } from "./task_manager.ts";
 
 export function add_exit_handler(m: TaskManager) {
-    const handler = () => {
+    let first_aborted = true;
+    let ignore_signal = false;
+    const handler = async () => {
+        if (ignore_signal) return;
+        if (first_aborted) {
+            m.abort();
+            console.log(
+                "Already abort all tasks. Please wait for a while. You can press Ctrl + C again to force abort.",
+            );
+            first_aborted = false;
+        } else {
+            m.force_abort();
+            ignore_signal = true;
+            return;
+        }
+        await m.waiting_unfinished_task();
         m.close();
     };
     Deno.addSignalListener("SIGINT", handler);

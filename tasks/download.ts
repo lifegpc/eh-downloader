@@ -14,12 +14,16 @@ import { join, resolve } from "std/path/mod.ts";
 import { exists } from "std/fs/exists.ts";
 
 class DownloadManager {
+    #abort: AbortSignal;
+    #force_abort: AbortSignal;
     #max_download_count;
     #running_tasks: Promise<unknown>[];
     #has_failed_task = false;
-    constructor(cfg: Config) {
+    constructor(cfg: Config, abort: AbortSignal, force_abort: AbortSignal) {
         this.#max_download_count = cfg.max_download_img_count;
         this.#running_tasks = [];
+        this.#abort = abort;
+        this.#force_abort = force_abort;
     }
     async #check_tasks() {
         this.#running_tasks = await asyncFilter(
@@ -27,7 +31,7 @@ class DownloadManager {
             async (t) => {
                 const s = await promiseState(t);
                 if (s.status === PromiseStatus.Rejected) {
-                    console.log(s.reason);
+                    if (!this.#force_abort.aborted) console.log(s.reason);
                     this.#has_failed_task = true;
                 }
                 return s.status === PromiseStatus.Pending;
@@ -36,6 +40,7 @@ class DownloadManager {
     }
     async add_new_task(f: () => Promise<unknown>) {
         while (1) {
+            if (this.#abort.aborted) break;
             await this.#check_tasks();
             if (this.#running_tasks.length < this.#max_download_count) {
                 this.#running_tasks.push(f());
@@ -61,6 +66,8 @@ export async function download_task(
     client: Client,
     db: EhDb,
     cfg: Config,
+    abort: AbortSignal,
+    force_abort: AbortSignal,
 ) {
     console.log("Started to download gallery", task.gid);
     const gdatas = await client.fetchGalleryMetadataByAPI([
@@ -75,10 +82,11 @@ export async function download_task(
     await db.add_gtag(task.gid, new Set(gdata.tags));
     const base_path = join(cfg.base, task.gid.toString());
     await sure_dir(base_path);
-    const m = new DownloadManager(cfg);
+    const m = new DownloadManager(cfg, abort, force_abort);
     if (cfg.mpv) {
         const mpv = await client.fetchMPVPage(task.gid, task.token);
         for (const i of mpv.imagelist) {
+            if (abort.aborted) break;
             await m.add_new_task(async () => {
                 const ofiles = db.get_files(task.gid, i.page_token);
                 if (ofiles.length) {
@@ -97,6 +105,9 @@ export async function download_task(
                         function try_load(a: number) {
                             if (a >= cfg.max_retry_count) reject(errors);
                             i.load().then(resolve).catch((e) => {
+                                if (force_abort.aborted) {
+                                    throw Error("aborted.");
+                                }
                                 errors.push(e);
                                 try_load(a + 1);
                             });
@@ -147,6 +158,9 @@ export async function download_task(
                                 reject(errors);
                             }
                             download().then(resolve).catch((e) => {
+                                if (force_abort.aborted) {
+                                    throw Error("aborted.");
+                                }
                                 errors.push(e);
                                 try_download(a + 1);
                             });
@@ -165,5 +179,6 @@ export async function download_task(
         }
     }
     await m.join();
+    if (abort.aborted || force_abort.aborted) throw Error("aborted");
     return task;
 }
