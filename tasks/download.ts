@@ -142,6 +142,7 @@ export async function download_task(
                             });
                             try {
                                 await re.body.pipeTo(f.writable, {
+                                    signal: force_abort,
                                     preventClose: true,
                                 });
                             } finally {
