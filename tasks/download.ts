@@ -134,7 +134,11 @@ export async function download_task(
                                     preventClose: true,
                                 });
                             } finally {
-                                f.close();
+                                try {
+                                    f.close();
+                                } catch (_) {
+                                    null;
+                                }
                             }
                         }
                         const errors: unknown[] = [];
