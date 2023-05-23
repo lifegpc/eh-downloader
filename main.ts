@@ -6,6 +6,7 @@ import { ParsedUrl, parseUrl, UrlType } from "./url.ts";
 import { sure_dir } from "./utils.ts";
 import { EhDb } from "./db.ts";
 import { load_eht_file, update_database_tag } from "./eh_translation.ts";
+import { get_abort_signal } from "./signal_handler.ts";
 
 function show_help() {
     console.log("Usage: main.ts [options]");
@@ -69,7 +70,7 @@ async function download() {
         }
         await manager.run();
     } finally {
-        manager.close();
+        if (!manager.aborted) manager.close();
     }
 }
 async function run() {
@@ -77,7 +78,7 @@ async function run() {
     try {
         await manager.run();
     } finally {
-        manager.close();
+        if (!manager.aborted) manager.close();
     }
 }
 function optimize() {
@@ -87,11 +88,18 @@ function optimize() {
 }
 async function update_tag_translation() {
     const db = new EhDb(settings.db_path || settings.base);
-    const f = await load_eht_file(
-        args._.length > 1 ? args._[1].toString() : undefined,
-    );
-    update_database_tag(db, f);
-    db.close();
+    const signal = get_abort_signal();
+    try {
+        const f = await load_eht_file(
+            args._.length > 1 ? args._[1].toString() : undefined,
+            signal,
+        );
+        update_database_tag(db, f);
+    } catch (e) {
+        if (!signal.aborted) throw e;
+    } finally {
+        db.close();
+    }
 }
 async function main() {
     await sure_dir(settings.base);

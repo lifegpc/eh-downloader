@@ -90,3 +90,18 @@ export async function asyncFilter<T>(
     )).filter((i) => i !== fail);
     return t.map((t) => t[0]);
 }
+
+export async function asyncForEach<T, V>(
+    arr: ArrayLike<T>,
+    callback: (
+        this: V | undefined,
+        element: T,
+        index: number,
+        array: ArrayLike<T>,
+    ) => Promise<void>,
+    thisArg?: V,
+) {
+    for (let i = 0; i < arr.length; i++) {
+        await callback.apply(thisArg, [arr[i], i, arr]);
+    }
+}

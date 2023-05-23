@@ -93,7 +93,10 @@ export class TaskManager {
         }
     }
     close() {
-        if (this.#closed) return;
+        if (this.#closed) {
+            console.trace("Manager closed multiple times.");
+            return;
+        }
         this.#closed = true;
         this.db.close();
     }

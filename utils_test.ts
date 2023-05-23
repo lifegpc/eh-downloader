@@ -1,6 +1,12 @@
 import { assertEquals } from "std/testing/asserts.ts";
 import { check_running } from "./pid_check.ts";
-import { asyncFilter, promiseState, PromiseStatus, sleep } from "./utils.ts";
+import {
+    asyncFilter,
+    asyncForEach,
+    promiseState,
+    PromiseStatus,
+    sleep,
+} from "./utils.ts";
 
 Deno.test("promiseState_test", async () => {
     const p1 = new Promise((res) => setTimeout(() => res(100), 100));
@@ -41,4 +47,13 @@ Deno.test("asyncFilter_test", async () => {
     });
     assertEquals(v, e);
     await Promise.allSettled(e);
+});
+
+Deno.test("asyncForEach", async () => {
+    const e = [new Promise<number>((res) => setTimeout(() => res(100), 100))];
+    const t = { test: 2 };
+    await asyncForEach(e, async function (e) {
+        assertEquals(this, t);
+        await e;
+    }, t);
 });

@@ -28,3 +28,17 @@ export function add_exit_handler(m: TaskManager) {
         });
     }
 }
+
+export function get_abort_signal(callback?: () => void): AbortSignal {
+    const a = new AbortController();
+    const handler = () => {
+        console.log("Aborted.");
+        a.abort();
+        if (callback) callback();
+    };
+    Deno.addSignalListener("SIGINT", handler);
+    if (Deno.build.os !== "windows") {
+        Deno.addSignalListener("SIGKILL", handler);
+    }
+    return a.signal;
+}

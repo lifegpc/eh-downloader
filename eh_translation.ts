@@ -35,9 +35,10 @@ export type EHTTextFile = {
     data: EHTData[];
 };
 
-async function fetch_eht_file() {
+async function fetch_eht_file(signal?: AbortSignal) {
     const re = await fetch(
         "https://github.com/EhTagTranslation/DatabaseReleases/raw/master/db.text.json",
+        { signal },
     );
     if (re.status != 200) throw Error("fetch failed");
     return re.text();
@@ -45,10 +46,11 @@ async function fetch_eht_file() {
 
 export async function load_eht_file(
     location: string | undefined = undefined,
+    signal?: AbortSignal,
 ): Promise<EHTTextFile> {
     const s = location === undefined
-        ? await fetch_eht_file()
-        : await Deno.readTextFile(location);
+        ? await fetch_eht_file(signal)
+        : await Deno.readTextFile(location, { signal });
     return JSON.parse(s);
 }
 
