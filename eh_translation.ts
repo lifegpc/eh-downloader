@@ -1,4 +1,5 @@
 import { EhDb } from "./db.ts";
+import { asyncForEach } from "./utils.ts";
 
 export type GHAuthor = {
     name: string;
@@ -54,12 +55,18 @@ export async function load_eht_file(
     return JSON.parse(s);
 }
 
-export function update_database_tag(db: EhDb, f: EHTTextFile) {
+export async function update_database_tag(
+    db: EhDb,
+    f: EHTTextFile,
+    signal: AbortSignal,
+) {
+    await Deno.writeTextFile("./utt.lock", "", { create: true, signal });
     for (const d of f.data) {
-        Object.getOwnPropertyNames(d.data).forEach((name) => {
+        await asyncForEach(Object.getOwnPropertyNames(d.data), async (name) => {
             const tag = `${d.namespace}:${name}`;
             const t = d.data[name];
             db.update_tags(tag, t.name, t.intro);
+            await Deno.readTextFile("./utt.lock", { signal });
         });
     }
 }

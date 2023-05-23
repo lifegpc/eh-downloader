@@ -3,7 +3,7 @@ import { load_settings } from "./config.ts";
 import { check_file_permissions } from "./permissons.ts";
 import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import { ParsedUrl, parseUrl, UrlType } from "./url.ts";
-import { sure_dir } from "./utils.ts";
+import { sure_dir, try_remove_sync } from "./utils.ts";
 import { EhDb } from "./db.ts";
 import { load_eht_file, update_database_tag } from "./eh_translation.ts";
 import { get_abort_signal } from "./signal_handler.ts";
@@ -94,10 +94,11 @@ async function update_tag_translation() {
             args._.length > 1 ? args._[1].toString() : undefined,
             signal,
         );
-        update_database_tag(db, f);
+        await update_database_tag(db, f, signal);
     } catch (e) {
         if (!signal.aborted) throw e;
     } finally {
+        try_remove_sync("utt.lock");
         db.close();
     }
 }
