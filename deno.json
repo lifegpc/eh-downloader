@@ -3,9 +3,9 @@
     "tasks": {
         "server-dev": "deno run -A --unstable --watch=static/,routes/ server-dev.ts",
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
-        "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
-        "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
-        "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-net --unstable"
+        "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
+        "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
+        "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable"
     },
     "fmt": {
         "indentWidth": 4,
