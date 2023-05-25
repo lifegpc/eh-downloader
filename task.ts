@@ -1,5 +1,6 @@
 export enum TaskType {
     Download,
+    ExportZip,
 }
 
 export type Task = {
@@ -9,4 +10,5 @@ export type Task = {
     token: string;
     pn: number;
     pid: number;
+    details: string | null;
 };

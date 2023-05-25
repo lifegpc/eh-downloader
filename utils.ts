@@ -105,3 +105,9 @@ export async function asyncForEach<T, V>(
         await callback.apply(thisArg, [arr[i], i, arr]);
     }
 }
+
+export function addZero(n: string | number, len: number) {
+    let s = n.toString();
+    while (s.length < len) s = "0" + s;
+    return s;
+}

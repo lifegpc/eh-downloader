@@ -5,6 +5,11 @@ import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
 import { Task, TaskType } from "./task.ts";
 import { download_task } from "./tasks/download.ts";
+import {
+    DEFAULT_EXPORT_ZIP_CONFIG,
+    export_zip,
+    ExportZipConfig,
+} from "./tasks/export_zip.ts";
 import { promiseState, PromiseStatus, sleep } from "./utils.ts";
 
 export class AlreadyClosedError extends Error {
@@ -52,6 +57,20 @@ export class TaskManager {
             pid: Deno.pid,
             pn: 1,
             type: TaskType.Download,
+            details: null,
+        };
+        return await this.db.add_task(task);
+    }
+    async add_export_zip_task(gid: number, output?: string) {
+        const cfg: ExportZipConfig = { output };
+        const task: Task = {
+            gid,
+            token: "",
+            id: 0,
+            pid: Deno.pid,
+            pn: 0,
+            type: TaskType.ExportZip,
+            details: JSON.stringify(cfg),
         };
         return await this.db.add_task(task);
     }
@@ -143,6 +162,20 @@ export class TaskManager {
                     this.cfg,
                     this.#abort.signal,
                     this.#force_abort.signal,
+                ),
+            );
+        } else if (task.type == TaskType.ExportZip) {
+            const cfg: ExportZipConfig = task.details
+                ? JSON.parse(task.details)
+                : DEFAULT_EXPORT_ZIP_CONFIG;
+            this.running_tasks.set(
+                task.id,
+                export_zip(
+                    task,
+                    this.db,
+                    this.cfg,
+                    this.#abort.signal,
+                    cfg,
                 ),
             );
         }

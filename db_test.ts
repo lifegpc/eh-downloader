@@ -16,6 +16,7 @@ Deno.test("DbTest", async () => {
             pn: 1,
             type: TaskType.Download,
             id: 0,
+            details: null,
         }),
     );
     const gmeta: GMeta = {

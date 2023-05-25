@@ -22,6 +22,7 @@ enum CMD {
     Run,
     Optimize,
     UpdateTagTranslation,
+    ExportZip,
 }
 
 const args = parse(Deno.args, {
@@ -44,6 +45,7 @@ if (rcmd == "optimize") cmd = CMD.Optimize;
 if (rcmd == "utt" || rcmd == "update_tag_translation") {
     cmd = CMD.UpdateTagTranslation;
 }
+if (rcmd == "ez" || rcmd == "export_zip") cmd = CMD.ExportZip;
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -102,6 +104,19 @@ async function update_tag_translation() {
         db.close();
     }
 }
+async function export_zip() {
+    const manager = new TaskManager(settings);
+    try {
+        for (const gid of args._.slice(1)) {
+            if (typeof gid === "number") {
+                await manager.add_export_zip_task(gid);
+            }
+        }
+        await manager.run();
+    } finally {
+        if (!manager.aborted) manager.close();
+    }
+}
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
@@ -112,6 +127,8 @@ async function main() {
         optimize();
     } else if (cmd == CMD.UpdateTagTranslation) {
         await update_tag_translation();
+    } else if (cmd == CMD.ExportZip) {
+        await export_zip();
     }
 }
 

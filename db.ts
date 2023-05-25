@@ -96,7 +96,8 @@ const TASK_TABLE = `CREATE TABLE task (
     gid INT,
     token TEXT,
     pn INT,
-    pid INT
+    pid INT,
+    details TEXT
 );`;
 const GMETA_TABLE = `CREATE TABLE gmeta (
     gid INT,
@@ -155,7 +156,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-2");
+    readonly version = new SemVer("1.0.0-3");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -208,6 +209,9 @@ export class EhDb {
                     f.path = resolve(f.path);
                     this.add_file(f, false);
                 });
+            }
+            if (v.compare("1.0.0-3") === -1) {
+                this.db.execute("ALTER TABLE task ADD details TEXT;");
             }
             this.#write_version();
         }
@@ -346,12 +350,26 @@ export class EhDb {
     add_task(task: Task) {
         return this.transaction(() => {
             this.db.query(
-                "INSERT INTO task (type, gid, token, pn, pid) VALUES (?, ?, ?, ?, ?);",
-                [task.type, task.gid, task.token, task.pn, task.pid],
+                "INSERT INTO task (type, gid, token, pn, pid, details) VALUES (?, ?, ?, ?, ?, ?);",
+                [
+                    task.type,
+                    task.gid,
+                    task.token,
+                    task.pn,
+                    task.pid,
+                    task.details,
+                ],
             );
             return this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ?;",
-                [task.type, task.gid, task.token, task.pn, task.pid],
+                "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ? AND details = ?;",
+                [
+                    task.type,
+                    task.gid,
+                    task.token,
+                    task.pn,
+                    task.pid,
+                    task.details,
+                ],
             )[0];
         });
     }
@@ -462,6 +480,12 @@ export class EhDb {
                 "SELECT tag.tag FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
                 [gid],
             ).map((v) => v[0]),
+        );
+    }
+    get_pmeta(gid: number) {
+        return this.db.queryEntries<PMeta>(
+            "SELECT * FROM pmeta WHERE gid = ?;",
+            [gid],
         );
     }
     get_pmeta_by_index(gid: number, index: number) {
