@@ -1,12 +1,7 @@
 {
-    "imports": {
-        "std/": "https://deno.land/std@0.188.0/",
-        "deno_dom/": "https://deno.land/x/deno_dom@v0.1.38/",
-        "sqlite/": "https://deno.land/x/sqlite@v3.7.2/",
-        "zipjs/": "https://deno.land/x/zipjs@v2.7.14/"
-    },
+    "importMap": "./import_map.json",
     "tasks": {
-        "dev": "deno run --watch main.ts",
+        "server-dev": "deno run -A --unstable --watch=static/,routes/ server-dev.ts",
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-net --unstable",
@@ -15,5 +10,9 @@
     "fmt": {
         "indentWidth": 4,
         "exclude": ["config.json"]
+    },
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact"
     }
 }
