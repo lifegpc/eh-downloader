@@ -43,6 +43,9 @@ export class TaskManager {
     get aborted() {
         return this.#abort.signal.aborted;
     }
+    get aborts() {
+        return this.#abort.signal;
+    }
     async add_download_task(gid: number, token: string) {
         this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
@@ -124,6 +127,9 @@ export class TaskManager {
     }
     get force_aborted() {
         return this.#force_abort.signal.aborted;
+    }
+    get force_aborts() {
+        return this.#force_abort.signal;
     }
     async run() {
         if (this.aborted || this.force_aborted) throw new AlreadyClosedError();
