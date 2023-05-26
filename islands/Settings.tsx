@@ -5,6 +5,8 @@ import Checkbox from "preact-material-components/Checkbox";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import { ConfigType } from "../config.ts";
+import SettingsCheckbox from "../components/SettingsCheckbox.tsx";
+import SettingsContext from "../components/SettingsContext.tsx";
 
 export type SettingsProps = {
     show: boolean;
@@ -17,9 +19,11 @@ export default class Settings extends Component<SettingsProps> {
         if (!this.props.show) return;
         const [settings, set_settings] = useState<ConfigType | undefined>();
         const [error, set_error] = useState<string | undefined>();
+        const [changed, set_changed] = useState<Set<string>>(new Set());
         const fetchSettings = async () => {
             const re = await fetch("/api/config");
             set_settings(await re.json());
+            set_changed(new Set());
         };
         const loadData = () => {
             fetchSettings().catch((e) => {
@@ -34,9 +38,26 @@ export default class Settings extends Component<SettingsProps> {
         } else if (settings) {
             data = (
                 <div class="settings">
-                    <Checkbox id="s-ex" checked={settings.ex} />
-                    <label for="s-ex">Use exhentai.org.</label>
-                    <br />
+                    <SettingsContext
+                        set_changed={set_changed}
+                        set_settings={set_settings}
+                    >
+                        <SettingsCheckbox
+                            name="download_original_img"
+                            checked={settings.download_original_img}
+                            description="Download original images."
+                        />
+                        <SettingsCheckbox
+                            name="ex"
+                            checked={settings.ex}
+                            description="Use exhentai.org."
+                        />
+                        <SettingsCheckbox
+                            name="mpv"
+                            checked={settings.mpv}
+                            description="Fetch page data from Multi-Page Viewer."
+                        />
+                    </SettingsContext>
                     <Button onClick={loadData}>Reload</Button>
                 </div>
             );
