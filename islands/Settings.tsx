@@ -1,7 +1,6 @@
 import { Component, ContextType } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import Button from "preact-material-components/Button";
-import Checkbox from "preact-material-components/Checkbox";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import { ConfigType } from "../config.ts";
