@@ -1,7 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import GlobalContext from "../components/GlobalContext.tsx";
-import Menu from "../components/Menu.tsx";
-import StyleSheet from "../components/StyleSheet.tsx";
+import Menu from "../islands/Menu.tsx";
 
 export default function Index() {
     return (

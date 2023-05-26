@@ -2,8 +2,8 @@ import { Head } from "$fresh/runtime.ts";
 import { Component } from "preact";
 import { ContextType } from "preact";
 import TopAppBar from "preact-material-components/TopAppBar";
-import StyleSheet from "./StyleSheet.tsx";
-import { GlobalCtx } from "./GlobalContext.tsx";
+import StyleSheet from "../components/StyleSheet.tsx";
+import { GlobalCtx } from "../components/GlobalContext.tsx";
 
 export default class Menu extends Component {
     static contextType = GlobalCtx;
