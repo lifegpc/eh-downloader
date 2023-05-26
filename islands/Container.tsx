@@ -23,9 +23,7 @@ export default class Container extends Component {
                 <Head>
                     <GlobalCtx.Provider value={this.context}>
                         <StyleSheet href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-                        <StyleSheet href="preact-material-components/TopAppBar/style.css" />
-                        <StyleSheet href="preact-material-components/List/style.css" />
-                        <StyleSheet href="preact-material-components/Icon/style.css" />
+                        <StyleSheet href="preact-material-components/style.css" />
                         <StyleSheet href="common.css" />
                     </GlobalCtx.Provider>
                 </Head>
@@ -42,10 +40,7 @@ export default class Container extends Component {
                         </TopAppBar.Section>
                     </TopAppBar.Row>
                 </TopAppBar>
-                <List
-                    class="nav-menu"
-                    style={{ display: display ? "block" : "none" }}
-                >
+                <List class={"nav-menu" + (display ? " open" : "")}>
                     <List.Item onClick={() => set_display(false)}>
                         <Icon>close</Icon>
                     </List.Item>

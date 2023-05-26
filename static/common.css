@@ -3,10 +3,21 @@
     position: fixed;
     background-color: white;
     box-sizing: border-box;
-    display: none;
+    display: block;
+    left: -64px;
+    transition: all 0.5s ease;
+    height: 100vh;
+}
+
+.nav-menu.open {
+    left: 0px;
 }
 
 .main {
     position: fixed;
     top: 64px;
+}
+
+.settings label {
+    line-height: 40px;
 }

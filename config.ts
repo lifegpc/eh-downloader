@@ -1,4 +1,18 @@
+import { exists } from "std/fs/exists.ts";
 import { JsonValue, parse } from "std/jsonc/mod.ts";
+
+export type ConfigType = {
+    cookies: boolean;
+    db_path?: string;
+    ua?: string;
+    ex: boolean;
+    base: string;
+    max_task_count: number;
+    mpv: boolean;
+    max_retry_count: number;
+    max_download_img_count: number;
+    download_original_img: boolean;
+};
 
 export class Config {
     _data;
@@ -71,9 +85,24 @@ export class Config {
     get download_original_img() {
         return this._return_bool("download_original_img") || false;
     }
+    to_json(): ConfigType {
+        return {
+            cookies: typeof this.cookies === "string",
+            db_path: this.db_path,
+            ua: this.ua,
+            ex: this.ex,
+            base: this.base,
+            max_task_count: this.max_task_count,
+            mpv: this.mpv,
+            max_retry_count: this.max_retry_count,
+            max_download_img_count: this.max_download_img_count,
+            download_original_img: this.download_original_img,
+        };
+    }
 }
 
 export async function load_settings(path: string) {
+    if (!await exists(path)) return new Config({});
     const s = (new TextDecoder()).decode(await Deno.readFile(path));
     return new Config(parse(s));
 }
