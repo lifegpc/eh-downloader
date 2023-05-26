@@ -14,6 +14,7 @@
     },
     "compilerOptions": {
         "jsx": "react-jsx",
-        "jsxImportSource": "preact"
+        "jsxImportSource": "preact",
+        "lib": ["es2022", "dom", "dom.iterable", "deno.window"]
     }
 }
