@@ -25,7 +25,7 @@ export default class SettingsContext extends Component<Props, State> {
     }
     render() {
         return (
-            <SettingsCtx.Provider value={this.props}>
+            <SettingsCtx.Provider value={this.state}>
                 {this.props.children}
             </SettingsCtx.Provider>
         );

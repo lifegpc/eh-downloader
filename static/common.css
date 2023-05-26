@@ -18,6 +18,14 @@
     top: 64px;
 }
 
+.settings {
+    width: 100vw;
+}
+
 .settings label {
     line-height: 40px;
+}
+
+.settings label.text {
+    line-height: 64px;
 }

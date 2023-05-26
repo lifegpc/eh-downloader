@@ -1,11 +1,12 @@
 import { Component, ContextType } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import Button from "preact-material-components/Button";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import { ConfigType } from "../config.ts";
 import SettingsCheckbox from "../components/SettingsCheckbox.tsx";
 import SettingsContext from "../components/SettingsContext.tsx";
+import SettingsText from "../components/SettingsText.tsx";
 
 export type SettingsProps = {
     show: boolean;
@@ -35,6 +36,7 @@ export default class Settings extends Component<SettingsProps> {
         if (error) {
             data = <div class={tw`text-red-500`}>{error}</div>;
         } else if (settings) {
+            const ref = useRef<SettingsText>();
             data = (
                 <div class="settings">
                     <SettingsContext
@@ -56,6 +58,30 @@ export default class Settings extends Component<SettingsProps> {
                             checked={settings.mpv}
                             description="Fetch page data from Multi-Page Viewer."
                         />
+                        <SettingsText
+                            name="base"
+                            value={settings.base}
+                            description="Download location:"
+                        />
+                        <SettingsText
+                            name="ua"
+                            value={settings.ua ? settings.ua : ""}
+                            description="User Agent:"
+                            ref={ref}
+                        >
+                            <Button
+                                onClick={() => {
+                                    if (ref.current) {
+                                        const ua = navigator.userAgent;
+                                        const t = ref.current;
+                                        t.update(ua);
+                                        t.set_text(ua);
+                                    }
+                                }}
+                            >
+                                Use current browser's user agent.
+                            </Button>
+                        </SettingsText>
                     </SettingsContext>
                     <Button onClick={loadData}>Reload</Button>
                 </div>
