@@ -7,7 +7,6 @@ import { sure_dir, try_remove_sync } from "./utils.ts";
 import { EhDb } from "./db.ts";
 import { load_eht_file, update_database_tag } from "./eh_translation.ts";
 import { get_abort_signal } from "./signal_handler.ts";
-import { startServer } from "./server.ts";
 
 function show_help() {
     console.log("Usage: main.ts [options]");
@@ -24,7 +23,6 @@ enum CMD {
     Optimize,
     UpdateTagTranslation,
     ExportZip,
-    Server,
 }
 
 const args = parse(Deno.args, {
@@ -48,7 +46,6 @@ if (rcmd == "utt" || rcmd == "update_tag_translation") {
     cmd = CMD.UpdateTagTranslation;
 }
 if (rcmd == "ez" || rcmd == "export_zip") cmd = CMD.ExportZip;
-if (rcmd == "s" || rcmd == "server") cmd = CMD.Server;
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -132,8 +129,6 @@ async function main() {
         await update_tag_translation();
     } else if (cmd == CMD.ExportZip) {
         await export_zip();
-    } else if (cmd == CMD.Server) {
-        await startServer(settings);
     }
 }
 
