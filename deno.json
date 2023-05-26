@@ -5,7 +5,8 @@
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
-        "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable"
+        "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
+        "fetch": "deno run --allow-read=./ --allow-write=./ --allow-net fetch_static_files.ts"
     },
     "fmt": {
         "indentWidth": 4,
