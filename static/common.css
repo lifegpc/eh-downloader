@@ -1,0 +1,12 @@
+.nav-menu {
+    z-index: 100;
+    position: fixed;
+    background-color: white;
+    box-sizing: border-box;
+    display: none;
+}
+
+.main {
+    position: fixed;
+    top: 64px;
+}

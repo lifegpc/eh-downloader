@@ -2,7 +2,11 @@ import { dirname, join } from "std/path/mod.ts";
 import { sure_dir } from "./utils.ts";
 
 const map = JSON.parse(await Deno.readTextFile("./import_map.json")).imports;
-const LIST: string[] = ["preact-material-components/TopAppBar/style.css"];
+const LIST: string[] = [
+    "preact-material-components/TopAppBar/style.css",
+    "preact-material-components/List/style.css",
+    "preact-material-components/Icon/style.css",
+];
 
 function get_url(i: string) {
     for (const v of Object.getOwnPropertyNames(map)) {

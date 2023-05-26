@@ -1,6 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import GlobalContext from "../components/GlobalContext.tsx";
-import Menu from "../islands/Menu.tsx";
+import Container from "../islands/Container.tsx";
 
 export default function Index() {
     return (
@@ -9,7 +9,7 @@ export default function Index() {
                 <Head>
                     <title>EH Downloader</title>
                 </Head>
-                <Menu></Menu>
+                <Container />
             </GlobalContext>
         </body>
     );

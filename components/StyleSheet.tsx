@@ -1,5 +1,5 @@
 import { asset } from "$fresh/runtime.ts";
-import { Component, ContextType, RenderableProps } from "preact";
+import { Component, ContextType } from "preact";
 import { GlobalCtx } from "./GlobalContext.tsx";
 
 export type StyleSheetType = {
