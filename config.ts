@@ -106,3 +106,7 @@ export async function load_settings(path: string) {
     const s = (new TextDecoder()).decode(await Deno.readFile(path));
     return new Config(parse(s));
 }
+
+export function save_settings(path: string, cfg: Config, signal?: AbortSignal) {
+    return Deno.writeTextFile(path, JSON.stringify(cfg._data), { signal });
+}
