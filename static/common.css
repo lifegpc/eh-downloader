@@ -22,10 +22,20 @@
     width: 100vw;
 }
 
+.settings div.text {
+    width: 100%;
+}
+
 .settings label {
     line-height: 40px;
 }
 
-.settings label.text {
-    line-height: 64px;
+.settings .mdc-text-field label {
+    line-height: revert;
+    top: 22px;
+    bottom: auto;
+}
+
+.settings #s-cookies .mdc-text-field {
+    min-width: 50%;
 }

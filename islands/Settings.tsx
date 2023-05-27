@@ -20,10 +20,16 @@ export default class Settings extends Component<SettingsProps> {
         const [settings, set_settings] = useState<ConfigType | undefined>();
         const [error, set_error] = useState<string | undefined>();
         const [changed, set_changed] = useState<Set<string>>(new Set());
+        const [new_cookies, set_new_cookies] = useState<string>("");
+        const cookies_ref = useRef<SettingsText>();
         const fetchSettings = async () => {
             const re = await fetch("/api/config");
             set_settings(await re.json());
             set_changed(new Set());
+            if (cookies_ref.current) {
+                const t = cookies_ref.current;
+                t.update("");
+            }
         };
         const loadData = () => {
             fetchSettings().catch((e) => {
@@ -82,8 +88,20 @@ export default class Settings extends Component<SettingsProps> {
                                 Use current browser's user agent.
                             </Button>
                         </SettingsText>
+                        <SettingsText
+                            name="cookies"
+                            value=""
+                            description="Cookies:"
+                            set_value={set_new_cookies}
+                            label={`Enter${
+                                settings.cookies ? " new" : ""
+                            } cookies here.`}
+                            ignore_update_value={true}
+                            ref={cookies_ref}
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>Reload</Button>
+                    <Button disabled={changed.size === 0}>Save</Button>
                 </div>
             );
         } else {

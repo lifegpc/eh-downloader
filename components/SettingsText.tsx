@@ -2,7 +2,7 @@ import { Component, ComponentChildren, ContextType } from "preact";
 import { SettingsCtx } from "./SettingsContext.tsx";
 import { ConfigType } from "../config.ts";
 import TextField from "preact-material-components/TextField";
-import { Ref, useRef } from "preact/hooks";
+import { Ref, StateUpdater, useRef } from "preact/hooks";
 
 export type SettingsTextProps = {
     value: string;
@@ -14,6 +14,8 @@ export type SettingsTextProps = {
     fullwidth?: boolean;
     disabled?: boolean;
     children?: ComponentChildren;
+    set_value?: StateUpdater<string>;
+    ignore_update_value?: boolean;
 };
 
 export default class SettingsText
@@ -34,37 +36,44 @@ export default class SettingsText
             }
         }
     }
-    set_text(value: string) {
+    set_changed() {
         if (this.context) {
+            this.context.set_changed((v) => {
+                v.add(this.props.name);
+                return v;
+            });
+        }
+    }
+    set_text(value: string) {
+        if (this.props.set_value) {
+            this.props.set_value(value);
+            this.set_changed();
+        } else if (this.context) {
             this.context.set_settings((v) => {
                 if (v) {
                     const t: Record<string, unknown> = v;
                     t[this.props.name] = value;
-                    if (this.context) {
-                        this.context.set_changed((v) => {
-                            v.add(this.props.name);
-                            return v;
-                        });
-                    }
+                    this.set_changed();
                     return t as ConfigType;
                 }
             });
         }
     }
     componentDidMount() {
-        this.update(this.props.value);
+        if (!this.props.ignore_update_value) this.update(this.props.value);
     }
     componentWillUpdate(
         nextProps: Readonly<SettingsTextProps>,
         _nextState: Readonly<unknown>,
         _nextContext: unknown,
     ) {
-        this.update(nextProps.value);
+        if (!this.props.ignore_update_value) this.update(nextProps.value);
     }
     render() {
         this.ref = useRef<TextField>();
+        const id = `s-${this.props.name}`;
         return (
-            <div class="text">
+            <div class="text" id={id}>
                 <label>{this.props.description}</label>
                 <TextField
                     fullwidth={this.props.fullwidth}
