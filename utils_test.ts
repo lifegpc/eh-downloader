@@ -3,6 +3,7 @@ import { check_running } from "./pid_check.ts";
 import {
     asyncFilter,
     asyncForEach,
+    filterFilename,
     promiseState,
     PromiseStatus,
     sleep,
@@ -49,11 +50,22 @@ Deno.test("asyncFilter_test", async () => {
     await Promise.allSettled(e);
 });
 
-Deno.test("asyncForEach", async () => {
+Deno.test("asyncForEach_test", async () => {
     const e = [new Promise<number>((res) => setTimeout(() => res(100), 100))];
     const t = { test: 2 };
     await asyncForEach(e, async function (e) {
         assertEquals(this, t);
         await e;
     }, t);
+});
+
+Deno.test("filterFilename_test", () => {
+    assertEquals(filterFilename("abcdef.ts", 5), "ab.ts");
+    assertEquals(filterFilename("\x00df\t\r.ts"), "df.ts");
+    assertEquals(filterFilename("a\u200bd.ts"), "ad.ts");
+    assertEquals(filterFilename("中文.ts"), "中文.ts");
+    assertEquals(filterFilename("d\\s/.ts"), "d_s_.ts");
+    if (Deno.build.os == "windows") {
+        assertEquals(filterFilename("d|?ad.ts"), "d__ad.ts");
+    }
 });

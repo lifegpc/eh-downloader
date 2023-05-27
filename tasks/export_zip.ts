@@ -1,7 +1,7 @@
 import { join } from "std/path/mod.ts";
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb } from "../db.ts";
-import { addZero, asyncForEach } from "../utils.ts";
+import { addZero, asyncForEach, filterFilename } from "../utils.ts";
 import { Config } from "../config.ts";
 import { Task } from "../task.ts";
 
@@ -22,7 +22,7 @@ export async function export_zip(
     const g = db.get_gmeta_by_gid(gid);
     if (!g) throw Error("Gallery not found in database.");
     const output = ecfg.output === undefined
-        ? join(cfg.base, g.title + ".zip")
+        ? join(cfg.base, filterFilename(g.title + ".zip"))
         : ecfg.output;
     const f = await Deno.open(output, {
         create: true,

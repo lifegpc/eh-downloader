@@ -1,4 +1,5 @@
 import { exists, existsSync } from "std/fs/exists.ts";
+import { extname } from "std/path/mod.ts";
 import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 
 export function sleep(time: number): Promise<undefined> {
@@ -110,4 +111,26 @@ export function addZero(n: string | number, len: number) {
     let s = n.toString();
     while (s.length < len) s = "0" + s;
     return s;
+}
+
+export function filterFilename(p: string, maxLength = 256) {
+    // strip control chars
+    p = p.replace(/\p{C}/gu, "");
+    // normalize newline
+    p = p.replace(/[\n\r]/g, "");
+    p = p.replace(/\p{Zl}/gu, "");
+    p = p.replace(/\p{Zp}/gu, "");
+    // normalize space
+    p = p.replace(/\p{Zs}/gu, " ");
+    p = p.replace(/[\\/]/g, "_");
+    if (Deno.build.os == "windows") {
+        p = p.replace(/[:\*\?\"<>\|]/g, "_");
+    } else if (Deno.build.os == "linux") {
+        p = p.replace(/[!\$\"]/g, "_");
+    }
+    if (p.length > maxLength) {
+        const ext = extname(p);
+        return p.slice(0, maxLength - ext.length) + ext;
+    }
+    return p;
 }
