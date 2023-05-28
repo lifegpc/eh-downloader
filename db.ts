@@ -124,7 +124,7 @@ const PMETA_TABLE = `CREATE TABLE pmeta (
     name TEXT,
     width INT,
     height INT,
-    PRIMARY KEY (gid, token)
+    PRIMARY KEY (gid, "index")
 );`;
 const TAG_TABLE = `CREATE TABLE tag (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -156,7 +156,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-3");
+    readonly version = new SemVer("1.0.0-4");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -198,6 +198,7 @@ export class EhDb {
         const v = this.#read_version();
         if (!v) return false;
         if (v.compare(this.version) === -1) {
+            let need_optimize = false;
             if (v.compare("1.0.0-1") === -1) {
                 this.db.execute("ALTER TABLE tag ADD translated TEXT;");
                 this.db.execute("ALTER TABLE tag ADD intro TEXT;");
@@ -213,7 +214,17 @@ export class EhDb {
             if (v.compare("1.0.0-3") === -1) {
                 this.db.execute("ALTER TABLE task ADD details TEXT;");
             }
+            if (v.compare("1.0.0-4") === -1) {
+                this.db.execute("ALTER TABLE pmeta RENAME TO pmeta_origin;");
+                this.db.execute(PMETA_TABLE);
+                this.db.execute(
+                    'INSERT INTO pmeta (gid, "index", token, name, width, height) SELECT gid, "index", token, name, width, height FROM pmeta_origin;',
+                );
+                this.db.execute("DROP TABLE pmeta_origin;");
+                need_optimize = true;
+            }
             this.#write_version();
+            if (need_optimize) this.optimize();
         }
         if (
             ALL_TABLES.length !== this.#exist_table.size ||

@@ -95,6 +95,19 @@ export async function download_task(
                         (t.is_original || !cfg.download_original_img) &&
                         (await exists(t.path))
                     ) {
+                        const p = db.get_pmeta_by_index(task.gid, i.index);
+                        if (!p) {
+                            const op = db.get_pmeta_by_token(
+                                task.gid,
+                                i.page_token,
+                            );
+                            if (op) {
+                                op.index = i.index;
+                                op.name = i.name;
+                                db.add_pmeta(op);
+                                return;
+                            }
+                        }
                         console.log("Already download page", i.index);
                         return;
                     }
