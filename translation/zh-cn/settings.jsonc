@@ -1,0 +1,19 @@
+{
+    "no_changed": "设置未更改，无需保存。",
+    "saved": "已保存。",
+    "failed": "获取设置失败。",
+    "need_restart": "部分设置需要重启后才能生效。",
+    "download_original_img": "下载原始画质的图片。",
+    "ex": "使用exhentai.org。",
+    "mpv": "从Multi-Page Viewer获取页面数据。",
+    "base": "下载位置：",
+    "ua": "用户代理(User Agent)：",
+    "ua_now": "使用当前浏览器的用户代理",
+    "cookies": "Cookies：",
+    "enter_cookies": "在此输入Cookies",
+    "enter_new_cookies": "在此输入新的Cookies",
+    "max_task_count": "最大并行任务数：",
+    "max_retry_count": "最大重试次数：",
+    "max_download_img_count": "最大图片并行下载数：",
+    "save_dlg": "是否保存设置？"
+}

@@ -1,0 +1,19 @@
+{
+    "no_changed": "Nothing was changed.",
+    "saved": "Saved.",
+    "failed": "Failed to fetch settings.",
+    "need_restart": " Some settings require a restart to take effect.",
+    "download_original_img": "Download original images.",
+    "ex": "Use exhentai.org.",
+    "mpv": "Fetch page data from Multi-Page Viewer.",
+    "base": "Download location: ",
+    "ua": "User Agent: ",
+    "ua_now": "Use current browser's user agent.",
+    "cookies": "Cookies: ",
+    "enter_cookies": "Enter cookies here",
+    "enter_new_cookies": "Enter new cookies here",
+    "max_task_count": "Maximum number of parallel tasks: ",
+    "max_retry_count": "Maximum retry count: ",
+    "max_download_img_count": "Maximum number of parallel downloads of images: ",
+    "save_dlg": "Do you want to save settings?"
+}

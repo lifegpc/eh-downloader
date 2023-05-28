@@ -1,3 +1,8 @@
 {
-    "title": "EH 下载器"
+    "title": "EH 下载器",
+    "loading": "加载中…",
+    "reload": "重新加载",
+    "save": "保存",
+    "yes": "是",
+    "no": "否"
 }

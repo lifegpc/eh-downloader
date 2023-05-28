@@ -9,7 +9,7 @@ import { ConfigType } from "../config.ts";
 import SettingsCheckbox from "../components/SettingsCheckbox.tsx";
 import SettingsContext from "../components/SettingsContext.tsx";
 import SettingsText from "../components/SettingsText.tsx";
-import { i18n_map } from "../server/i18n.ts";
+import t from "../server/i18n.ts";
 
 export type SettingsProps = {
     show: boolean;
@@ -53,7 +53,7 @@ export default class Settings extends Component<SettingsProps> {
         };
         const loadData = () => {
             fetchSettings().catch((e) => {
-                set_error("Failed to fetch settings.");
+                set_error(t("settings.failed"));
                 console.error(e);
             });
         };
@@ -71,7 +71,7 @@ export default class Settings extends Component<SettingsProps> {
             const dlg = useRef<Dialog>();
             const showDlg = () => {
                 if (!changed.size) {
-                    show_snack("Nothing was changed.");
+                    show_snack(t("settings.no_changed"));
                     return;
                 }
                 dlg.current?.MDComponent?.show();
@@ -81,14 +81,13 @@ export default class Settings extends Component<SettingsProps> {
                 saveSettings().then((d) => {
                     set_disabled(false);
                     show_snack(
-                        "Saved." +
-                            (d.is_unsafe
-                                ? " Some settings require a restart to take effect."
-                                : ""),
+                        t("settings.saved") +
+                            (d.is_unsafe ? t("settings.need_restart") : ""),
                     );
+                    loadData();
                 }).catch((e) => {
                     set_disabled(false);
-                    show_snack("Failed to save settings.");
+                    show_snack(t("settings.failed"));
                     console.error(e);
                 });
             };
@@ -101,28 +100,28 @@ export default class Settings extends Component<SettingsProps> {
                         <SettingsCheckbox
                             name="download_original_img"
                             checked={settings.download_original_img}
-                            description="Download original images."
+                            description={t("settings.download_original_img")}
                         />
                         <SettingsCheckbox
                             name="ex"
                             checked={settings.ex}
-                            description="Use exhentai.org."
+                            description={t("settings.ex")}
                         />
                         <SettingsCheckbox
                             name="mpv"
                             checked={settings.mpv}
-                            description="Fetch page data from Multi-Page Viewer."
+                            description={t("settings.mpv")}
                         />
                         <SettingsText
                             name="base"
                             value={settings.base}
-                            description="Download location:"
+                            description={t("settings.base")}
                             type="text"
                         />
                         <SettingsText
                             name="ua"
                             value={settings.ua ? settings.ua : ""}
-                            description="User Agent:"
+                            description={t("settings.ua")}
                             type="text"
                             ref={ref}
                         >
@@ -136,60 +135,62 @@ export default class Settings extends Component<SettingsProps> {
                                     }
                                 }}
                             >
-                                Use current browser's user agent.
+                                {t("settings.ua_now")}
                             </Button>
                         </SettingsText>
                         <SettingsText
                             name="cookies"
                             value={new_cookies}
-                            description="Cookies:"
+                            description={t("settings.cookies")}
                             type="text"
                             set_value={set_new_cookies}
-                            label={`Enter${
-                                settings.cookies ? " new" : ""
-                            } cookies here.`}
+                            label={t(
+                                `settings.enter${
+                                    settings.cookies ? "_new" : ""
+                                }_cookies`,
+                            )}
                         />
                         <SettingsText
                             name="max_task_count"
                             value={settings.max_task_count}
-                            description="Maximum number of parallel tasks:"
+                            description={t("settings.max_task_count")}
                             type="number"
                             min={1}
                         />
                         <SettingsText
                             name="max_retry_count"
                             value={settings.max_retry_count}
-                            description="Maximum retry count:"
+                            description={t("settings.max_retry_count")}
                             type="number"
                             min={1}
                         />
                         <SettingsText
                             name="max_download_img_count"
                             value={settings.max_download_img_count}
-                            description="Maximum number of parallel downloads of images:"
+                            description={t("settings.max_download_img_count")}
                             type="number"
                             min={1}
                         />
                     </SettingsContext>
-                    <Button onClick={loadData}>Reload</Button>
-                    <Button onClick={showDlg} disabled={disabled}>Save</Button>
+                    <Button onClick={loadData}>{t("common.reload")}</Button>
+                    <Button onClick={showDlg} disabled={disabled}>
+                        {t("common.save")}
+                    </Button>
                     <Dialog ref={dlg} onAccept={save}>
-                        <Dialog.Header>
-                            Do you want to save settings?
-                        </Dialog.Header>
+                        <Dialog.Header>{t("settings.save_dlg")}</Dialog.Header>
                         <Dialog.Footer>
                             <Dialog.FooterButton accept={true}>
-                                Yes
+                                {t("common.yes")}
                             </Dialog.FooterButton>
                             <Dialog.FooterButton cancel={true}>
-                                No
+                                {t("common.no")}
                             </Dialog.FooterButton>
                         </Dialog.Footer>
                     </Dialog>
                 </div>
             );
         } else {
-            data = <div class={tw`text-red-500`}>Loading...</div>;
+            data = <div class={tw`text-red-500`}>{t("common.loading")}</div>;
         }
         return (
             <div>

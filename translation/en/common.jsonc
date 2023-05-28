@@ -1,3 +1,8 @@
 {
-    "title": "EH Downloader"
+    "title": "EH Downloader",
+    "loading": "Loading...",
+    "reload": "Reload",
+    "save": "Save",
+    "yes": "Yes",
+    "no": "No"
 }
