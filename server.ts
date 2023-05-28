@@ -1,9 +1,10 @@
-import { start } from "$fresh/server.ts";
+import { RenderFunction, start } from "$fresh/server.ts";
 import { load_settings } from "./config.ts";
 import manifest from "./fresh.gen.ts";
 import { TaskManager } from "./task_manager.ts";
 import twindPlugin from "$fresh/plugins/twind.ts";
 import twindConfig from "./twind.config.ts";
+import { load_translation } from "./server/i18ns.ts";
 
 let task_manager: TaskManager | undefined = undefined;
 let cfg_path: string | undefined = undefined;
@@ -18,12 +19,21 @@ export function get_cfg_path() {
     return cfg_path;
 }
 
+const renderFn: RenderFunction = (ctx, render) => {
+    const u = new URL(ctx.url);
+    const lang = u.searchParams.get("lang");
+    if (lang) ctx.lang = lang;
+    render();
+};
+
 export async function startServer(path: string) {
     cfg_path = path;
     const cfg = await load_settings(path);
     task_manager = new TaskManager(cfg);
+    await load_translation(task_manager.aborts);
     return start(manifest, {
         signal: task_manager.aborts,
         plugins: [twindPlugin(twindConfig)],
+        render: renderFn,
     });
 }

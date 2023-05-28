@@ -9,6 +9,7 @@ import { ConfigType } from "../config.ts";
 import SettingsCheckbox from "../components/SettingsCheckbox.tsx";
 import SettingsContext from "../components/SettingsContext.tsx";
 import SettingsText from "../components/SettingsText.tsx";
+import { i18n_map } from "../server/i18n.ts";
 
 export type SettingsProps = {
     show: boolean;

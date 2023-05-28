@@ -7,11 +7,17 @@ import TopAppBar from "preact-material-components/TopAppBar";
 import StyleSheet from "../components/StyleSheet.tsx";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import Settings from "./Settings.tsx";
+import t, { i18n_map, I18NMap } from "../server/i18n.ts";
 
-export default class Container extends Component {
+export type ContainerProps = {
+    i18n: I18NMap;
+};
+
+export default class Container extends Component<ContainerProps> {
     static contextType = GlobalCtx;
     declare context: ContextType<typeof GlobalCtx>;
     render() {
+        i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
         const [show_settings, set_show_settings] = useState(false);
         const close_all = () => {
@@ -21,6 +27,7 @@ export default class Container extends Component {
         return (
             <div>
                 <Head>
+                    <title>{t("common.title")}</title>
                     <GlobalCtx.Provider value={this.context}>
                         <StyleSheet href="https://fonts.googleapis.com/icon?family=Material+Icons" />
                         <StyleSheet href="preact-material-components/style.css" />
@@ -32,7 +39,7 @@ export default class Container extends Component {
                         <TopAppBar.Section align-start>
                             <TopAppBar.Icon navigation>menu</TopAppBar.Icon>
                             <TopAppBar.Title>
-                                EH Downloader
+                                {t("common.title")}
                             </TopAppBar.Title>
                         </TopAppBar.Section>
                         <TopAppBar.Section align-end>
