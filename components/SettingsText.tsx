@@ -97,8 +97,10 @@ export default class SettingsText<T extends keyof TextType>
     render() {
         this.ref = useRef<TextField>();
         const id = `s-${this.props.name}`;
+        let cn = "text";
+        if (this.props.helpertext) cn += " helper";
         return (
-            <div class="text" id={id}>
+            <div class={cn} id={id}>
                 <label>{this.props.description}</label>
                 <TextField
                     fullwidth={this.props.fullwidth}

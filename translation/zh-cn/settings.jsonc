@@ -15,5 +15,7 @@
     "max_task_count": "最大并行任务数：",
     "max_retry_count": "最大重试次数：",
     "max_download_img_count": "最大图片并行下载数：",
-    "save_dlg": "是否保存设置？"
+    "save_dlg": "是否保存设置？",
+    "db_path": "存放数据库的文件夹位置：",
+    "db_path_help": "如果未设置，将使用下载位置。"
 }

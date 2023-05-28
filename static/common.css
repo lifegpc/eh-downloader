@@ -14,12 +14,8 @@
 }
 
 .main {
-    position: fixed;
+    position: relative;
     top: 64px;
-}
-
-.settings {
-    width: 100vw;
 }
 
 .settings div.text {
@@ -38,4 +34,12 @@
 
 .settings #s-cookies .mdc-text-field {
     min-width: 50%;
+}
+
+.settings div.text.helper {
+    display: flex;
+}
+
+.settings div.text.helper label {
+    margin-top: 14px;
 }

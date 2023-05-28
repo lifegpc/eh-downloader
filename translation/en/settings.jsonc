@@ -15,5 +15,7 @@
     "max_task_count": "Maximum number of parallel tasks: ",
     "max_retry_count": "Maximum retry count: ",
     "max_download_img_count": "Maximum number of parallel downloads of images: ",
-    "save_dlg": "Do you want to save settings?"
+    "save_dlg": "Do you want to save settings?",
+    "db_path": "The folder where the database is stored: ",
+    "db_path_help": "If not set, the download location is used."
 }

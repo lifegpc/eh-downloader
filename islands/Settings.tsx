@@ -171,6 +171,13 @@ export default class Settings extends Component<SettingsProps> {
                             type="number"
                             min={1}
                         />
+                        <SettingsText
+                            name="db_path"
+                            value={settings.db_path || ""}
+                            type="text"
+                            description={t("settings.db_path")}
+                            helpertext={t("settings.db_path_help")}
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>
