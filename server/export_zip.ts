@@ -117,7 +117,7 @@ export function get_export_zip_response(gid: number, db: EhDb) {
         headers: {
             "content-type": "application/zip",
             "Content-Disposition": `attachment; filename="${
-                gmeta.title.replace(/"/g, '\\"')
+                encodeURIComponent(gmeta.title)
             }.zip"`,
         },
     });
