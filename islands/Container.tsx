@@ -1,6 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import { Component, ContextType } from "preact";
-import { useState, StateUpdater, useEffect } from "preact/hooks";
+import { StateUpdater, useEffect, useState } from "preact/hooks";
 import Icon from "preact-material-components/Icon";
 import List from "preact-material-components/List";
 import TopAppBar from "preact-material-components/TopAppBar";
@@ -24,7 +24,7 @@ export default class Container extends Component<ContainerProps> {
             const v = typeof updater === "function" ? updater(state) : updater;
             set_state1(v);
             history.pushState(v, "", v);
-        }
+        };
         useEffect(() => {
             const hash = document.location.hash;
             if (!hash || hash == "#") {
@@ -32,15 +32,15 @@ export default class Container extends Component<ContainerProps> {
             } else {
                 set_state1(hash);
             }
-            self.addEventListener('popstate', (e) => {
+            self.addEventListener("popstate", (e) => {
                 const s = e.state;
                 if (typeof s === "string") {
                     set_state1(s);
                 } else {
                     set_state1("#/");
                 }
-            })
-        }, [])
+            });
+        }, []);
         return (
             <div>
                 <Head>
@@ -68,10 +68,12 @@ export default class Container extends Component<ContainerProps> {
                     <List.Item onClick={() => set_display(false)}>
                         <Icon>close</Icon>
                     </List.Item>
-                    <List.Item onClick={() => {
-                        set_display(false);
-                        set_state("#/");
-                    }}>
+                    <List.Item
+                        onClick={() => {
+                            set_display(false);
+                            set_state("#/");
+                        }}
+                    >
                         <Icon>home</Icon>
                     </List.Item>
                     <List.Item
