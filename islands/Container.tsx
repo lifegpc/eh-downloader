@@ -1,6 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import { Component, ContextType } from "preact";
-import { useState } from "preact/hooks";
+import { useState, StateUpdater, useEffect } from "preact/hooks";
 import Icon from "preact-material-components/Icon";
 import List from "preact-material-components/List";
 import TopAppBar from "preact-material-components/TopAppBar";
@@ -19,11 +19,28 @@ export default class Container extends Component<ContainerProps> {
     render() {
         i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
-        const [show_settings, set_show_settings] = useState(false);
-        const close_all = () => {
-            set_display(false);
-            set_show_settings(false);
-        };
+        const [state, set_state1] = useState("#/");
+        const set_state: StateUpdater<string> = (updater) => {
+            const v = typeof updater === "function" ? updater(state) : updater;
+            set_state1(v);
+            history.pushState(v, "", v);
+        }
+        useEffect(() => {
+            const hash = document.location.hash;
+            if (!hash || hash == "#") {
+                set_state("#/");
+            } else {
+                set_state1(hash);
+            }
+            self.addEventListener('popstate', (e) => {
+                const s = e.state;
+                if (typeof s === "string") {
+                    set_state1(s);
+                } else {
+                    set_state1("#/");
+                }
+            })
+        }, [])
         return (
             <div>
                 <Head>
@@ -51,20 +68,23 @@ export default class Container extends Component<ContainerProps> {
                     <List.Item onClick={() => set_display(false)}>
                         <Icon>close</Icon>
                     </List.Item>
-                    <List.Item onClick={close_all}>
+                    <List.Item onClick={() => {
+                        set_display(false);
+                        set_state("#/");
+                    }}>
                         <Icon>home</Icon>
                     </List.Item>
                     <List.Item
                         onClick={() => {
-                            close_all();
-                            set_show_settings(true);
+                            set_display(false);
+                            set_state("#/settings");
                         }}
                     >
                         <Icon>settings</Icon>
                     </List.Item>
                 </List>
                 <div class="main">
-                    <Settings show={show_settings} />
+                    <Settings show={state === "#/settings"} />
                 </div>
             </div>
         );
