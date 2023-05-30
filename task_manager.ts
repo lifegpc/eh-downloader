@@ -15,7 +15,11 @@ import { promiseState, PromiseStatus, sleep } from "./utils.ts";
 export class AlreadyClosedError extends Error {
 }
 
-export class TaskManager {
+type EventMap = {
+    new_task: CustomEvent<Task>;
+};
+
+export class TaskManager extends EventTarget {
     #closed = false;
     cfg;
     client;
@@ -25,6 +29,7 @@ export class TaskManager {
     #abort;
     #force_abort;
     constructor(cfg: Config) {
+        super();
         this.cfg = cfg;
         this.#abort = new AbortController();
         this.#force_abort = new AbortController();
@@ -39,6 +44,14 @@ export class TaskManager {
     }
     abort(reason?: unknown) {
         this.#abort.abort(reason);
+    }
+    // @ts-ignore Checked type
+    addEventListener<T extends keyof EventMap>(
+        type: T,
+        callback: ((e: EventMap[T]) => void | Promise<void>) | null,
+        options?: boolean | AddEventListenerOptions,
+    ): void {
+        super.addEventListener(type, <EventListener | null> callback, options);
     }
     get aborted() {
         return this.#abort.signal.aborted;
@@ -130,6 +143,18 @@ export class TaskManager {
     }
     get force_aborts() {
         return this.#force_abort.signal;
+    }
+    // @ts-ignore Checked type
+    removeEventListener<T extends keyof EventMap>(
+        type: T,
+        callback: ((e: EventMap[T]) => void | Promise<void>) | null,
+        options?: boolean | EventListenerOptions,
+    ): void {
+        super.removeEventListener(
+            type,
+            <EventListener | null> callback,
+            options,
+        );
     }
     async run() {
         if (this.aborted || this.force_aborted) throw new AlreadyClosedError();
