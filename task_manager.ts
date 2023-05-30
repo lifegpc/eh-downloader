@@ -16,7 +16,9 @@ export class AlreadyClosedError extends Error {
 }
 
 type EventMap = {
-    new_task: CustomEvent<Task>;
+    new_task: Task;
+    task_started: Task;
+    task_finished: Task;
 };
 
 export class TaskManager extends EventTarget {
@@ -39,6 +41,11 @@ export class TaskManager extends EventTarget {
         this.max_task_count = cfg.max_task_count;
         add_exit_handler(this);
     }
+    async #add_task(task: Task) {
+        const r = await this.db.add_task(task);
+        this.dispatchEvent(new CustomEvent("new_task", { detail: r }));
+        return r;
+    }
     #check_closed() {
         if (this.#closed) throw new AlreadyClosedError();
     }
@@ -48,7 +55,7 @@ export class TaskManager extends EventTarget {
     // @ts-ignore Checked type
     addEventListener<T extends keyof EventMap>(
         type: T,
-        callback: (e: EventMap[T]) => void | Promise<void>,
+        callback: (e: CustomEvent<EventMap[T]>) => void | Promise<void>,
         options?: boolean | AddEventListenerOptions,
     ): void {
         super.addEventListener(type, <EventListener> callback, options);
@@ -75,7 +82,7 @@ export class TaskManager extends EventTarget {
             type: TaskType.Download,
             details: null,
         };
-        return await this.db.add_task(task);
+        return await this.#add_task(task);
     }
     async add_export_zip_task(gid: number, output?: string) {
         const cfg: ExportZipConfig = { output };
@@ -88,7 +95,7 @@ export class TaskManager extends EventTarget {
             type: TaskType.ExportZip,
             details: JSON.stringify(cfg),
         };
-        return await this.db.add_task(task);
+        return await this.#add_task(task);
     }
     async check_task(task: Task) {
         this.#check_closed();
@@ -118,6 +125,9 @@ export class TaskManager extends EventTarget {
             if (status.status == PromiseStatus.Fulfilled && status.value) {
                 removed_task.push(id);
                 await this.db.delete_task(status.value);
+                this.dispatchEvent(
+                    new CustomEvent("task_finished", { detail: status.value }),
+                );
             } else if (status.status == PromiseStatus.Rejected) {
                 if (status.reason && !this.aborted) console.log(status.reason);
                 removed_task.push(id);
@@ -147,7 +157,7 @@ export class TaskManager extends EventTarget {
     // @ts-ignore Checked type
     removeEventListener<T extends keyof EventMap>(
         type: T,
-        callback: (e: EventMap[T]) => void | Promise<void>,
+        callback: (e: CustomEvent<EventMap[T]>) => void | Promise<void>,
         options?: boolean | EventListenerOptions,
     ): void {
         super.removeEventListener(
@@ -156,7 +166,7 @@ export class TaskManager extends EventTarget {
             options,
         );
     }
-    async run() {
+    async run(forever = false) {
         if (this.aborted || this.force_aborted) throw new AlreadyClosedError();
         this.#check_closed();
         while (1) {
@@ -178,7 +188,10 @@ export class TaskManager extends EventTarget {
                 const checked = await this.check_task(task);
                 if (checked) this.run_task(checked);
             }
-            if (this.running_tasks.size == 0) break;
+            if (this.running_tasks.size == 0) {
+                if (!forever) break;
+                await sleep(1000);
+            }
         }
     }
     run_task(task: Task) {
@@ -210,6 +223,7 @@ export class TaskManager extends EventTarget {
                 ),
             );
         }
+        this.dispatchEvent(new CustomEvent("task_started", { detail: task }));
     }
     async waiting_unfinished_task() {
         while (1) {

@@ -371,6 +371,18 @@ export class EhDb {
                     task.details,
                 ],
             );
+            if (task.details === null) {
+                return this.db.queryEntries<Task>(
+                    "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ?;",
+                    [
+                        task.type,
+                        task.gid,
+                        task.token,
+                        task.pn,
+                        task.pid,
+                    ],
+                )[0];
+            }
             return this.db.queryEntries<Task>(
                 "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ? AND details = ?;",
                 [

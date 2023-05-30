@@ -1,7 +1,7 @@
 import { RenderFunction, start } from "$fresh/server.ts";
 import { load_settings } from "./config.ts";
 import manifest from "./fresh.gen.ts";
-import { TaskManager } from "./task_manager.ts";
+import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import twindPlugin from "$fresh/plugins/twind.ts";
 import twindConfig from "./twind.config.ts";
 import { load_translation } from "./server/i18ns.ts";
@@ -30,6 +30,9 @@ export async function startServer(path: string) {
     cfg_path = path;
     const cfg = await load_settings(path);
     task_manager = new TaskManager(cfg);
+    task_manager.run(true).catch((e) => {
+        if (!(e instanceof AlreadyClosedError)) throw e;
+    });
     await load_translation(task_manager.aborts);
     return start(manifest, {
         signal: task_manager.aborts,

@@ -19,6 +19,17 @@ Deno.test("DbTest", async () => {
             details: null,
         }),
     );
+    console.log(
+        await db.add_task({
+            gid: 1,
+            token: "dd",
+            pid: 1,
+            pn: 1,
+            type: TaskType.ExportZip,
+            id: 0,
+            details: "test",
+        }),
+    );
     const gmeta: GMeta = {
         gid: 1,
         token: "test",
