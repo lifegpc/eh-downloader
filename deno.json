@@ -1,6 +1,7 @@
 {
     "importMap": "./import_map.json",
     "tasks": {
+        "cache": "deno cache main.ts server-dev.ts",
         "server-dev": "deno run -A --unstable --watch=static/,routes/,translation/ server-dev.ts",
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
