@@ -48,10 +48,10 @@ export class TaskManager extends EventTarget {
     // @ts-ignore Checked type
     addEventListener<T extends keyof EventMap>(
         type: T,
-        callback: ((e: EventMap[T]) => void | Promise<void>) | null,
+        callback: (e: EventMap[T]) => void | Promise<void>,
         options?: boolean | AddEventListenerOptions,
     ): void {
-        super.addEventListener(type, <EventListener | null> callback, options);
+        super.addEventListener(type, <EventListener> callback, options);
     }
     get aborted() {
         return this.#abort.signal.aborted;
@@ -147,12 +147,12 @@ export class TaskManager extends EventTarget {
     // @ts-ignore Checked type
     removeEventListener<T extends keyof EventMap>(
         type: T,
-        callback: ((e: EventMap[T]) => void | Promise<void>) | null,
+        callback: (e: EventMap[T]) => void | Promise<void>,
         options?: boolean | EventListenerOptions,
     ): void {
         super.removeEventListener(
             type,
-            <EventListener | null> callback,
+            <EventListener> callback,
             options,
         );
     }

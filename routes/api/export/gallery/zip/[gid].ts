@@ -9,11 +9,6 @@ export const handler: Handlers = {
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();
-        try {
-            return get_export_zip_response(gid, m.db);
-        } catch (e) {
-            console.error(e);
-            return new Response("Gallery not found.", { status: 404 });
-        }
+        return get_export_zip_response(gid, m.db);
     },
 };

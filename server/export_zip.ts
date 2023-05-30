@@ -4,7 +4,7 @@ import { addZero } from "../utils.ts";
 
 export function get_export_zip_response(gid: number, db: EhDb) {
     const gmeta = db.get_gmeta_by_gid(gid);
-    if (!gmeta) throw Error("Gallery not found.");
+    if (!gmeta) return new Response("Gallery not found.", { status: 404 });
     const pmetas = db.get_pmeta(gid).sort((a, b) => a.index - b.index);
     const p = pmetas.length;
     const l = gmeta.filecount.toString().length;
