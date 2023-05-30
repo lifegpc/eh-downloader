@@ -12,6 +12,7 @@ export type ConfigType = {
     max_retry_count: number;
     max_download_img_count: number;
     download_original_img: boolean;
+    port: number;
 };
 
 export class Config {
@@ -85,6 +86,9 @@ export class Config {
     get download_original_img() {
         return this._return_bool("download_original_img") || false;
     }
+    get port() {
+        return this._return_number("port") || 8000;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -97,6 +101,7 @@ export class Config {
             max_retry_count: this.max_retry_count,
             max_download_img_count: this.max_download_img_count,
             download_original_img: this.download_original_img,
+            port: this.port,
         };
     }
 }

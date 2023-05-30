@@ -13,5 +13,6 @@
     "db_path": "./downloads",
     "max_retry_count": 3,
     "max_download_img_count": 3,
-    "download_original_img": true
+    "download_original_img": true,
+    "port": 8000
 }

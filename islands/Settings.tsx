@@ -178,6 +178,14 @@ export default class Settings extends Component<SettingsProps> {
                             description={t("settings.db_path")}
                             helpertext={t("settings.db_path_help")}
                         />
+                        <SettingsText
+                            name="port"
+                            value={settings.port}
+                            description={t("settings.port")}
+                            type="number"
+                            min={0}
+                            max={65535}
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>

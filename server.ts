@@ -35,5 +35,6 @@ export async function startServer(path: string) {
         signal: task_manager.aborts,
         plugins: [twindPlugin(twindConfig)],
         render: renderFn,
+        port: cfg.port,
     });
 }

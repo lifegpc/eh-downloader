@@ -2,7 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import { ConfigType, load_settings, save_settings } from "../../config.ts";
 import { get_cfg_path, get_task_manager } from "../../server.ts";
 
-const UNSAFE_TYPE: (keyof ConfigType)[] = ["base", "db_path"];
+const UNSAFE_TYPE: (keyof ConfigType)[] = ["base", "db_path", "port"];
 const UNSAFE_TYPE2 = UNSAFE_TYPE as string[];
 
 export const handler: Handlers = {
