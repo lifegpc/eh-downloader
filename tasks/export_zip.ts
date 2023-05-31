@@ -3,7 +3,8 @@ import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb } from "../db.ts";
 import { addZero, asyncForEach, filterFilename } from "../utils.ts";
 import { Config } from "../config.ts";
-import { Task } from "../task.ts";
+import { Task, TaskExportZipProgress, TaskType } from "../task.ts";
+import { TaskManager } from "../task_manager.ts";
 
 export type ExportZipConfig = {
     output?: string;
@@ -17,10 +18,23 @@ export async function export_zip(
     cfg: Config,
     signal: AbortSignal,
     ecfg: ExportZipConfig,
+    manager: TaskManager,
 ) {
     const gid = task.gid;
     const g = db.get_gmeta_by_gid(gid);
     if (!g) throw Error("Gallery not found in database.");
+    const progress: TaskExportZipProgress = {
+        total_page: g.filecount,
+        added_page: 0,
+    };
+    const sendEvent = () => {
+        manager.dispatchTaskProgressEvent(TaskType.ExportZip, {
+            task_id: task.id,
+            added_page: progress.added_page,
+            total_page: progress.total_page,
+        });
+    };
+    sendEvent();
     const output = ecfg.output === undefined
         ? join(cfg.base, filterFilename(g.title + ".zip"))
         : ecfg.output;
@@ -47,6 +61,8 @@ export async function export_zip(
                         { signal },
                     );
                 }
+                progress.added_page += 1;
+                sendEvent();
             },
         );
         await z.close();

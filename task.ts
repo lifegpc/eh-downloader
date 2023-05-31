@@ -24,9 +24,15 @@ export type TaskExportZipProgress = {
     total_page: number;
 };
 
-export type TaskProgressType = {
+type TaskId<T extends Record<PropertyKey, unknown>> = {
+    [P in keyof T]: ({
+        task_id: number;
+    } & T[P]) extends infer U ? { [Q in keyof U]: U[Q] } : never;
+};
+
+export type TaskProgressType = TaskId<{
     [TaskType.Download]: TaskDownloadProgess;
     [TaskType.ExportZip]: TaskExportZipProgress;
-};
+}>;
 
 export type TaskProgress = DiscriminatedUnion<"type", TaskProgressType>;

@@ -3,7 +3,7 @@ import { Config } from "./config.ts";
 import { EhDb } from "./db.ts";
 import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
-import { Task, TaskProgress, TaskType } from "./task.ts";
+import { Task, TaskProgress, TaskProgressType, TaskType } from "./task.ts";
 import { download_task } from "./tasks/download.ts";
 import {
     DEFAULT_EXPORT_ZIP_CONFIG,
@@ -157,6 +157,15 @@ export class TaskManager extends EventTarget {
     dispatchEvent<T extends keyof EventMap>(type: T, detail: EventMap[T]) {
         return super.dispatchEvent(new CustomEvent(type, { detail }));
     }
+    dispatchTaskProgressEvent<T extends keyof TaskProgressType>(
+        type: T,
+        detail: TaskProgressType[T],
+    ) {
+        return this.dispatchEvent(
+            "task_progress",
+            <TaskProgress> <unknown> { type, ...detail },
+        );
+    }
     force_abort(reason?: unknown) {
         this.#force_abort.abort(reason);
     }
@@ -208,6 +217,7 @@ export class TaskManager extends EventTarget {
     }
     run_task(task: Task) {
         this.#check_closed();
+        this.dispatchEvent("task_started", task);
         if (task.type == TaskType.Download) {
             this.running_tasks.set(
                 task.id,
@@ -218,6 +228,7 @@ export class TaskManager extends EventTarget {
                     this.cfg,
                     this.#abort.signal,
                     this.#force_abort.signal,
+                    this,
                 ),
             );
         } else if (task.type == TaskType.ExportZip) {
@@ -232,10 +243,10 @@ export class TaskManager extends EventTarget {
                     this.cfg,
                     this.#abort.signal,
                     cfg,
+                    this,
                 ),
             );
         }
-        this.dispatchEvent("task_started", task);
     }
     async waiting_unfinished_task() {
         while (1) {

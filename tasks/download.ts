@@ -2,7 +2,8 @@ import { assert } from "std/testing/asserts.ts";
 import { Client } from "../client.ts";
 import { Config } from "../config.ts";
 import { EhDb } from "../db.ts";
-import { Task } from "../task.ts";
+import { Task, TaskDownloadProgess, TaskType } from "../task.ts";
+import { TaskManager } from "../task_manager.ts";
 import {
     asyncFilter,
     promiseState,
@@ -19,11 +20,23 @@ class DownloadManager {
     #max_download_count;
     #running_tasks: Promise<unknown>[];
     #has_failed_task = false;
-    constructor(cfg: Config, abort: AbortSignal, force_abort: AbortSignal) {
+    #progress: TaskDownloadProgess;
+    #task: Task;
+    #manager: TaskManager;
+    constructor(
+        cfg: Config,
+        abort: AbortSignal,
+        force_abort: AbortSignal,
+        task: Task,
+        manager: TaskManager,
+    ) {
         this.#max_download_count = cfg.max_download_img_count;
         this.#running_tasks = [];
         this.#abort = abort;
         this.#force_abort = force_abort;
+        this.#progress = { total_page: 0, downloaded_page: 0 };
+        this.#task = task;
+        this.#manager = manager;
     }
     async #check_tasks() {
         this.#running_tasks = await asyncFilter(
@@ -33,10 +46,20 @@ class DownloadManager {
                 if (s.status === PromiseStatus.Rejected) {
                     if (!this.#force_abort.aborted) console.log(s.reason);
                     this.#has_failed_task = true;
+                } else if (s.status === PromiseStatus.Fulfilled) {
+                    this.#progress.downloaded_page += 1;
+                    this.#sendEvent();
                 }
                 return s.status === PromiseStatus.Pending;
             },
         );
+    }
+    #sendEvent() {
+        return this.#manager.dispatchTaskProgressEvent(TaskType.Download, {
+            task_id: this.#task.id,
+            downloaded_page: this.#progress.downloaded_page,
+            total_page: this.#progress.total_page,
+        });
     }
     async add_new_task(f: () => Promise<unknown>) {
         while (1) {
@@ -59,6 +82,10 @@ class DownloadManager {
             await sleep(10);
         }
     }
+    set_total_page(page: number) {
+        this.#progress.total_page = page;
+        this.#sendEvent();
+    }
 }
 
 export async function download_task(
@@ -68,6 +95,7 @@ export async function download_task(
     cfg: Config,
     abort: AbortSignal,
     force_abort: AbortSignal,
+    manager: TaskManager,
 ) {
     console.log("Started to download gallery", task.gid);
     const gdatas = await client.fetchGalleryMetadataByAPI([
@@ -82,9 +110,10 @@ export async function download_task(
     await db.add_gtag(task.gid, new Set(gdata.tags));
     const base_path = join(cfg.base, task.gid.toString());
     await sure_dir(base_path);
-    const m = new DownloadManager(cfg, abort, force_abort);
+    const m = new DownloadManager(cfg, abort, force_abort, task, manager);
     if (cfg.mpv) {
         const mpv = await client.fetchMPVPage(task.gid, task.token);
+        m.set_total_page(mpv.pagecount);
         for (const i of mpv.imagelist) {
             if (abort.aborted) break;
             await m.add_new_task(async () => {

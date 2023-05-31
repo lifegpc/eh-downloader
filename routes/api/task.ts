@@ -6,6 +6,7 @@ import { DiscriminatedUnion } from "../../utils.ts";
 type EventMap = {
     close: Record<PropertyKey, never>;
     new_download_task: { gid: number; token: string };
+    new_export_zip_task: { gid: number; output?: string };
 };
 
 type EventData = DiscriminatedUnion<"type", EventMap>;
@@ -37,6 +38,8 @@ export const handler: Handlers<Task[]> = {
                     socket.close();
                 } else if (d.type == "new_download_task") {
                     t.add_download_task(d.gid, d.token);
+                } else if (d.type == "new_export_zip_task") {
+                    t.add_export_zip_task(d.gid, d.output);
                 }
             } catch (_) {
                 null;
