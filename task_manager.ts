@@ -3,14 +3,19 @@ import { Config } from "./config.ts";
 import { EhDb } from "./db.ts";
 import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
-import { Task, TaskType } from "./task.ts";
+import { Task, TaskProgress, TaskType } from "./task.ts";
 import { download_task } from "./tasks/download.ts";
 import {
     DEFAULT_EXPORT_ZIP_CONFIG,
     export_zip,
     ExportZipConfig,
 } from "./tasks/export_zip.ts";
-import { promiseState, PromiseStatus, sleep } from "./utils.ts";
+import {
+    DiscriminatedUnion,
+    promiseState,
+    PromiseStatus,
+    sleep,
+} from "./utils.ts";
 
 export class AlreadyClosedError extends Error {
 }
@@ -19,7 +24,14 @@ type EventMap = {
     new_task: Task;
     task_started: Task;
     task_finished: Task;
+    task_progress: TaskProgress;
 };
+
+type Detail<T extends Record<PropertyKey, unknown>> = {
+    [P in keyof T]: { detail: T[P] };
+};
+
+export type TaskEventData = DiscriminatedUnion<"type", Detail<EventMap>>;
 
 export class TaskManager extends EventTarget {
     #closed = false;

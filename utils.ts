@@ -134,3 +134,12 @@ export function filterFilename(p: string, maxLength = 256) {
     }
     return p;
 }
+
+export type DiscriminatedUnion<
+    K extends PropertyKey,
+    T extends Record<PropertyKey, unknown>,
+> = {
+    [P in keyof T]: ({ [Q in K]: P } & T[P]) extends infer U
+        ? { [Q in keyof U]: U[Q] }
+        : never;
+}[keyof T];
