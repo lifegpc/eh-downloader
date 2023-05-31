@@ -43,7 +43,7 @@ export class TaskManager extends EventTarget {
     }
     async #add_task(task: Task) {
         const r = await this.db.add_task(task);
-        this.dispatchEvent(new CustomEvent("new_task", { detail: r }));
+        this.dispatchEvent("new_task", r);
         return r;
     }
     #check_closed() {
@@ -78,7 +78,6 @@ export class TaskManager extends EventTarget {
             token,
             id: 0,
             pid: Deno.pid,
-            pn: 1,
             type: TaskType.Download,
             details: null,
         };
@@ -91,7 +90,6 @@ export class TaskManager extends EventTarget {
             token: "",
             id: 0,
             pid: Deno.pid,
-            pn: 0,
             type: TaskType.ExportZip,
             details: JSON.stringify(cfg),
         };
@@ -125,9 +123,7 @@ export class TaskManager extends EventTarget {
             if (status.status == PromiseStatus.Fulfilled && status.value) {
                 removed_task.push(id);
                 await this.db.delete_task(status.value);
-                this.dispatchEvent(
-                    new CustomEvent("task_finished", { detail: status.value }),
-                );
+                this.dispatchEvent("task_finished", status.value);
             } else if (status.status == PromiseStatus.Rejected) {
                 if (status.reason && !this.aborted) console.log(status.reason);
                 removed_task.push(id);
@@ -144,6 +140,10 @@ export class TaskManager extends EventTarget {
         }
         this.#closed = true;
         this.db.close();
+    }
+    // @ts-ignore Checked type
+    dispatchEvent<T extends keyof EventMap>(type: T, detail: EventMap[T]) {
+        return super.dispatchEvent(new CustomEvent(type, { detail }));
     }
     force_abort(reason?: unknown) {
         this.#force_abort.abort(reason);
@@ -223,7 +223,7 @@ export class TaskManager extends EventTarget {
                 ),
             );
         }
-        this.dispatchEvent(new CustomEvent("task_started", { detail: task }));
+        this.dispatchEvent("task_started", task);
     }
     async waiting_unfinished_task() {
         while (1) {

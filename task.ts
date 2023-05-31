@@ -8,7 +8,6 @@ export type Task = {
     type: TaskType;
     gid: number;
     token: string;
-    pn: number;
     pid: number;
     details: string | null;
 };

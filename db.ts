@@ -95,7 +95,6 @@ const TASK_TABLE = `CREATE TABLE task (
     type INT,
     gid INT,
     token TEXT,
-    pn INT,
     pid INT,
     details TEXT
 );`;
@@ -156,7 +155,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-4");
+    readonly version = new SemVer("1.0.0-5");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -222,6 +221,9 @@ export class EhDb {
                 );
                 this.db.execute("DROP TABLE pmeta_origin;");
                 need_optimize = true;
+            }
+            if (v.compare("1.0.0-5") === -1) {
+                this.db.execute("ALTER TABLE task DROP pn;");
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -361,35 +363,32 @@ export class EhDb {
     add_task(task: Task) {
         return this.transaction(() => {
             this.db.query(
-                "INSERT INTO task (type, gid, token, pn, pid, details) VALUES (?, ?, ?, ?, ?, ?);",
+                "INSERT INTO task (type, gid, token, pid, details) VALUES (?, ?, ?, ?, ?);",
                 [
                     task.type,
                     task.gid,
                     task.token,
-                    task.pn,
                     task.pid,
                     task.details,
                 ],
             );
             if (task.details === null) {
                 return this.db.queryEntries<Task>(
-                    "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ?;",
+                    "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pid = ?;",
                     [
                         task.type,
                         task.gid,
                         task.token,
-                        task.pn,
                         task.pid,
                     ],
                 )[0];
             }
             return this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pn = ? AND pid = ? AND details = ?;",
+                "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ? AND pid = ? AND details = ?;",
                 [
                     task.type,
                     task.gid,
                     task.token,
-                    task.pn,
                     task.pid,
                     task.details,
                 ],
