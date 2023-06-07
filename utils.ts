@@ -149,6 +149,6 @@ let zipjs_configured = false;
 
 export function configureZipJs() {
     if (zipjs_configured) return;
-    configure({useWebWorkers: false});
+    configure({ useWebWorkers: false });
     zipjs_configured = true;
 }
