@@ -1,7 +1,12 @@
 import { join } from "std/path/mod.ts";
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb } from "../db.ts";
-import { addZero, asyncForEach, filterFilename } from "../utils.ts";
+import {
+    addZero,
+    asyncForEach,
+    configureZipJs,
+    filterFilename,
+} from "../utils.ts";
 import { Config } from "../config.ts";
 import { Task, TaskExportZipProgress, TaskType } from "../task.ts";
 import { TaskManager } from "../task_manager.ts";
@@ -44,6 +49,7 @@ export async function export_zip(
         truncate: true,
     });
     try {
+        configureZipJs();
         const z = new ZipWriter(f.writable, {
             signal,
             level: 0,

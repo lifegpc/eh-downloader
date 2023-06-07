@@ -1,6 +1,7 @@
 import { exists, existsSync } from "std/fs/exists.ts";
 import { extname } from "std/path/mod.ts";
 import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { configure } from "zipjs/index.js";
 
 export function sleep(time: number): Promise<undefined> {
     return new Promise((r) => {
@@ -143,3 +144,11 @@ export type DiscriminatedUnion<
         ? { [Q in keyof U]: U[Q] }
         : never;
 }[keyof T];
+
+let zipjs_configured = false;
+
+export function configureZipJs() {
+    if (zipjs_configured) return;
+    configure({useWebWorkers: false});
+    zipjs_configured = true;
+}

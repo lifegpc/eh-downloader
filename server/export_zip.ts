@@ -1,6 +1,6 @@
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb, PMeta } from "../db.ts";
-import { addZero } from "../utils.ts";
+import { addZero, configureZipJs } from "../utils.ts";
 
 export function get_export_zip_response(gid: number, db: EhDb) {
     const gmeta = db.get_gmeta_by_gid(gid);
@@ -36,6 +36,7 @@ export function get_export_zip_response(gid: number, db: EhDb) {
             bn += s;
         },
     });
+    configureZipJs();
     const zip_writer = new ZipWriter(s);
     let zip_closed = false;
     let closed = false;
