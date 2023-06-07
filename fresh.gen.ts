@@ -4,18 +4,20 @@
 
 import config from "./deno.json" assert { type: "json" };
 import * as $0 from "./routes/api/config.ts";
-import * as $1 from "./routes/api/export/gallery/zip/[gid].ts";
-import * as $2 from "./routes/api/task.ts";
-import * as $3 from "./routes/index.tsx";
+import * as $1 from "./routes/api/exit.ts";
+import * as $2 from "./routes/api/export/gallery/zip/[gid].ts";
+import * as $3 from "./routes/api/task.ts";
+import * as $4 from "./routes/index.tsx";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 
 const manifest = {
     routes: {
         "./routes/api/config.ts": $0,
-        "./routes/api/export/gallery/zip/[gid].ts": $1,
-        "./routes/api/task.ts": $2,
-        "./routes/index.tsx": $3,
+        "./routes/api/exit.ts": $1,
+        "./routes/api/export/gallery/zip/[gid].ts": $2,
+        "./routes/api/task.ts": $3,
+        "./routes/index.tsx": $4,
     },
     islands: {
         "./islands/Container.tsx": $$0,
