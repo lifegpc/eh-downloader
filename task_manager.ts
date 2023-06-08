@@ -33,12 +33,17 @@ type Detail<T extends Record<PropertyKey, unknown>> = {
 
 export type TaskEventData = DiscriminatedUnion<"type", Detail<EventMap>>;
 
+type RunningTask = {
+    task: Promise<Task>;
+    base: Task;
+};
+
 export class TaskManager extends EventTarget {
     #closed = false;
     cfg;
     client;
     db;
-    running_tasks: Map<number, Promise<Task>>;
+    running_tasks: Map<number, RunningTask>;
     max_task_count;
     #abort;
     #force_abort;
@@ -131,7 +136,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const removed_task: number[] = [];
         for (const [id, task] of this.running_tasks) {
-            const status = await promiseState(task);
+            const status = await promiseState(task.task);
             if (status.status == PromiseStatus.Fulfilled && status.value) {
                 removed_task.push(id);
                 await this.db.delete_task(status.value);
@@ -174,6 +179,12 @@ export class TaskManager extends EventTarget {
     }
     get force_aborts() {
         return this.#force_abort.signal;
+    }
+    get_running_task() {
+        return Array.from(this.running_tasks.keys());
+    }
+    get_task_list() {
+        return this.db.get_tasks();
     }
     // @ts-ignore Checked type
     removeEventListener<T extends keyof EventMap>(
@@ -221,15 +232,18 @@ export class TaskManager extends EventTarget {
         if (task.type == TaskType.Download) {
             this.running_tasks.set(
                 task.id,
-                download_task(
-                    task,
-                    this.client,
-                    this.db,
-                    this.cfg,
-                    this.#abort.signal,
-                    this.#force_abort.signal,
-                    this,
-                ),
+                {
+                    task: download_task(
+                        task,
+                        this.client,
+                        this.db,
+                        this.cfg,
+                        this.#abort.signal,
+                        this.#force_abort.signal,
+                        this,
+                    ),
+                    base: task,
+                },
             );
         } else if (task.type == TaskType.ExportZip) {
             const cfg: ExportZipConfig = task.details
@@ -237,14 +251,17 @@ export class TaskManager extends EventTarget {
                 : DEFAULT_EXPORT_ZIP_CONFIG;
             this.running_tasks.set(
                 task.id,
-                export_zip(
-                    task,
-                    this.db,
-                    this.cfg,
-                    this.#abort.signal,
-                    cfg,
-                    this,
-                ),
+                {
+                    task: export_zip(
+                        task,
+                        this.db,
+                        this.cfg,
+                        this.#abort.signal,
+                        cfg,
+                        this,
+                    ),
+                    base: task,
+                },
             );
         }
     }

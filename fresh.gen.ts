@@ -10,6 +10,7 @@ import * as $3 from "./routes/api/task.ts";
 import * as $4 from "./routes/index.tsx";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
+import * as $$2 from "./islands/TaskManager.tsx";
 
 const manifest = {
     routes: {
@@ -22,6 +23,7 @@ const manifest = {
     islands: {
         "./islands/Container.tsx": $$0,
         "./islands/Settings.tsx": $$1,
+        "./islands/TaskManager.tsx": $$2,
     },
     baseUrl: import.meta.url,
     config,

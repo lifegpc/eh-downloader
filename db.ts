@@ -524,6 +524,11 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_tasks() {
+        return this.transaction(() =>
+            this.db.queryEntries<Task>("SELECT * FROM task;")
+        );
+    }
     get_tasks_by_pid(pid: number) {
         return this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task WHERE pid = ?;", [

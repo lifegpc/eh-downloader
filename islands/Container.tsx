@@ -8,6 +8,7 @@ import StyleSheet from "../components/StyleSheet.tsx";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import Settings from "./Settings.tsx";
 import t, { i18n_map, I18NMap } from "../server/i18n.ts";
+import TaskManager from "./TaskManager.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -79,6 +80,14 @@ export default class Container extends Component<ContainerProps> {
                     <List.Item
                         onClick={() => {
                             set_display(false);
+                            set_state("#/task_manager");
+                        }}
+                    >
+                        <Icon>task</Icon>
+                    </List.Item>
+                    <List.Item
+                        onClick={() => {
+                            set_display(false);
                             set_state("#/settings");
                         }}
                     >
@@ -87,6 +96,7 @@ export default class Container extends Component<ContainerProps> {
                 </List>
                 <div class="main">
                     <Settings show={state === "#/settings"} />
+                    <TaskManager show={state === "#/task_manager"} />
                 </div>
             </div>
         );
