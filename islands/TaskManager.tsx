@@ -90,6 +90,51 @@ export default class TaskManager extends Component<TaskManagerProps> {
                         task_list.value.push(t.detail.id);
                     }
                     this.forceUpdate();
+                } else if (t.type == "task_started") {
+                    const task = tasks.value.get(t.detail.id);
+                    if (task === undefined) {
+                        tasks.value.set(t.detail.id, {
+                            base: t.detail,
+                            status: TaskStatus.Running,
+                        });
+                        const tl = task_list.value;
+                        if (!tl.includes(t.detail.id)) {
+                            tl.push(t.detail.id);
+                            if (tl.length) {
+                                tl.splice(0, 0, tl.splice(tl.length - 1, 1)[0]);
+                            }
+                        }
+                        this.forceUpdate();
+                    } else {
+                        task.status = TaskStatus.Running;
+                        self.dispatchEvent(
+                            new CustomEvent("task_started", {
+                                detail: t.detail.id,
+                            }),
+                        );
+                        const tl = task_list.value;
+                        const ind = tl.indexOf(task.base.id);
+                        if (ind > 0) {
+                            tl.splice(0, 0, tl.splice(ind, 1)[0]);
+                            this.sortable?.sort(tl.map((t) => t.toString()));
+                        }
+                    }
+                } else if (t.type == "task_finished") {
+                    const task = tasks.value.get(t.detail.id);
+                    if (task !== undefined) {
+                        task.status = TaskStatus.Finished;
+                        self.dispatchEvent(
+                            new CustomEvent("task_finished", {
+                                detail: t.detail.id,
+                            }),
+                        );
+                        const tl = task_list.value;
+                        const ind = tl.indexOf(task.base.id);
+                        if (ind < tl.length - 1 && ind > -1) {
+                            tl.splice(tl.length - 1, 0, tl.splice(ind, 1)[0]);
+                            this.sortable?.sort(tl.map((t) => t.toString()));
+                        }
+                    }
                 }
             };
             self.addEventListener("beforeunload", () => {
