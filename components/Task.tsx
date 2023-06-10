@@ -1,5 +1,7 @@
 import { Component } from "preact";
-import { TaskDetail, TaskStatus } from "../task.ts";
+import Icon from "preact-material-components/Icon";
+import { TaskDetail, TaskStatus, TaskType } from "../task.ts";
+import t from "../server/i18n.ts";
 
 type Props = {
     task: TaskDetail;
@@ -28,16 +30,16 @@ export default class Task extends Component<Props, State> {
         console.log(task);
         return (
             <div data-id={task.base.id}>
-                Task Id: {task.base.id}
+                <Icon class="task_handle">unfold_more</Icon>
+                {t("task.id")}
+                {task.base.id}
             </div>
         );
     }
     componentDidMount(): void {
-        self.addEventListener("task_started", this.state.task_changed);
-        self.addEventListener("task_finished", this.state.task_changed);
+        self.addEventListener("task_changed", this.state.task_changed);
     }
     componentWillUnmount(): void {
-        self.removeEventListener("task_started", this.state.task_changed);
-        self.removeEventListener("task_finished", this.state.task_changed);
+        self.removeEventListener("task_changed", this.state.task_changed);
     }
 }

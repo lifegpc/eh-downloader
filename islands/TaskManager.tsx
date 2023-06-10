@@ -33,6 +33,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
                 return;
             }
             this.sortable = new Sortable(ul.current, {
+                handle: ".task_handle",
                 onSort: (evt: SortableEvent) => {
                     if (
                         evt.newIndex === undefined || evt.oldIndex === undefined
@@ -53,6 +54,11 @@ export default class TaskManager extends Component<TaskManagerProps> {
             };
             ws.onmessage = (e) => {
                 const t: TaskServerSocketData = JSON.parse(e.data);
+                function sendTaskChangedEvent(id: number) {
+                    self.dispatchEvent(
+                        new CustomEvent("task_changed", { detail: id }),
+                    );
+                }
                 if (t.type == "close") {
                     ws.close();
                 } else if (t.type == "tasks") {
@@ -107,11 +113,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
                         this.forceUpdate();
                     } else {
                         task.status = TaskStatus.Running;
-                        self.dispatchEvent(
-                            new CustomEvent("task_started", {
-                                detail: t.detail.id,
-                            }),
-                        );
+                        sendTaskChangedEvent(t.detail.id);
                         const tl = task_list.value;
                         const ind = tl.indexOf(task.base.id);
                         if (ind > 0) {
@@ -123,17 +125,19 @@ export default class TaskManager extends Component<TaskManagerProps> {
                     const task = tasks.value.get(t.detail.id);
                     if (task !== undefined) {
                         task.status = TaskStatus.Finished;
-                        self.dispatchEvent(
-                            new CustomEvent("task_finished", {
-                                detail: t.detail.id,
-                            }),
-                        );
+                        sendTaskChangedEvent(t.detail.id);
                         const tl = task_list.value;
                         const ind = tl.indexOf(task.base.id);
                         if (ind < tl.length - 1 && ind > -1) {
                             tl.splice(tl.length - 1, 0, tl.splice(ind, 1)[0]);
                             this.sortable?.sort(tl.map((t) => t.toString()));
                         }
+                    }
+                } else if (t.type == "task_progress") {
+                    const task = tasks.value.get(t.detail.task_id);
+                    if (task !== undefined) {
+                        task.progress = t.detail.detail;
+                        sendTaskChangedEvent(t.detail.task_id);
                     }
                 }
             };

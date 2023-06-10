@@ -55,11 +55,14 @@ class DownloadManager {
         );
     }
     #sendEvent() {
-        return this.#manager.dispatchTaskProgressEvent(TaskType.Download, {
-            task_id: this.#task.id,
-            downloaded_page: this.#progress.downloaded_page,
-            total_page: this.#progress.total_page,
-        });
+        return this.#manager.dispatchTaskProgressEvent(
+            TaskType.Download,
+            this.#task.id,
+            {
+                downloaded_page: this.#progress.downloaded_page,
+                total_page: this.#progress.total_page,
+            },
+        );
     }
     async add_new_task(f: () => Promise<unknown>) {
         while (1) {

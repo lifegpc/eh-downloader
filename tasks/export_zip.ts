@@ -33,8 +33,7 @@ export async function export_zip(
         added_page: 0,
     };
     const sendEvent = () => {
-        manager.dispatchTaskProgressEvent(TaskType.ExportZip, {
-            task_id: task.id,
+        manager.dispatchTaskProgressEvent(TaskType.ExportZip, task.id, {
             added_page: progress.added_page,
             total_page: progress.total_page,
         });

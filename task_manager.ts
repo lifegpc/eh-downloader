@@ -3,7 +3,7 @@ import { Config } from "./config.ts";
 import { EhDb } from "./db.ts";
 import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
-import { Task, TaskProgress, TaskProgressType, TaskType } from "./task.ts";
+import { Task, TaskProgress, TaskProgressBasicType, TaskType } from "./task.ts";
 import { download_task } from "./tasks/download.ts";
 import {
     DEFAULT_EXPORT_ZIP_CONFIG,
@@ -162,14 +162,12 @@ export class TaskManager extends EventTarget {
     dispatchEvent<T extends keyof EventMap>(type: T, detail: EventMap[T]) {
         return super.dispatchEvent(new CustomEvent(type, { detail }));
     }
-    dispatchTaskProgressEvent<T extends keyof TaskProgressType>(
+    dispatchTaskProgressEvent<T extends TaskType>(
         type: T,
-        detail: TaskProgressType[T],
+        task_id: number,
+        detail: TaskProgressBasicType[T],
     ) {
-        return this.dispatchEvent(
-            "task_progress",
-            <TaskProgress> <unknown> { type, ...detail },
-        );
+        return this.dispatchEvent("task_progress", { type, task_id, detail });
     }
     force_abort(reason?: unknown) {
         this.#force_abort.abort(reason);

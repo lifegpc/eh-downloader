@@ -6,8 +6,8 @@ import { pick } from "accept-language-parser/";
 
 const whole_maps = new Map<string, I18NMap>();
 const LANGUAGES = ["zh-cn"];
-type MODULE = "common" | "settings";
-const MODULES: MODULE[] = ["common", "settings"];
+type MODULE = "common" | "settings" | "task";
+const MODULES: MODULE[] = ["common", "settings", "task"];
 
 export async function load_translation(signal?: AbortSignal) {
     const base = import.meta.resolve("../translation").slice(8);

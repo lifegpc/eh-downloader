@@ -1,5 +1,3 @@
-import { DiscriminatedUnion } from "./utils.ts";
-
 export enum TaskType {
     Download,
     ExportZip,
@@ -24,20 +22,16 @@ export type TaskExportZipProgress = {
     total_page: number;
 };
 
-type TaskId<T extends Record<PropertyKey, unknown>> = {
-    [P in keyof T]: ({
-        task_id: number;
-    } & T[P]) extends infer U ? { [Q in keyof U]: U[Q] } : never;
-};
-
 export type TaskProgressBasicType = {
     [TaskType.Download]: TaskDownloadProgess;
     [TaskType.ExportZip]: TaskExportZipProgress;
 };
 
-export type TaskProgressType = TaskId<TaskProgressBasicType>;
-
-export type TaskProgress = DiscriminatedUnion<"type", TaskProgressType>;
+export type TaskProgress<T extends TaskType = TaskType> = {
+    type: T;
+    task_id: number;
+    detail: TaskProgressBasicType[T];
+};
 
 export enum TaskStatus {
     Wait,
