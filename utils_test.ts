@@ -1,6 +1,7 @@
-import { assertEquals } from "std/testing/asserts.ts";
+import { assert, assertEquals } from "std/testing/asserts.ts";
 import { check_running } from "./pid_check.ts";
 import {
+    add_suffix_to_path,
     asyncFilter,
     asyncForEach,
     filterFilename,
@@ -68,4 +69,13 @@ Deno.test("filterFilename_test", () => {
     if (Deno.build.os == "windows") {
         assertEquals(filterFilename("d|?ad.ts"), "d__ad.ts");
     }
+});
+
+Deno.test("add_suffix_to_path_test", () => {
+    assertEquals(add_suffix_to_path("test.ts", "ok"), "test-ok.ts");
+    assertEquals(add_suffix_to_path("test", "ok"), "test-ok");
+    const t = add_suffix_to_path("test.ts");
+    console.log(t);
+    assert(t.startsWith("test-"));
+    assert(t.endsWith(".ts"));
 });

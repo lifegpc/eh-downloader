@@ -152,3 +152,15 @@ export function configureZipJs() {
     configure({ useWebWorkers: false });
     zipjs_configured = true;
 }
+
+export function add_suffix_to_path(path: string, suffix?: string) {
+    if (suffix === undefined) {
+        suffix = Math.round(Math.random() * 100000).toString();
+    }
+    const ext = extname(path);
+    if (ext) {
+        return `${path.slice(0, path.length - ext.length)}-${suffix}${ext}`;
+    } else {
+        return `${path}-${suffix}`;
+    }
+}

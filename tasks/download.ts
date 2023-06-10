@@ -5,6 +5,7 @@ import { EhDb } from "../db.ts";
 import { Task, TaskDownloadProgess, TaskType } from "../task.ts";
 import { TaskManager } from "../task_manager.ts";
 import {
+    add_suffix_to_path,
     asyncFilter,
     promiseState,
     PromiseStatus,
@@ -117,6 +118,13 @@ export async function download_task(
     if (cfg.mpv) {
         const mpv = await client.fetchMPVPage(task.gid, task.token);
         m.set_total_page(mpv.pagecount);
+        const names = mpv.imagelist.reduce(
+            (acc: Record<string, number>, cur) => {
+                const curr = cur.name;
+                return acc[curr] ? ++acc[curr] : acc[curr] = 1, acc;
+            },
+            {},
+        );
         for (const i of mpv.imagelist) {
             if (abort.aborted) break;
             await m.add_new_task(async () => {
@@ -167,7 +175,11 @@ export async function download_task(
                 const download_original = cfg.download_original_img &&
                     !i.is_original;
                 if (download_original) console.log(i.index, i.data.o);
-                const path = resolve(join(base_path, i.name));
+                let path = resolve(join(base_path, i.name));
+                if (names[i.name] > 1) {
+                    path = add_suffix_to_path(path, i.page_token);
+                    console.log("Changed path to", path);
+                }
                 function download_img() {
                     return new Promise<void>((resolve, reject) => {
                         async function download() {
