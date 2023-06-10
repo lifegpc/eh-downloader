@@ -237,6 +237,7 @@ export async function download_task(
         }
     }
     await m.join();
+    if (m.has_failed_task) throw Error("Some tasks failed.");
     if (abort.aborted || force_abort.aborted) throw Error("aborted");
     return task;
 }
