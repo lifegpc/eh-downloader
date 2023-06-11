@@ -13,6 +13,7 @@ export type ConfigType = {
     max_download_img_count: number;
     download_original_img: boolean;
     port: number;
+    export_zip_jpn_title: boolean;
 };
 
 export class Config {
@@ -89,6 +90,9 @@ export class Config {
     get port() {
         return this._return_number("port") || 8000;
     }
+    get export_zip_jpn_title() {
+        return this._return_bool("export_zip_jpn_title") || false;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -102,6 +106,7 @@ export class Config {
             max_download_img_count: this.max_download_img_count,
             download_original_img: this.download_original_img,
             port: this.port,
+            export_zip_jpn_title: this.export_zip_jpn_title,
         };
     }
 }

@@ -41,7 +41,10 @@ export const handler: Handlers<Task[]> = {
                 } else if (d.type == "new_download_task") {
                     t.add_download_task(d.gid, d.token);
                 } else if (d.type == "new_export_zip_task") {
-                    t.add_export_zip_task(d.gid, d.output);
+                    t.add_export_zip_task(d.gid, {
+                        output: d.output,
+                        jpn_title: d.jpn_title,
+                    });
                 } else if (d.type == "task_list") {
                     t.get_task_list().then((tasks) => {
                         sendMessage({

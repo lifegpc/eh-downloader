@@ -18,5 +18,6 @@
     "save_dlg": "Do you want to save settings?",
     "db_path": "The folder where the database is stored: ",
     "db_path_help": "If not set, the download location is used.",
-    "port": "Listening port: "
+    "port": "Listening port: ",
+    "export_zip_jpn_title": "Use japanese title first when exporting zip."
 }

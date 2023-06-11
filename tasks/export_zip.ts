@@ -13,6 +13,7 @@ import { TaskManager } from "../task_manager.ts";
 
 export type ExportZipConfig = {
     output?: string;
+    jpn_title?: boolean;
 };
 
 export const DEFAULT_EXPORT_ZIP_CONFIG: ExportZipConfig = {};
@@ -28,6 +29,9 @@ export async function export_zip(
     const gid = task.gid;
     const g = db.get_gmeta_by_gid(gid);
     if (!g) throw Error("Gallery not found in database.");
+    const jpn_title = ecfg.jpn_title !== undefined
+        ? ecfg.jpn_title
+        : cfg.export_zip_jpn_title;
     const progress: TaskExportZipProgress = {
         total_page: g.filecount,
         added_page: 0,
@@ -39,8 +43,9 @@ export async function export_zip(
         });
     };
     sendEvent();
+    const title = (jpn_title && g.title_jpn) ? g.title_jpn : g.title;
     const output = ecfg.output === undefined
-        ? join(cfg.base, filterFilename(g.title + ".zip"))
+        ? join(cfg.base, filterFilename(title + ".zip"))
         : ecfg.output;
     const f = await Deno.open(output, {
         create: true,

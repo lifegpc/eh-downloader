@@ -101,15 +101,14 @@ export class TaskManager extends EventTarget {
         };
         return await this.#add_task(task);
     }
-    async add_export_zip_task(gid: number, output?: string) {
-        const cfg: ExportZipConfig = { output };
+    async add_export_zip_task(gid: number, cfg?: ExportZipConfig) {
         const task: Task = {
             gid,
             token: "",
             id: 0,
             pid: Deno.pid,
             type: TaskType.ExportZip,
-            details: JSON.stringify(cfg),
+            details: JSON.stringify(cfg || DEFAULT_EXPORT_ZIP_CONFIG),
         };
         return await this.#add_task(task);
     }

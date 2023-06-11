@@ -112,6 +112,11 @@ export default class Settings extends Component<SettingsProps> {
                             checked={settings.mpv}
                             description={t("settings.mpv")}
                         />
+                        <SettingsCheckbox
+                            name="export_zip_jpn_title"
+                            checked={settings.export_zip_jpn_title}
+                            description={t("settings.export_zip_jpn_title")}
+                        />
                         <SettingsText
                             name="base"
                             value={settings.base}

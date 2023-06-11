@@ -1,8 +1,13 @@
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb, PMeta } from "../db.ts";
+import { ExportZipConfig } from "../tasks/export_zip.ts";
 import { addZero, configureZipJs } from "../utils.ts";
 
-export function get_export_zip_response(gid: number, db: EhDb) {
+export function get_export_zip_response(
+    gid: number,
+    db: EhDb,
+    cfg: ExportZipConfig,
+) {
     const gmeta = db.get_gmeta_by_gid(gid);
     if (!gmeta) return new Response("Gallery not found.", { status: 404 });
     const pmetas = db.get_pmeta(gid).sort((a, b) => a.index - b.index);
@@ -114,11 +119,14 @@ export function get_export_zip_response(gid: number, db: EhDb) {
         },
         type: "bytes",
     });
+    const title = (cfg.jpn_title && gmeta.title_jpn)
+        ? gmeta.title_jpn
+        : gmeta.title;
     return new Response(readable, {
         headers: {
             "content-type": "application/zip",
             "Content-Disposition": `attachment; filename="${
-                encodeURIComponent(gmeta.title)
+                encodeURIComponent(title)
             }.zip"`,
         },
     });
