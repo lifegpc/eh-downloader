@@ -25,6 +25,7 @@ type EventMap = {
     task_started: Task;
     task_finished: Task;
     task_progress: TaskProgress;
+    task_error: { task: Task; error: string };
 };
 
 type Detail<T extends Record<PropertyKey, unknown>> = {
@@ -142,7 +143,13 @@ export class TaskManager extends EventTarget {
                 await this.db.delete_task(status.value);
                 this.dispatchEvent("task_finished", status.value);
             } else if (status.status == PromiseStatus.Rejected) {
-                if (status.reason && !this.aborted) console.log(status.reason);
+                if (status.reason && !this.aborted) {
+                    console.log(status.reason);
+                    this.dispatchEvent("task_error", {
+                        task: task.base,
+                        error: status.reason.toString(),
+                    });
+                }
                 removed_task.push(id);
             }
         }

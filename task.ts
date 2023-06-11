@@ -14,6 +14,7 @@ export type Task<T extends TaskType = TaskType> = {
 
 export type TaskDownloadProgess = {
     downloaded_page: number;
+    failed_page: number;
     total_page: number;
 };
 

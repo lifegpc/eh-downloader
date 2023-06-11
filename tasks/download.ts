@@ -20,7 +20,6 @@ class DownloadManager {
     #force_abort: AbortSignal;
     #max_download_count;
     #running_tasks: Promise<unknown>[];
-    #has_failed_task = false;
     #progress: TaskDownloadProgess;
     #task: Task;
     #manager: TaskManager;
@@ -35,7 +34,7 @@ class DownloadManager {
         this.#running_tasks = [];
         this.#abort = abort;
         this.#force_abort = force_abort;
-        this.#progress = { total_page: 0, downloaded_page: 0 };
+        this.#progress = { downloaded_page: 0, failed_page: 0, total_page: 0 };
         this.#task = task;
         this.#manager = manager;
     }
@@ -46,7 +45,8 @@ class DownloadManager {
                 const s = await promiseState(t);
                 if (s.status === PromiseStatus.Rejected) {
                     if (!this.#force_abort.aborted) console.log(s.reason);
-                    this.#has_failed_task = true;
+                    this.#progress.failed_page += 1;
+                    this.#sendEvent();
                 } else if (s.status === PromiseStatus.Fulfilled) {
                     this.#progress.downloaded_page += 1;
                     this.#sendEvent();
@@ -59,10 +59,7 @@ class DownloadManager {
         return this.#manager.dispatchTaskProgressEvent(
             TaskType.Download,
             this.#task.id,
-            {
-                downloaded_page: this.#progress.downloaded_page,
-                total_page: this.#progress.total_page,
-            },
+            this.#progress,
         );
     }
     async add_new_task(f: () => Promise<unknown>) {
@@ -77,7 +74,7 @@ class DownloadManager {
         }
     }
     get has_failed_task() {
-        return this.#has_failed_task;
+        return this.#progress.failed_page > 0;
     }
     async join() {
         while (1) {

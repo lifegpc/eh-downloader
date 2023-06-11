@@ -10,7 +10,9 @@ export const handler: Handlers<Task[]> = {
     GET(req, _ctx) {
         const t = get_task_manager();
         const { socket, response } = Deno.upgradeWebSocket(req);
-        const handle = (e: CustomEvent<Task | TaskProgress>) => {
+        const handle = (
+            e: CustomEvent<Task | TaskProgress | { task: Task; error: string }>,
+        ) => {
             socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
         };
         const removeListener = () => {
@@ -18,6 +20,7 @@ export const handler: Handlers<Task[]> = {
             t.removeEventListener("task_started", handle);
             t.removeEventListener("task_finished", handle);
             t.removeEventListener("task_progress", handle);
+            t.removeEventListener("task_error", handle);
         };
         function sendMessage(mes: TaskServerSocketData) {
             socket.send(JSON.stringify(mes));
@@ -57,6 +60,7 @@ export const handler: Handlers<Task[]> = {
             t.addEventListener("task_started", handle);
             t.addEventListener("task_finished", handle);
             t.addEventListener("task_progress", handle);
+            t.addEventListener("task_error", handle);
         };
         return response;
     },
