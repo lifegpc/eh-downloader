@@ -5,6 +5,7 @@ import {
     TaskClientSocketData,
     TaskServerSocketData,
 } from "../../server/task.ts";
+import { ExitTarget } from "../../signal_handler.ts";
 
 export const handler: Handlers<Task[]> = {
     GET(req, _ctx) {
@@ -15,12 +16,17 @@ export const handler: Handlers<Task[]> = {
         ) => {
             socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
         };
+        const close_handle = () => {
+            sendMessage({ type: "close" });
+            socket.close();
+        };
         const removeListener = () => {
             t.removeEventListener("new_task", handle);
             t.removeEventListener("task_started", handle);
             t.removeEventListener("task_finished", handle);
             t.removeEventListener("task_progress", handle);
             t.removeEventListener("task_error", handle);
+            ExitTarget.removeEventListener("close", close_handle);
         };
         function sendMessage(mes: TaskServerSocketData) {
             socket.send(JSON.stringify(mes));
@@ -64,6 +70,7 @@ export const handler: Handlers<Task[]> = {
             t.addEventListener("task_finished", handle);
             t.addEventListener("task_progress", handle);
             t.addEventListener("task_error", handle);
+            ExitTarget.addEventListener("close", close_handle);
         };
         return response;
     },

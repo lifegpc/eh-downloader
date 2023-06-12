@@ -1,5 +1,7 @@
 import { TaskManager } from "./task_manager.ts";
 
+export const ExitTarget = new EventTarget();
+
 export function add_exit_handler(m: TaskManager) {
     let first_aborted = true;
     let ignore_signal = false;
@@ -17,6 +19,7 @@ export function add_exit_handler(m: TaskManager) {
             return;
         }
         await m.waiting_unfinished_task();
+        ExitTarget.dispatchEvent(new Event("close"));
         m.close();
     };
     Deno.addSignalListener("SIGINT", handler);
@@ -24,6 +27,7 @@ export function add_exit_handler(m: TaskManager) {
         Deno.addSignalListener("SIGKILL", () => {
             m.abort();
             m.force_abort();
+            ExitTarget.dispatchEvent(new Event("close"));
             m.close();
         });
     }
