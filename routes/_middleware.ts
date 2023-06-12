@@ -13,6 +13,9 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
                 entryPoints: [join(base, "sw.ts")],
                 outfile: join(base, "sw.js"),
                 metafile: true,
+                bundle: true,
+                minify: true,
+                sourcemap: true,
             });
             const map = data.metafile;
             await asyncForEach(
