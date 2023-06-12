@@ -81,14 +81,25 @@ export function try_remove_sync(
     }
 }
 
-export async function asyncFilter<T>(
-    arr: T[],
-    callback: (element: T, index: number, array: T[]) => Promise<boolean>,
+const fail = Symbol();
+
+export async function asyncFilter<T, V>(
+    arr: ArrayLike<T>,
+    callback: (
+        this: V | undefined,
+        element: T,
+        index: number,
+        array: ArrayLike<T>,
+    ) => Promise<boolean>,
+    thisArg?: V,
 ): Promise<T[]> {
-    const fail = Symbol();
     const t = <[T][]> (await Promise.all(
-        arr.map(async (item, index, array) =>
-            (await callback(item, index, array)) ? [item] : fail
+        map(
+            arr,
+            async (item, index, array) =>
+                (await callback.apply(thisArg, [item, index, array]))
+                    ? [item]
+                    : fail,
         ),
     )).filter((i) => i !== fail);
     return t.map((t) => t[0]);
@@ -230,4 +241,21 @@ export async function asyncEvery<T, V>(
         if (!await callback.apply(thisArg, [arr[i], i, arr])) return false;
     }
     return true;
+}
+
+export function map<T, S, V>(
+    arr: ArrayLike<T>,
+    callback: (
+        this: S | undefined,
+        element: T,
+        index: number,
+        array: ArrayLike<T>,
+    ) => V,
+    thisArg?: S,
+) {
+    const re: V[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        re.push(callback.apply(thisArg, [arr[i], i, arr]));
+    }
+    return re;
 }

@@ -7,6 +7,7 @@ import {
     asyncForEach,
     calFileMd5,
     filterFilename,
+    map,
     promiseState,
     PromiseStatus,
     sleep,
@@ -47,11 +48,19 @@ Deno.test("asyncFilter_test", async () => {
     });
     assertEquals(r, [3]);
     const e = [new Promise<number>((res) => setTimeout(() => res(100), 100))];
-    const v = await asyncFilter(e, async (t) => {
-        const s = await promiseState(t);
+    const v = await asyncFilter(e, async function (d) {
+        assertEquals(this, t);
+        const s = await promiseState(d);
         return s.status === PromiseStatus.Pending;
-    });
+    }, t);
     assertEquals(v, e);
+    const e2 = { 0: e[0], length: 1 };
+    const v2 = await asyncFilter(e2, async function (d) {
+        assertEquals(this, t);
+        const s = await promiseState(d);
+        return s.status === PromiseStatus.Pending;
+    }, t);
+    assertEquals(v, v2);
     await Promise.allSettled(e);
 });
 
@@ -127,4 +136,14 @@ Deno.test("asyncEvery_test", async () => {
         }, t),
         false,
     );
+});
+
+Deno.test("map_test", () => {
+    const arr = { 0: 1, 1: 2, length: 2 };
+    const d = { d: 1 };
+    const re = map(arr, function (n) {
+        assertEquals(this, d);
+        return n + 2;
+    }, d);
+    assertEquals(re, [3, 4]);
 });
