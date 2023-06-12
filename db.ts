@@ -60,7 +60,7 @@ export type PMeta = {
     width: number;
     height: number;
 };
-type Tag = {
+export type Tag = {
     id: number;
     tag: string;
     translated: string | undefined;
@@ -502,6 +502,12 @@ export class EhDb {
                 "SELECT tag.tag FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
                 [gid],
             ).map((v) => v[0]),
+        );
+    }
+    get_gtags_full(gid: number) {
+        return this.db.queryEntries<Tag>(
+            "SELECT tag.* FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
+            [gid],
         );
     }
     get_pmeta(gid: number) {

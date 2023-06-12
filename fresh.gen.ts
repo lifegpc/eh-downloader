@@ -8,8 +8,9 @@ import * as $1 from "./routes/api/config.ts";
 import * as $2 from "./routes/api/deploy_id.ts";
 import * as $3 from "./routes/api/exit.ts";
 import * as $4 from "./routes/api/export/gallery/zip/[gid].ts";
-import * as $5 from "./routes/api/task.ts";
-import * as $6 from "./routes/index.tsx";
+import * as $5 from "./routes/api/gallery/[gid].ts";
+import * as $6 from "./routes/api/task.ts";
+import * as $7 from "./routes/index.tsx";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -21,8 +22,9 @@ const manifest = {
         "./routes/api/deploy_id.ts": $2,
         "./routes/api/exit.ts": $3,
         "./routes/api/export/gallery/zip/[gid].ts": $4,
-        "./routes/api/task.ts": $5,
-        "./routes/index.tsx": $6,
+        "./routes/api/gallery/[gid].ts": $5,
+        "./routes/api/task.ts": $6,
+        "./routes/index.tsx": $7,
     },
     islands: {
         "./islands/Container.tsx": $$0,

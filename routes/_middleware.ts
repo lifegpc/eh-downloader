@@ -28,6 +28,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
                         k = p;
                     }
                     const data = map.inputs[k];
+                    // @ts-ignore add custom property
                     data.md5 = await calFileMd5(k);
                 },
             );
@@ -41,6 +42,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
                         k = p;
                     }
                     const data = map.outputs[k];
+                    // @ts-ignore add custom property
                     data.md5 = await calFileMd5(k);
                 },
             );
