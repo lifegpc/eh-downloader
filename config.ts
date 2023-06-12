@@ -14,6 +14,7 @@ export type ConfigType = {
     download_original_img: boolean;
     port: number;
     export_zip_jpn_title: boolean;
+    hostname: string;
 };
 
 export class Config {
@@ -93,6 +94,9 @@ export class Config {
     get export_zip_jpn_title() {
         return this._return_bool("export_zip_jpn_title") || false;
     }
+    get hostname() {
+        return this._return_string("hostname") || "localhost";
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -107,6 +111,7 @@ export class Config {
             download_original_img: this.download_original_img,
             port: this.port,
             export_zip_jpn_title: this.export_zip_jpn_title,
+            hostname: this.hostname,
         };
     }
 }

@@ -191,6 +191,12 @@ export default class Settings extends Component<SettingsProps> {
                             min={0}
                             max={65535}
                         />
+                        <SettingsText
+                            name="hostname"
+                            value={settings.hostname}
+                            description={t("settings.hostname")}
+                            type="text"
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>

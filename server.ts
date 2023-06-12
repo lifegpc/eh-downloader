@@ -39,5 +39,6 @@ export async function startServer(path: string) {
         plugins: [twindPlugin(twindConfig)],
         render: renderFn,
         port: cfg.port,
+        hostname: cfg.hostname,
     });
 }

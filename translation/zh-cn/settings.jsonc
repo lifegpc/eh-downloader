@@ -19,5 +19,6 @@
     "db_path": "存放数据库的文件夹位置：",
     "db_path_help": "如果未设置，将使用下载位置。",
     "port": "监听端口：",
-    "export_zip_jpn_title": "导出Zip时优先使用日语标题。"
+    "export_zip_jpn_title": "导出Zip时优先使用日语标题。",
+    "hostname": "监听主机："
 }
