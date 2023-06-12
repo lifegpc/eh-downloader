@@ -8,6 +8,7 @@ async function get_deploy_id(): Promise<string | undefined> {
 }
 
 let deploy_id: string | undefined = undefined;
+let inited = false;
 
 const deleteCache = async (key: string) => {
     await caches.delete(key);
@@ -15,6 +16,7 @@ const deleteCache = async (key: string) => {
 
 const deleteOldCaches = async () => {
     deploy_id = await get_deploy_id();
+    inited = true;
     const keyList = await caches.keys();
     const cachesToDelete = keyList.filter((key) => key !== deploy_id);
     await Promise.all(cachesToDelete.map(deleteCache));
@@ -40,6 +42,7 @@ function match_url(u: URL) {
 
 /**@ts-ignore */
 self.addEventListener("fetch", async (e: FetchEvent) => {
+    if (!inited) await deleteOldCaches();
     const r = e.request;
     const responseFromCache = await caches.match(r);
     if (responseFromCache) {
