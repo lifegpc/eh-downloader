@@ -118,7 +118,10 @@ export class Config {
 
 export async function load_settings(path: string) {
     if (!await exists(path)) return new Config({});
-    const s = (new TextDecoder()).decode(await Deno.readFile(path));
+    let s = (new TextDecoder()).decode(await Deno.readFile(path));
+    while (!s.length) {
+        s = (new TextDecoder()).decode(await Deno.readFile(path));
+    }
     return new Config(parse(s));
 }
 
