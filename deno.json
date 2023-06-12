@@ -3,6 +3,7 @@
     "tasks": {
         "cache": "deno cache main.ts server-dev.ts",
         "server-dev": "deno run -A --unstable \"--watch=static/*.css,static/*.ts,static/*/,routes/,translation/\" server-dev.ts",
+        "server": "deno run -A --unstable server-run.ts",
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",

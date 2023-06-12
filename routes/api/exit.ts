@@ -1,6 +1,8 @@
 import { Handlers } from "$fresh/server.ts";
 import { parse_bool } from "../../server/parse_form.ts";
 import { get_task_manager } from "../../server.ts";
+import { ExitTarget } from "../../signal_handler.ts";
+import { AlreadyClosedError } from "../../task_manager.ts";
 
 export const handler: Handlers = {
     async POST(req, _ctx) {
@@ -11,7 +13,7 @@ export const handler: Handlers = {
         } catch (_) {
             null;
         }
-        setTimeout(async () => {
+        const h = async () => {
             const m = get_task_manager();
             const aborted = m.aborted;
             m.abort();
@@ -20,8 +22,11 @@ export const handler: Handlers = {
             }
             if (aborted) return;
             await m.waiting_unfinished_task();
+            ExitTarget.dispatchEvent(new Event("close"));
             m.close();
-        }, 1);
+            throw new AlreadyClosedError();
+        };
+        setTimeout(h, 1);
         return new Response("Aborted.");
     },
 };
