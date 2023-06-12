@@ -2,13 +2,17 @@ import { assert, assertEquals } from "std/testing/asserts.ts";
 import { check_running } from "./pid_check.ts";
 import {
     add_suffix_to_path,
+    asyncEvery,
     asyncFilter,
     asyncForEach,
+    calFileMd5,
     filterFilename,
     promiseState,
     PromiseStatus,
     sleep,
+    sure_dir,
 } from "./utils.ts";
+import { md5 } from "lifegpc-md5";
 
 Deno.test("promiseState_test", async () => {
     const p1 = new Promise((res) => setTimeout(() => res(100), 100));
@@ -78,4 +82,49 @@ Deno.test("add_suffix_to_path_test", () => {
     console.log(t);
     assert(t.startsWith("test-"));
     assert(t.endsWith(".ts"));
+});
+
+Deno.test("calFileMd5_test", async () => {
+    await sure_dir();
+    const text = `Hello World.te${Math.random()}`;
+    await Deno.writeTextFile("./test/test.txt", text);
+    assertEquals(await calFileMd5("./test/test.txt"), md5(text));
+});
+
+Deno.test("asyncEvery_test", async () => {
+    const e = [new Promise<number>((res) => setTimeout(() => res(100), 100))];
+    const e2 = [
+        new Promise<number>((res) => setTimeout(() => res(100), 100)),
+        new Promise<number>((res) => setTimeout(() => res(200), 100)),
+    ];
+    const e3 = [
+        new Promise<number>((res) => setTimeout(() => res(100), 100)),
+        new Promise<number>((res) => setTimeout(() => res(200), 100)),
+        new Promise<number>((res) => setTimeout(() => res(150), 100)),
+    ];
+    const t = { test: 2 };
+    assertEquals(
+        await asyncEvery(e, async function (e) {
+            assertEquals(this, t);
+            return (await e) === 100;
+        }, t),
+        true,
+    );
+    assertEquals(
+        await asyncEvery(e2, async function (e) {
+            assertEquals(this, t);
+            const d = await e;
+            return d === 100;
+        }, t),
+        false,
+    );
+    assertEquals(
+        await asyncEvery(e3, async function (e) {
+            assertEquals(this, t);
+            const d = await e;
+            if (d === 150) throw Error("Should exited.");
+            return d === 100;
+        }, t),
+        false,
+    );
 });

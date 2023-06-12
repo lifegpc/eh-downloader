@@ -15,6 +15,8 @@
         "$std/": "https://deno.land/std@0.187.0/",
         "preact-material-components/": "https://esm.sh/preact-material-components@1.6.1/",
         "accept-language-parser/": "https://esm.sh/accept-language-parser@1.5.0/",
-        "sortable": "https://esm.sh/gh/SortableJS/Sortable@1.15.0/Sortable.min.js"
+        "sortable": "https://esm.sh/gh/SortableJS/Sortable@1.15.0/Sortable.min.js",
+        "esbuild/": "https://deno.land/x/esbuild@v0.18.0/",
+        "lifegpc-md5": "https://esm.sh/lifegpc-md5@1.0.3"
     }
 }

@@ -2,6 +2,7 @@ import { exists, existsSync } from "std/fs/exists.ts";
 import { extname } from "std/path/mod.ts";
 import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { configure } from "zipjs/index.js";
+import { MD5 } from "lifegpc-md5";
 
 export function sleep(time: number): Promise<undefined> {
     return new Promise((r) => {
@@ -163,4 +164,70 @@ export function add_suffix_to_path(path: string, suffix?: string) {
     } else {
         return `${path}-${suffix}`;
     }
+}
+
+export async function calFileMd5(p: string | URL) {
+    const h = new MD5();
+    const f = await Deno.open(p);
+    try {
+        const buf = new Uint8Array(4096);
+        let readed: number | null = null;
+        do {
+            readed = await f.read(buf);
+            if (readed) {
+                h.update(buf.slice(0, readed));
+            }
+        } while (readed !== null);
+        return h.digest_hex();
+    } finally {
+        f.close();
+    }
+}
+
+export async function checkMapFile(p: string | URL, signal?: AbortSignal) {
+    if (!(await exists(p))) return false;
+    const map = JSON.parse(await Deno.readTextFile(p, { signal }));
+    if (
+        !(await asyncEvery(
+            Object.getOwnPropertyNames(map.inputs),
+            async (k) => {
+                const data = map.inputs[k];
+                const md5 = data.md5;
+                if (!md5) return false;
+                if (!(await exists(k))) return false;
+                const m = await calFileMd5(k);
+                return md5 === m;
+            },
+        ))
+    ) return false;
+    if (
+        !(await asyncEvery(
+            Object.getOwnPropertyNames(map.outputs),
+            async (k) => {
+                const data = map.outputs[k];
+                const md5 = data.md5;
+                if (!md5) return false;
+                if (!(await exists(k))) return false;
+                const m = await calFileMd5(k);
+                return md5 === m;
+            },
+        ))
+    ) return false;
+    return true;
+}
+
+export async function asyncEvery<T, V>(
+    arr: ArrayLike<T>,
+    callback: (
+        this: V | undefined,
+        element: T,
+        index: number,
+        array: ArrayLike<T>,
+    ) => Promise<boolean>,
+    thisArg?: V,
+) {
+    for (let i = 0; i < arr.length; i++) {
+        if (!await callback.apply(thisArg, [arr[i], i, arr])) return false;
+    }
+    return true;
 }

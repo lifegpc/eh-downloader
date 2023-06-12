@@ -2,7 +2,7 @@
     "importMap": "./import_map.json",
     "tasks": {
         "cache": "deno cache main.ts server-dev.ts",
-        "server-dev": "deno run -A --unstable --watch=static/,routes/,translation/ server-dev.ts",
+        "server-dev": "deno run -A --unstable \"--watch=static/*.css,static/*.ts,static/*/,routes/,translation/\" server-dev.ts",
         "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --unstable",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
@@ -11,7 +11,7 @@
     },
     "fmt": {
         "indentWidth": 4,
-        "exclude": ["config.json"]
+        "exclude": ["config.json", "static/sw.js", "static/sw.meta.json"]
     },
     "compilerOptions": {
         "jsx": "react-jsx",
