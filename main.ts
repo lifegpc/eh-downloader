@@ -9,7 +9,16 @@ import { load_eht_file, update_database_tag } from "./eh_translation.ts";
 import { get_abort_signal } from "./signal_handler.ts";
 
 function show_help() {
-    console.log("Usage: main.ts [options]");
+    console.log("Usage: main.ts [options] Command");
+    console.log("Commonds:");
+    console.log("  d/download <URL>     Download a gallery");
+    console.log("  r/run                Run tasks in database");
+    console.log("  optimize             Optimize the database");
+    console.log("  utt/update_tag_translation");
+    console.log("  ez/export_zip <GID>  Export a gallery as zip");
+    console.log(
+        "  umsd/update_meili_search_data    Sync all gallery metadata to meiliserach server.",
+    );
     console.log("Options:");
     console.log("  -h, --help           Show this help");
     console.log("  -c, --config <PATH>  Specify config file path.");
