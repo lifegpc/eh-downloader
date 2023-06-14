@@ -6,6 +6,7 @@ import {
     asyncForEach,
     configureZipJs,
     filterFilename,
+    limitFilename,
 } from "../utils.ts";
 import { Config } from "../config.ts";
 import { Task, TaskExportZipProgress, TaskType } from "../task.ts";
@@ -14,6 +15,7 @@ import { TaskManager } from "../task_manager.ts";
 export type ExportZipConfig = {
     output?: string;
     jpn_title?: boolean;
+    max_length?: number;
 };
 
 export const DEFAULT_EXPORT_ZIP_CONFIG: ExportZipConfig = {};
@@ -47,6 +49,7 @@ export async function export_zip(
     const output = ecfg.output === undefined
         ? join(cfg.base, filterFilename(title + ".zip"))
         : ecfg.output;
+    const maxLength = ecfg.max_length || 0;
     const f = await Deno.open(output, {
         create: true,
         write: true,
@@ -66,7 +69,10 @@ export async function export_zip(
                 if (f.length) {
                     const r = await Deno.readFile(f[0].path, { signal });
                     await z.add(
-                        `${addZero(p.index, l)}_${p.name}`,
+                        limitFilename(
+                            `${addZero(p.index, l)}_${p.name}`,
+                            maxLength,
+                        ),
                         new Uint8ArrayReader(r),
                         { signal },
                     );

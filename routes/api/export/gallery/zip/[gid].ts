@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../../../server.ts";
 import { get_export_zip_response } from "../../../../../server/export_zip.ts";
-import { parse_bool } from "../../../../../server/parse_form.ts";
+import { parse_bool, parse_int } from "../../../../../server/parse_form.ts";
 import { ExportZipConfig } from "../../../../../tasks/export_zip.ts";
 
 export const handler: Handlers = {
@@ -13,6 +13,7 @@ export const handler: Handlers = {
         const params = new URL(req.url).searchParams;
         const cfg: ExportZipConfig = {};
         cfg.jpn_title = await parse_bool(params.get("jpn_title"), false);
+        cfg.max_length = await parse_int(params.get("max_length"), 0);
         const m = get_task_manager();
         return get_export_zip_response(gid, m.db, cfg);
     },

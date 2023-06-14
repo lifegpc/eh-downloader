@@ -1,7 +1,7 @@
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import { EhDb, PMeta } from "../db.ts";
 import { ExportZipConfig } from "../tasks/export_zip.ts";
-import { addZero, configureZipJs } from "../utils.ts";
+import { addZero, configureZipJs, limitFilename } from "../utils.ts";
 
 export function get_export_zip_response(
     gid: number,
@@ -47,12 +47,13 @@ export function get_export_zip_response(
     let closed = false;
     const signalc = new AbortController();
     const signal = signalc.signal;
+    const maxLength = cfg.max_length || 0;
     const download_task = async (p: PMeta) => {
         const f = db.get_files(p.token);
         if (f.length) {
             const r = await Deno.readFile(f[0].path, { signal });
             await zip_writer.add(
-                `${addZero(p.index, l)}_${p.name}`,
+                limitFilename(`${addZero(p.index, l)}_${p.name}`, maxLength),
                 new Uint8ArrayReader(r),
                 { signal },
             );

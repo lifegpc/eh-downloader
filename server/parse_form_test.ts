@@ -1,5 +1,5 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { parse_bool } from "./parse_form.ts";
+import { parse_bool, parse_int } from "./parse_form.ts";
 
 Deno.test("parse_bool_test", async () => {
     const f = new FormData();
@@ -14,4 +14,16 @@ Deno.test("parse_bool_test", async () => {
     assertEquals(await parse_bool(f.get("d"), null), true);
     f.append("e", "tRUE", "a.png");
     assertEquals(await parse_bool(f.get("e"), null), true);
+});
+
+Deno.test("parse_int_test", async () => {
+    const f = new FormData();
+    f.append("a", "d");
+    assertEquals(await parse_int(f.get("a"), null), null);
+    assertEquals(await parse_int(f.get("a"), 1), 1);
+    f.append("c", "1");
+    assertEquals(await parse_int(f.get("c"), null), 1);
+    assertEquals(await parse_int(f.get("c"), 2), 1);
+    f.append("d", "-1");
+    assertEquals(await parse_int(f.get("d"), null), -1);
 });

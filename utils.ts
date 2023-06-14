@@ -141,8 +141,13 @@ export function filterFilename(p: string, maxLength = 256) {
     } else if (Deno.build.os == "linux") {
         p = p.replace(/[!\$\"]/g, "_");
     }
-    if (p.length > maxLength) {
+    return limitFilename(p, maxLength);
+}
+
+export function limitFilename(p: string, maxLength: number) {
+    if (maxLength > 0 && p.length > maxLength) {
         const ext = extname(p);
+        if (maxLength < ext.length) return ext;
         return p.slice(0, maxLength - ext.length) + ext;
     }
     return p;

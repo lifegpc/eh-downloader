@@ -82,6 +82,7 @@ Deno.test("filterFilename_test", () => {
     if (Deno.build.os == "windows") {
         assertEquals(filterFilename("d|?ad.ts"), "d__ad.ts");
     }
+    assertEquals(filterFilename("t|.ts", 0), "t_.ts");
 });
 
 Deno.test("add_suffix_to_path_test", () => {
