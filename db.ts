@@ -4,7 +4,7 @@ import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
-import { sleep, sure_dir_sync } from "./utils.ts";
+import { sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 
 type SqliteMaster = {
@@ -69,16 +69,23 @@ export type Tag = {
 };
 export type EhFile = {
     id: number;
-    gid: number;
     token: string;
     path: string;
     width: number;
     height: number;
     is_original: boolean;
 };
-export type EhFileRaw = {
+export type EhFileRawV1 = {
     id: number;
     gid: number;
+    token: string;
+    path: string;
+    width: number;
+    height: number;
+    is_original: number;
+};
+export type EhFileRaw = {
+    id: number;
     token: string;
     path: string;
     width: number;
@@ -139,7 +146,6 @@ const GTAG_TABLE = `CREATE TABLE gtag (
 );`;
 const FILE_TABLE = `CREATE TABLE file (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    gid INT,
     token TEXT,
     path TEXT,
     width INT,
@@ -156,7 +162,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-6");
+    readonly version = new SemVer("1.0.0-7");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -248,6 +254,35 @@ export class EhDb {
                         ),
                     );
                 }
+            }
+            if (v.compare("1.0.0-7") === -1) {
+                this.db.execute("ALTER TABLE file RENAME TO file_origin;");
+                this.db.execute(FILE_TABLE);
+                let offset = 0;
+                let files = this.db.queryEntries<EhFileRawV1>(
+                    "SELECT * FROM file_origin LIMIT 20 OFFSET 0;",
+                );
+                const d: string[] = [];
+                while (files.length) {
+                    files.forEach((f) => {
+                        if (!d.includes(f.token)) {
+                            d.push(f.token);
+                            const g: Record<string, unknown> = f;
+                            delete g["gid"];
+                            this.add_file(g as EhFile, false);
+                        } else {
+                            try_remove_sync(f.path);
+                            console.log("Deleted ", f.path);
+                        }
+                    });
+                    offset += files.length;
+                    files = this.db.queryEntries<EhFileRawV1>(
+                        "SELECT * FROM file_origin LIMIT 20 OFFSET ?;",
+                        [offset],
+                    );
+                }
+                this.db.execute("DROP TABLE file_origin;");
+                need_optimize = true;
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -354,7 +389,7 @@ export class EhDb {
     }
     add_file(f: EhFile, overwrite = true): EhFile {
         if (overwrite) {
-            const ofiles = this.get_files(f.gid, f.token);
+            const ofiles = this.get_files(f.token);
             if (ofiles.length) {
                 const o = ofiles[0];
                 f.id = o.id;
@@ -365,16 +400,16 @@ export class EhDb {
         }
         if (f.id) {
             this.db.query(
-                "INSERT OR REPLACE INTO file VALUES (:id, :gid, :token, :path, :width, :height, :is_original);",
+                "INSERT OR REPLACE INTO file VALUES (:id, :token, :path, :width, :height, :is_original);",
                 f,
             );
             return structuredClone(f);
         } else {
             this.db.query(
-                "INSERT INTO file (gid, token, path, width, height, is_original) VALUES (?, ?, ?, ?, ?, ?);",
-                [f.gid, f.token, f.path, f.width, f.height, f.is_original],
+                "INSERT INTO file (token, path, width, height, is_original) VALUES (?, ?, ?, ?, ?);",
+                [f.token, f.path, f.width, f.height, f.is_original],
             );
-            const s = this.get_files(f.gid, f.token);
+            const s = this.get_files(f.token);
             return s[s.length - 1];
         }
     }
@@ -505,10 +540,10 @@ export class EhDb {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
     }
-    get_files(gid: number, token: string) {
+    get_files(token: string) {
         return this.convert_file(this.db.queryEntries<EhFileRaw>(
-            "SELECT * FROM file WHERE gid = ? AND token = ?;",
-            [gid, token],
+            "SELECT * FROM file WHERE token = ?;",
+            [token],
         ));
     }
     get_gids(offset = 0, limit = 20) {

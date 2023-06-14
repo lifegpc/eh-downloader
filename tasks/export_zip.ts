@@ -62,7 +62,7 @@ export async function export_zip(
         await asyncForEach(
             db.get_pmeta(gid).sort((a, b) => a.index - b.index),
             async (p) => {
-                const f = db.get_files(gid, p.token);
+                const f = db.get_files(p.token);
                 if (f.length) {
                     const r = await Deno.readFile(f[0].path, { signal });
                     await z.add(

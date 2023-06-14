@@ -48,7 +48,7 @@ export function get_export_zip_response(
     const signalc = new AbortController();
     const signal = signalc.signal;
     const download_task = async (p: PMeta) => {
-        const f = db.get_files(gid, p.token);
+        const f = db.get_files(p.token);
         if (f.length) {
             const r = await Deno.readFile(f[0].path, { signal });
             await zip_writer.add(

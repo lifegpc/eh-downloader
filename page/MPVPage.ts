@@ -58,7 +58,6 @@ class MPVImage {
         if (is_original === undefined) return undefined;
         return {
             id: 0,
-            gid: this.#mpv.gid,
             token: this.page_token,
             path,
             width,
@@ -73,7 +72,6 @@ class MPVImage {
         if (height === undefined) return undefined;
         return {
             id: 0,
-            gid: this.#mpv.gid,
             token: this.page_token,
             path,
             width,

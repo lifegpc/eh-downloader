@@ -66,7 +66,6 @@ Deno.test("DbTest", async () => {
     assertEquals(tags, db.get_gtags(1));
     const f: EhFile = {
         id: 0,
-        gid: 1,
         token: "s",
         path: "a.png",
         width: 1280,
@@ -87,8 +86,8 @@ Deno.test("DbTest", async () => {
     f3.id = f4.id;
     assertEquals(f3, f4);
     assertEquals(f.id, f2.id);
-    assertEquals(db.get_files(1, "s").length, 2);
+    assertEquals(db.get_files("s").length, 2);
     db.add_file(f3);
-    assertEquals(db.get_files(1, "s").length, 1);
+    assertEquals(db.get_files("s").length, 1);
     db.close();
 });

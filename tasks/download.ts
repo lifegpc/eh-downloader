@@ -130,7 +130,7 @@ export async function download_task(
         for (const i of mpv.imagelist) {
             if (abort.aborted) break;
             await m.add_new_task(async () => {
-                const ofiles = db.get_files(task.gid, i.page_token);
+                const ofiles = db.get_files(i.page_token);
                 if (ofiles.length) {
                     const t = ofiles[0];
                     if (
