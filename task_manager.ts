@@ -1,6 +1,7 @@
 import { Client } from "./client.ts";
 import { Config } from "./config.ts";
 import { EhDb } from "./db.ts";
+import { MeiliSearchServer } from "./meilisearch.ts";
 import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
 import { Task, TaskProgress, TaskProgressBasicType, TaskType } from "./task.ts";
@@ -10,6 +11,7 @@ import {
     export_zip,
     ExportZipConfig,
 } from "./tasks/export_zip.ts";
+import { update_meili_search_data } from "./tasks/update_meili_search_data.ts";
 import {
     DiscriminatedUnion,
     promiseState,
@@ -46,6 +48,7 @@ export class TaskManager extends EventTarget {
     db;
     running_tasks: Map<number, RunningTask>;
     max_task_count;
+    meilisearch?: MeiliSearchServer;
     #abort;
     #force_abort;
     constructor(cfg: Config) {
@@ -58,6 +61,14 @@ export class TaskManager extends EventTarget {
         this.running_tasks = new Map();
         this.max_task_count = cfg.max_task_count;
         add_exit_handler(this);
+        if (this.cfg.meili_host && this.cfg.meili_update_api_key) {
+            this.meilisearch = new MeiliSearchServer(
+                this.cfg.meili_host,
+                this.cfg.meili_update_api_key,
+                this.db,
+                this.force_aborts,
+            );
+        }
     }
     async #add_task(task: Task) {
         const r = await this.db.add_task(task);
@@ -109,6 +120,17 @@ export class TaskManager extends EventTarget {
             pid: Deno.pid,
             type: TaskType.ExportZip,
             details: JSON.stringify(cfg || DEFAULT_EXPORT_ZIP_CONFIG),
+        };
+        return await this.#add_task(task);
+    }
+    async add_update_meili_search_data_task(gid?: number) {
+        const task: Task = {
+            gid: gid ? gid : 0,
+            token: "",
+            id: 0,
+            pid: Deno.pid,
+            type: TaskType.UpdateMeiliSearchData,
+            details: null,
         };
         return await this.#add_task(task);
     }
@@ -267,6 +289,11 @@ export class TaskManager extends EventTarget {
                     base: task,
                 },
             );
+        } else if (task.type === TaskType.UpdateMeiliSearchData) {
+            this.running_tasks.set(task.id, {
+                task: update_meili_search_data(task, this),
+                base: task,
+            });
         }
     }
     async waiting_unfinished_task() {

@@ -15,6 +15,8 @@ export type ConfigType = {
     port: number;
     export_zip_jpn_title: boolean;
     hostname: string;
+    meili_host?: string;
+    meili_update_api_key?: string;
 };
 
 export class Config {
@@ -97,6 +99,12 @@ export class Config {
     get hostname() {
         return this._return_string("hostname") || "localhost";
     }
+    get meili_host() {
+        return this._return_string("meili_host");
+    }
+    get meili_update_api_key() {
+        return this._return_string("meili_update_api_key");
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -112,6 +120,8 @@ export class Config {
             port: this.port,
             export_zip_jpn_title: this.export_zip_jpn_title,
             hostname: this.hostname,
+            meili_host: this.meili_host,
+            meili_update_api_key: this.meili_update_api_key,
         };
     }
 }

@@ -109,6 +109,11 @@ export async function download_task(
     const gmeta = gdatas.convert(gdata);
     db.add_gmeta(gmeta);
     await db.add_gtag(task.gid, new Set(gdata.tags));
+    if (manager.meilisearch) {
+        manager.meilisearch.target.dispatchEvent(
+            new CustomEvent("gallery_update", { detail: gmeta.gid }),
+        );
+    }
     const base_path = join(cfg.base, task.gid.toString());
     await sure_dir(base_path);
     const m = new DownloadManager(cfg, abort, force_abort, task, manager);

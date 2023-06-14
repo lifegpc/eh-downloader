@@ -1,5 +1,6 @@
 import { DB } from "sqlite/mod.ts";
 import { SemVer } from "std/semver/mod.ts";
+import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
@@ -155,7 +156,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-5");
+    readonly version = new SemVer("1.0.0-6");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -224,6 +225,29 @@ export class EhDb {
             }
             if (v.compare("1.0.0-5") === -1) {
                 this.db.execute("ALTER TABLE task DROP pn;");
+            }
+            if (v.compare("1.0.0-6") === -1) {
+                let offset = 0;
+                let tasks = this.convert_gmeta(
+                    this.db.queryEntries<GMetaRaw>(
+                        "SELECT * FROM gmeta LIMIT 20 OFFSET 0;",
+                    ),
+                );
+                while (tasks.length) {
+                    tasks.forEach((t) => {
+                        t.title = unescape(t.title);
+                        t.title_jpn = unescape(t.title_jpn);
+                        t.uploader = unescape(t.uploader);
+                        this.add_gmeta(t);
+                    });
+                    offset += tasks.length;
+                    tasks = this.convert_gmeta(
+                        this.db.queryEntries<GMetaRaw>(
+                            "SELECT * FROM gmeta LIMIT 20 OFFSET ?;",
+                            [offset],
+                        ),
+                    );
+                }
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -486,6 +510,12 @@ export class EhDb {
             "SELECT * FROM file WHERE gid = ? AND token = ?;",
             [gid, token],
         ));
+    }
+    get_gids(offset = 0, limit = 20) {
+        return this.db.query<[number]>(
+            "SELECT gid FROM gmeta LIMIT ? OFFSET ?;",
+            [limit, offset],
+        ).map((n) => n[0]);
     }
     get_gmeta_by_gid(gid: number) {
         const s = this.convert_gmeta(

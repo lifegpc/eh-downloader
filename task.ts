@@ -1,6 +1,7 @@
 export enum TaskType {
     Download,
     ExportZip,
+    UpdateMeiliSearchData,
 }
 
 export type Task<T extends TaskType = TaskType> = {
@@ -23,9 +24,15 @@ export type TaskExportZipProgress = {
     total_page: number;
 };
 
+export type TaskUpdateMeiliSearchDataProgress = {
+    total_gallery: number;
+    updated_gallery: number;
+};
+
 export type TaskProgressBasicType = {
     [TaskType.Download]: TaskDownloadProgess;
     [TaskType.ExportZip]: TaskExportZipProgress;
+    [TaskType.UpdateMeiliSearchData]: TaskUpdateMeiliSearchDataProgress;
 };
 
 export type TaskProgress<T extends TaskType = TaskType> = {

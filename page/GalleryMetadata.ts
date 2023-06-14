@@ -1,3 +1,4 @@
+import { unescape } from "std/html/mod.ts";
 import { GMeta } from "../db.ts";
 
 export type GalleryMetadataTorrentInfo = {
@@ -12,10 +13,13 @@ export type GalleryMetadataSingle = {
     gid: number;
     token: string;
     archiver_key: string;
+    /// HTML escaped
     title: string;
+    /// HTML escaped
     title_jpn: string;
     category: string;
     thumb: string;
+    /// HTML escaped
     uploader: string;
     posted: string;
     filecount: string;
@@ -45,10 +49,10 @@ class GalleryMetadata {
         return {
             gid: g.gid,
             token: g.token,
-            title: g.title,
-            title_jpn: g.title_jpn,
+            title: unescape(g.title),
+            title_jpn: unescape(g.title_jpn),
             category: g.category,
-            uploader: g.uploader,
+            uploader: unescape(g.uploader),
             posted: parseInt(g.posted),
             filecount: parseInt(g.filecount),
             filesize: g.filesize,

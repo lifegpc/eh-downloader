@@ -23,6 +23,7 @@ enum CMD {
     Optimize,
     UpdateTagTranslation,
     ExportZip,
+    UpdateMeiliSearchData,
 }
 
 const args = parse(Deno.args, {
@@ -46,6 +47,9 @@ if (rcmd == "utt" || rcmd == "update_tag_translation") {
     cmd = CMD.UpdateTagTranslation;
 }
 if (rcmd == "ez" || rcmd == "export_zip") cmd = CMD.ExportZip;
+if (rcmd == "umsd" || rcmd == "update_meili_search_data") {
+    cmd = CMD.UpdateMeiliSearchData;
+}
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -117,6 +121,15 @@ async function export_zip() {
         if (!manager.aborted) manager.close();
     }
 }
+async function update_meili_search_data() {
+    const manager = new TaskManager(settings);
+    try {
+        await manager.add_update_meili_search_data_task();
+        await manager.run();
+    } finally {
+        if (!manager.aborted) manager.close();
+    }
+}
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
@@ -129,6 +142,8 @@ async function main() {
         await update_tag_translation();
     } else if (cmd == CMD.ExportZip) {
         await export_zip();
+    } else if (cmd == CMD.UpdateMeiliSearchData) {
+        await update_meili_search_data();
     }
 }
 
