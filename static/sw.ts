@@ -42,6 +42,10 @@ function match_url(u: URL) {
 
 /**@ts-ignore */
 self.addEventListener("fetch", async (e: FetchEvent) => {
+    const u = new URL(e.request.url);
+    if (u.origin === self.location.origin && u.pathname.startsWith("/api/")) {
+        return;
+    }
     if (!inited) await deleteOldCaches();
     const r = e.request;
     const responseFromCache = await caches.match(r);

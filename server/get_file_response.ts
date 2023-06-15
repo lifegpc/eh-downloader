@@ -8,6 +8,8 @@ export type GetFileResponseOptions = {
     chunk?: number;
     /**@default {false} */
     combineRange?: boolean;
+    if_modified_since?: string;
+    if_unmodified_since?: string;
     mimetype?: string;
     range?: string;
 };
@@ -21,6 +23,12 @@ export async function get_file_response(
     }
     const i = await Deno.stat(path);
     const mimetype = opts && opts.mimetype ? opts.mimetype : mime.getType(path);
+    if (opts?.if_modified_since && i.mtime) {
+        const s = i.mtime.toUTCString();
+        if (opts.if_modified_since === s) {
+            return new Response(null, { status: 304 });
+        }
+    }
     const f = await Deno.open(path);
     const close_f = () => {
         try {
@@ -32,6 +40,12 @@ export async function get_file_response(
     const chunk = opts && opts.chunk && opts.chunk > 0 ? opts.chunk : 4096;
     try {
         if (opts && opts.range) {
+            if (opts.if_unmodified_since && i.mtime) {
+                const s = i.mtime.toUTCString();
+                if (opts.if_unmodified_since !== s) {
+                    return new Response("", { status: 412 });
+                }
+            }
             const combine = opts.combineRange || false;
             const ranges = parse_range(i.size, opts.range, combine);
             if (ranges === -1) {
@@ -107,6 +121,7 @@ export async function get_file_response(
                     "Content-Range": `bytes ${start}-${end - 1}/${i.size}`,
                 };
                 if (mimetype) headers["Content-Type"] = mimetype;
+                if (i.mtime) headers["Last-Modified"] = i.mtime.toUTCString();
                 return new Response(readable, { status: 206, headers });
             } else {
                 let ri = 0;
@@ -225,6 +240,7 @@ export async function get_file_response(
                     "Content-Type":
                         `multipart/byteranges; boundary=${boundary}`,
                 };
+                if (i.mtime) headers["Last-Modified"] = i.mtime.toUTCString();
                 return new Response(readable, { status: 206, headers });
             }
         } else {
@@ -232,6 +248,7 @@ export async function get_file_response(
                 "Content-Length": i.size.toString(),
             };
             if (mimetype) headers["Content-Type"] = mimetype;
+            if (i.mtime) headers["Last-Modified"] = i.mtime.toUTCString();
             return new Response(f.readable, { headers });
         }
     } catch (e) {

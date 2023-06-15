@@ -17,8 +17,9 @@ export const handler: Handlers = {
             return new Response("File not found.", { status: 404 });
         }
         const opts: GetFileResponseOptions = {};
-        const range = req.headers.get("range");
-        if (range) opts.range = range;
+        opts.range = req.headers.get("range");
+        opts.if_modified_since = req.headers.get("If-Modified-Since");
+        opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
         return await get_file_response(f.path, opts);
     },
 };
