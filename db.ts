@@ -540,6 +540,13 @@ export class EhDb {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
     }
+    get_file(id: number) {
+        const d = this.convert_file(this.db.queryEntries<EhFileRaw>(
+            "SELECT * FROM file WHERE id = ?;",
+            [id],
+        ));
+        return d.length ? d[0] : null;
+    }
     get_files(token: string) {
         return this.convert_file(this.db.queryEntries<EhFileRaw>(
             "SELECT * FROM file WHERE token = ?;",

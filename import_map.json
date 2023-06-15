@@ -19,6 +19,7 @@
         "esbuild/": "https://deno.land/x/esbuild@v0.18.0/",
         "lifegpc-md5": "https://esm.sh/lifegpc-md5@1.0.3",
         "meilisearch": "https://esm.sh/meilisearch@0.33.0",
-        "lodash/": "https://esm.sh/lodash@4.17.21/"
+        "lodash/": "https://esm.sh/lodash@4.17.21/",
+        "mime": "https://esm.sh/mime@3.0.0"
     }
 }
