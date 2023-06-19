@@ -602,6 +602,14 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_random_file() {
+        const s = this.convert_file(
+            this.db.queryEntries<EhFileRaw>(
+                "SELECT * FROM file ORDER BY RANDOM() LIMIT 1;",
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
     get_tasks() {
         return this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task;")
