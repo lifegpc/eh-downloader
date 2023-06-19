@@ -465,6 +465,33 @@ export class EhDb {
             throw e;
         }
     }
+    better_optimize() {
+        const d = this.db.query<[string, number]>(
+            "SELECT * FROM main.sqlite_sequence",
+        );
+        d.forEach(([name, count]) => {
+            const c = this.db.query<[number]>(
+                `SELECT COUNT(*) FROM "${name}";`,
+            )[0][0];
+            console.log(c);
+            if (c !== count) {
+                const d = this.db.query<[number]>(`SELECT id FROM "${name}";`);
+                d.forEach((d, i) => {
+                    const r = i + 1;
+                    if (d[0] !== r) {
+                        this.db.query(
+                            `UPDATE "${name}" SET id = ? WHERE id = ?;`,
+                            [r, d[0]],
+                        );
+                    }
+                });
+                this.db.query(
+                    "UPDATE sqlite_sequence SET seq = ? WHERE name = ?;",
+                    [c, name],
+                );
+            }
+        });
+    }
     check_download_task(gid: number, token: string) {
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(

@@ -23,6 +23,7 @@ function show_help() {
     console.log("  -h, --help           Show this help");
     console.log("  -c, --config <PATH>  Specify config file path.");
     console.log("  -a, --add-only       Just add task to task list.");
+    console.log("  -b, --better-optimize Use better way to optimize.");
 }
 
 enum CMD {
@@ -36,8 +37,13 @@ enum CMD {
 }
 
 const args = parse(Deno.args, {
-    alias: { config: ["c"], help: ["h"], add_only: ["a", "add-only"] },
-    boolean: ["help", "add_only"],
+    alias: {
+        config: ["c"],
+        help: ["h"],
+        add_only: ["a", "add-only"],
+        better_optimize: ["b", "better-optimize"],
+    },
+    boolean: ["help", "add_only", "better_optimize"],
     string: ["config"],
     default: { config: "./config.json" },
     negatable: ["add_only"],
@@ -98,6 +104,7 @@ async function run() {
 }
 function optimize() {
     const db = new EhDb(settings.db_path || settings.base);
+    if (args.better_optimize) db.better_optimize();
     db.optimize();
     db.close();
 }

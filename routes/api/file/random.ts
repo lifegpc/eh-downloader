@@ -8,5 +8,5 @@ export const handler: Handlers = {
         if (!f) return new Response("File not found.", { status: 404 });
         const u = new URL(req.url);
         return Response.redirect(`${u.origin}/api/file/${f.id}`);
-    }
-}
+    },
+};
