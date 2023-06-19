@@ -473,7 +473,6 @@ export class EhDb {
             const c = this.db.query<[number]>(
                 `SELECT COUNT(*) FROM "${name}";`,
             )[0][0];
-            console.log(c);
             if (c !== count) {
                 const d = this.db.query<[number]>(`SELECT id FROM "${name}";`);
                 d.forEach((d, i) => {
@@ -483,6 +482,12 @@ export class EhDb {
                             `UPDATE "${name}" SET id = ? WHERE id = ?;`,
                             [r, d[0]],
                         );
+                        if (name === "tag") {
+                            this.db.query(
+                                "UPDATE gtag SET id = ? WHERE id = ?;",
+                                [r, d[0]],
+                            );
+                        }
                     }
                 });
                 this.db.query(
