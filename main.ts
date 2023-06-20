@@ -19,6 +19,7 @@ function show_help() {
     console.log(
         "  umsd/update_meili_search_data    Sync all gallery metadata to meiliserach server.",
     );
+    console.log("  fgp/fix_gallery_page Fix incorrect gallery page.");
     console.log("Options:");
     console.log("  -h, --help           Show this help");
     console.log("  -c, --config <PATH>  Specify config file path.");
@@ -34,6 +35,7 @@ enum CMD {
     UpdateTagTranslation,
     ExportZip,
     UpdateMeiliSearchData,
+    FixGalleryPage,
 }
 
 const args = parse(Deno.args, {
@@ -65,6 +67,7 @@ if (rcmd == "ez" || rcmd == "export_zip") cmd = CMD.ExportZip;
 if (rcmd == "umsd" || rcmd == "update_meili_search_data") {
     cmd = CMD.UpdateMeiliSearchData;
 }
+if (rcmd == "fgp" || rcmd == "fix_gallery_page") cmd = CMD.FixGalleryPage;
 if (cmd == CMD.Unknown) {
     throw Error(`Unknown command: ${rcmd}`);
 }
@@ -146,6 +149,15 @@ async function update_meili_search_data() {
         if (!manager.aborted) manager.close();
     }
 }
+async function fix_gallery_page() {
+    const manager = new TaskManager(settings);
+    try {
+        await manager.add_fix_gallery_page_task();
+        await manager.run();
+    } finally {
+        if (!manager.aborted) manager.close();
+    }
+}
 async function main() {
     await sure_dir(settings.base);
     if (cmd == CMD.Download) {
@@ -160,6 +172,8 @@ async function main() {
         await export_zip();
     } else if (cmd == CMD.UpdateMeiliSearchData) {
         await update_meili_search_data();
+    } else if (cmd == CMD.FixGalleryPage) {
+        await fix_gallery_page();
     }
 }
 

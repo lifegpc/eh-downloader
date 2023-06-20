@@ -506,6 +506,33 @@ export class EhDb {
             return r.length ? r[0] : undefined;
         });
     }
+    check_fix_gallery_page_task() {
+        return this.transaction(() => {
+            const r = this.db.queryEntries<Task>(
+                "SELECT * FROM task WHERE type = ?;",
+                [TaskType.FixGalleryPage],
+            );
+            return r.length ? r[0] : undefined;
+        });
+    }
+    check_onetime_task() {
+        return this.transaction(() => {
+            const r = this.db.queryEntries<Task>(
+                "SELECT * FROM task WHERE type = ? OR type = ?;",
+                [TaskType.UpdateMeiliSearchData, TaskType.FixGalleryPage],
+            );
+            return r;
+        });
+    }
+    check_update_meili_search_data_task() {
+        return this.transaction(() => {
+            const r = this.db.queryEntries<Task>(
+                "SELECT * FROM task WHERE type = ?;",
+                [TaskType.UpdateMeiliSearchData],
+            );
+            return r.length ? r[0] : undefined;
+        });
+    }
     close() {
         this.db.close();
         if (this.#file) {
@@ -633,6 +660,19 @@ export class EhDb {
             [gid, token],
         );
         return s.length ? s[0] : undefined;
+    }
+    get_pmeta_by_token_only(token: string) {
+        const s = this.db.queryEntries<PMeta>(
+            "SELECT * FROM pmeta WHERE token = ?;",
+            [token],
+        );
+        return s;
+    }
+    get_pmeta_count(gid: number) {
+        return this.db.query<[number]>(
+            "SELECT COUNT(*) FROM pmeta WHERE gid = ?;",
+            [gid],
+        )[0][0];
     }
     get_random_file() {
         const s = this.convert_file(

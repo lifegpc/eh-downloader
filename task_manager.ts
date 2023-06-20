@@ -11,6 +11,7 @@ import {
     export_zip,
     ExportZipConfig,
 } from "./tasks/export_zip.ts";
+import { fix_gallery_page } from "./tasks/fix_gallery_page.ts";
 import { update_meili_search_data } from "./tasks/update_meili_search_data.ts";
 import {
     DiscriminatedUnion,
@@ -123,7 +124,30 @@ export class TaskManager extends EventTarget {
         };
         return await this.#add_task(task);
     }
+    async add_fix_gallery_page_task() {
+        this.#check_closed();
+        const otask = await this.db.check_fix_gallery_page_task();
+        if (otask !== undefined) {
+            console.log("The task is already in list.");
+            return otask;
+        }
+        const task: Task = {
+            gid: 0,
+            token: "",
+            id: 0,
+            pid: Deno.pid,
+            type: TaskType.FixGalleryPage,
+            details: null,
+        };
+        return await this.#add_task(task);
+    }
     async add_update_meili_search_data_task(gid?: number) {
+        this.#check_closed();
+        const otask = await this.db.check_update_meili_search_data_task();
+        if (otask !== undefined) {
+            console.log("The task is already in list.");
+            return otask;
+        }
         const task: Task = {
             gid: gid ? gid : 0,
             token: "",
@@ -137,6 +161,8 @@ export class TaskManager extends EventTarget {
     async check_task(task: Task) {
         this.#check_closed();
         if (await this.check_task_is_running(task)) return;
+        const ut = (await this.db.check_onetime_task()).map((t) => t.id);
+        if (ut.length && !ut.includes(task.id)) return;
         let t = task;
         if (task.pid !== Deno.pid) {
             const p = await this.db.set_task_pid(t);
@@ -237,14 +263,14 @@ export class TaskManager extends EventTarget {
             for (const task of my_tasks) {
                 if (this.running_tasks.size == this.max_task_count) break;
                 const checked = await this.check_task(task);
-                if (checked) this.run_task(checked);
+                if (checked) await this.run_task(checked);
             }
             if (this.running_tasks.size == this.max_task_count) continue;
             const otasks = await this.db.get_other_pid_tasks();
             for (const task of otasks) {
                 if (this.running_tasks.size == this.max_task_count) break;
                 const checked = await this.check_task(task);
-                if (checked) this.run_task(checked);
+                if (checked) await this.run_task(checked);
             }
             if (this.running_tasks.size == 0) {
                 if (!forever) break;
@@ -252,7 +278,7 @@ export class TaskManager extends EventTarget {
             }
         }
     }
-    run_task(task: Task) {
+    async run_task(task: Task) {
         this.#check_closed();
         this.dispatchEvent("task_started", task);
         if (task.type == TaskType.Download) {
@@ -290,8 +316,15 @@ export class TaskManager extends EventTarget {
                 },
             );
         } else if (task.type === TaskType.UpdateMeiliSearchData) {
+            await this.waiting_unfinished_task();
             this.running_tasks.set(task.id, {
                 task: update_meili_search_data(task, this),
+                base: task,
+            });
+        } else if (task.type === TaskType.FixGalleryPage) {
+            await this.waiting_unfinished_task();
+            this.running_tasks.set(task.id, {
+                task: fix_gallery_page(task, this),
                 base: task,
             });
         }

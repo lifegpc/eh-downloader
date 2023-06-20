@@ -148,6 +148,18 @@ export async function download_task(
                                 op.name = i.name;
                                 db.add_pmeta(op);
                                 return;
+                            } else {
+                                const ops = db.get_pmeta_by_token_only(
+                                    i.page_token,
+                                );
+                                if (ops.length) {
+                                    const op = ops[0];
+                                    op.gid = task.gid;
+                                    op.index = i.index;
+                                    op.name = i.name;
+                                    db.add_pmeta(op);
+                                    return;
+                                }
                             }
                         }
                         console.log("Already download page", i.index);
