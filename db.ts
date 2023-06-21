@@ -1,5 +1,5 @@
 import { DB } from "sqlite/mod.ts";
-import { SemVer } from "std/semver/mod.ts";
+import { compare as compare_ver, parse as parse_ver } from "std/semver/mod.ts";
 import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
@@ -162,7 +162,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = new SemVer("1.0.0-7");
+    readonly version = parse_ver("1.0.0-7");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -203,13 +203,13 @@ export class EhDb {
         this.#updateExistsTable();
         const v = this.#read_version();
         if (!v) return false;
-        if (v.compare(this.version) === -1) {
+        if (compare_ver(v, this.version) === -1) {
             let need_optimize = false;
-            if (v.compare("1.0.0-1") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-1")) === -1) {
                 this.db.execute("ALTER TABLE tag ADD translated TEXT;");
                 this.db.execute("ALTER TABLE tag ADD intro TEXT;");
             }
-            if (v.compare("1.0.0-2") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-2")) === -1) {
                 this.convert_file(
                     this.db.queryEntries<EhFileRaw>("SELECT * FROM file;"),
                 ).forEach((f) => {
@@ -217,10 +217,10 @@ export class EhDb {
                     this.add_file(f, false);
                 });
             }
-            if (v.compare("1.0.0-3") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-3")) === -1) {
                 this.db.execute("ALTER TABLE task ADD details TEXT;");
             }
-            if (v.compare("1.0.0-4") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-4")) === -1) {
                 this.db.execute("ALTER TABLE pmeta RENAME TO pmeta_origin;");
                 this.db.execute(PMETA_TABLE);
                 this.db.execute(
@@ -229,10 +229,10 @@ export class EhDb {
                 this.db.execute("DROP TABLE pmeta_origin;");
                 need_optimize = true;
             }
-            if (v.compare("1.0.0-5") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-5")) === -1) {
                 this.db.execute("ALTER TABLE task DROP pn;");
             }
-            if (v.compare("1.0.0-6") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-6")) === -1) {
                 let offset = 0;
                 let tasks = this.convert_gmeta(
                     this.db.queryEntries<GMetaRaw>(
@@ -255,7 +255,7 @@ export class EhDb {
                     );
                 }
             }
-            if (v.compare("1.0.0-7") === -1) {
+            if (compare_ver(v, parse_ver("1.0.0-7")) === -1) {
                 this.db.execute("ALTER TABLE file RENAME TO file_origin;");
                 this.db.execute(FILE_TABLE);
                 let offset = 0;
@@ -325,7 +325,7 @@ export class EhDb {
             ["eh"],
         );
         for (const i of cur) {
-            return new SemVer(i[0]);
+            return parse_ver(i[0]);
         }
         return null;
     }

@@ -1,9 +1,9 @@
 {
     "imports": {
-        "std/": "https://deno.land/std@0.191.0/",
+        "std/": "https://deno.land/std@0.192.0/",
         "deno_dom/": "https://deno.land/x/deno_dom@v0.1.38/",
         "sqlite/": "https://deno.land/x/sqlite@v3.7.2/",
-        "zipjs/": "https://deno.land/x/zipjs@v2.7.14/",
+        "zipjs/": "https://deno.land/x/zipjs@v2.7.16/",
         "$fresh/": "https://deno.land/x/fresh@1.2.0/",
         "preact": "https://esm.sh/preact@10.15.1",
         "preact/": "https://esm.sh/preact@10.15.1/",
@@ -16,7 +16,7 @@
         "preact-material-components/": "https://esm.sh/preact-material-components@1.6.1/",
         "accept-language-parser/": "https://esm.sh/accept-language-parser@1.5.0/",
         "sortable": "https://esm.sh/gh/SortableJS/Sortable@1.15.0/Sortable.min.js",
-        "esbuild/": "https://deno.land/x/esbuild@v0.18.0/",
+        "esbuild/": "https://deno.land/x/esbuild@v0.18.6/",
         "lifegpc-md5": "https://esm.sh/lifegpc-md5@1.0.3",
         "meilisearch": "https://esm.sh/meilisearch@0.33.0",
         "lodash/": "https://esm.sh/lodash@4.17.21/",
