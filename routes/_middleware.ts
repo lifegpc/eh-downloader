@@ -2,6 +2,12 @@ import { MiddlewareHandlerContext } from "$fresh/server.ts";
 import { build } from "esbuild/mod.js";
 import { join, resolve } from "std/path/mod.ts";
 import { asyncForEach, calFileMd5, checkMapFile } from "../utils.ts";
+import {
+    get_file_response,
+    GetFileResponseOptions,
+} from "../server/get_file_response.ts";
+
+const STATIC_FILES = ["/sw.js", "/sw.js.map"];
 
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     const url = new URL(req.url);
@@ -50,9 +56,14 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
             console.log("Rebuild.");
         }
     }
-    const res = await ctx.next();
-    if (url.pathname == "/sw.js") {
-        res.headers.delete("etag");
+    if (STATIC_FILES.includes(url.pathname)) {
+        const base = import.meta.resolve("../static").slice(8);
+        const file = join(base, url.pathname.slice(1));
+        const opts: GetFileResponseOptions = {};
+        opts.range = req.headers.get("Range");
+        opts.if_modified_since = req.headers.get("If-Modified-Since");
+        return get_file_response(file, opts);
     }
+    const res = await ctx.next();
     return res;
 }
