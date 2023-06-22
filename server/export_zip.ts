@@ -50,6 +50,8 @@ export function get_export_zip_response(
     const maxLength = cfg.max_length || 0;
     const download_task = async (p: PMeta) => {
         const f = db.get_files(p.token);
+        const t = db.get_filemeta(p.token);
+        if (t && t.is_ad && !cfg.export_ad) return;
         if (f.length) {
             const r = await Deno.readFile(f[0].path, { signal });
             await zip_writer.add(

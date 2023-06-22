@@ -14,6 +14,7 @@ export const handler: Handlers = {
         const cfg: ExportZipConfig = {};
         cfg.jpn_title = await parse_bool(params.get("jpn_title"), false);
         cfg.max_length = await parse_int(params.get("max_length"), 0);
+        cfg.export_ad = await parse_bool(params.get("export_ad"), false);
         const m = get_task_manager();
         return get_export_zip_response(gid, m.db, cfg);
     },

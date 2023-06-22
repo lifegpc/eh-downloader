@@ -16,6 +16,7 @@ export type ExportZipConfig = {
     output?: string;
     jpn_title?: boolean;
     max_length?: number;
+    export_ad?: boolean;
 };
 
 export const DEFAULT_EXPORT_ZIP_CONFIG: ExportZipConfig = {};
@@ -66,6 +67,12 @@ export async function export_zip(
             db.get_pmeta(gid).sort((a, b) => a.index - b.index),
             async (p) => {
                 const f = db.get_files(p.token);
+                const t = db.get_filemeta(p.token);
+                if (t && t.is_ad && !ecfg.export_ad) {
+                    progress.total_page -= 1;
+                    sendEvent();
+                    return;
+                }
                 if (f.length) {
                     const r = await Deno.readFile(f[0].path, { signal });
                     await z.add(
