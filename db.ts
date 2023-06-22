@@ -461,6 +461,12 @@ export class EhDb {
             return s[s.length - 1];
         }
     }
+    add_filemeta(m: EhFileMeta) {
+        this.db.query(
+            "INSERT OR REPLACE INTO filemeta VALUES (:token, :is_nsfw, :is_ad);",
+            m,
+        );
+    }
     add_pmeta(pmeta: PMeta) {
         this.db.queryEntries(
             "INSERT OR REPLACE INTO pmeta VALUES (:gid, :index, :token, :name, :width, :height)",
@@ -679,6 +685,13 @@ export class EhDb {
         const d = this.convert_file(this.db.queryEntries<EhFileRaw>(
             "SELECT * FROM file WHERE id = ?;",
             [id],
+        ));
+        return d.length ? d[0] : null;
+    }
+    get_filemeta(token: string) {
+        const d = this.convert_filemeta(this.db.queryEntries<EhFileMetaRaw>(
+            "SELECT * FROM filemeta WHERE token = ?;",
+            [token],
         ));
         return d.length ? d[0] : null;
     }

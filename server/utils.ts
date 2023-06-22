@@ -13,8 +13,7 @@ export type JSONResult<T> = {
     error: string;
 };
 
-function gen_response<T>(d: JSONResult<T>) {
-    let status = 200;
+function gen_response<T>(d: JSONResult<T>, status = 200) {
     if (d.status !== 0) {
         status = (d.status >= 400 && d.status < 600) ? d.status : 400;
     }
@@ -31,6 +30,6 @@ export function return_error<T = unknown>(
     return gen_response<T>({ ok: false, status, error });
 }
 
-export function return_data<T = unknown>(data: T) {
-    return gen_response<T>({ ok: true, status: 0, data });
+export function return_data<T = unknown>(data: T, status = 200) {
+    return gen_response<T>({ ok: true, status: 0, data }, status);
 }
