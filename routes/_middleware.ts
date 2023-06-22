@@ -62,6 +62,9 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const opts: GetFileResponseOptions = {};
         opts.range = req.headers.get("Range");
         opts.if_modified_since = req.headers.get("If-Modified-Since");
+        if (file.endsWith(".js.map")) {
+            opts.mimetype = "application/json";
+        }
         return get_file_response(file, opts);
     }
     const res = await ctx.next();
