@@ -7,6 +7,9 @@ const UNSAFE_TYPE: (keyof ConfigType)[] = [
     "db_path",
     "port",
     "hostname",
+    "meili_host",
+    "meili_search_api_key",
+    "meili_update_api_key",
 ];
 const UNSAFE_TYPE2 = UNSAFE_TYPE as string[];
 

@@ -20,5 +20,8 @@
     "db_path_help": "如果未设置，将使用下载位置。",
     "port": "监听端口：",
     "export_zip_jpn_title": "导出Zip时优先使用日语标题。",
-    "hostname": "监听主机："
+    "hostname": "监听主机：",
+    "meili_host": "Meilisearch服务器主机：",
+    "meili_update_api_key": "用于更新画廊元数据的Meilisearch API密钥：",
+    "meili_search_api_key": "用于搜索的Meilisearch API密钥："
 }

@@ -197,6 +197,24 @@ export default class Settings extends Component<SettingsProps> {
                             description={t("settings.hostname")}
                             type="text"
                         />
+                        <SettingsText
+                            name="meili_host"
+                            value={settings.meili_host || ""}
+                            description={t("settings.meili_host")}
+                            type="text"
+                        />
+                        <SettingsText
+                            name="meili_update_api_key"
+                            value={settings.meili_update_api_key || ""}
+                            description={t("settings.meili_update_api_key")}
+                            type="text"
+                        />
+                        <SettingsText
+                            name="meili_search_api_key"
+                            value={settings.meili_search_api_key || ""}
+                            description={t("settings.meili_search_api_key")}
+                            type="text"
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>

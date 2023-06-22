@@ -16,6 +16,7 @@ export type ConfigType = {
     export_zip_jpn_title: boolean;
     hostname: string;
     meili_host?: string;
+    meili_search_api_key?: string;
     meili_update_api_key?: string;
 };
 
@@ -102,6 +103,9 @@ export class Config {
     get meili_host() {
         return this._return_string("meili_host");
     }
+    get meili_search_api_key() {
+        return this._return_string("meili_search_api_key");
+    }
     get meili_update_api_key() {
         return this._return_string("meili_update_api_key");
     }
@@ -121,6 +125,7 @@ export class Config {
             export_zip_jpn_title: this.export_zip_jpn_title,
             hostname: this.hostname,
             meili_host: this.meili_host,
+            meili_search_api_key: this.meili_search_api_key,
             meili_update_api_key: this.meili_update_api_key,
         };
     }

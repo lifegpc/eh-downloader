@@ -20,5 +20,8 @@
     "db_path_help": "If not set, the download location is used.",
     "port": "Listening port: ",
     "export_zip_jpn_title": "Use japanese title first when exporting zip.",
-    "hostname": "Listening host: "
+    "hostname": "Listening host: ",
+    "meili_host": "Meilisearch server host: ",
+    "meili_update_api_key": "Meilisearch API key for updating gallery metadata: ",
+    "meili_search_api_key": "Meilisearch API key for searching: "
 }
