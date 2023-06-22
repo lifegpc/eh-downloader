@@ -766,13 +766,39 @@ export class EhDb {
             [gid],
         )[0][0];
     }
-    get_random_file() {
-        const s = this.convert_file(
-            this.db.queryEntries<EhFileRaw>(
-                "SELECT * FROM file ORDER BY RANDOM() LIMIT 1;",
-            ),
-        );
-        return s.length ? s[0] : undefined;
+    get_random_file(is_nsfw: boolean | null, is_ad: boolean | null) {
+        if (is_nsfw === null && is_ad === null) {
+            const s = this.convert_file(
+                this.db.queryEntries<EhFileRaw>(
+                    "SELECT * FROM file ORDER BY RANDOM() LIMIT 1;",
+                ),
+            );
+            return s.length ? s[0] : undefined;
+        } else if (is_nsfw === null) {
+            const s = this.convert_file(
+                this.db.queryEntries<EhFileRaw>(
+                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
+                    [is_ad],
+                ),
+            );
+            return s.length ? s[0] : undefined;
+        } else if (is_ad === null) {
+            const s = this.convert_file(
+                this.db.queryEntries<EhFileRaw>(
+                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? ORDER BY RANDOM() LIMIT 1;",
+                    [is_nsfw],
+                ),
+            );
+            return s.length ? s[0] : undefined;
+        } else {
+            const s = this.convert_file(
+                this.db.queryEntries<EhFileRaw>(
+                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? AND IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
+                    [is_nsfw, is_ad],
+                ),
+            );
+            return s.length ? s[0] : undefined;
+        }
     }
     get_tasks() {
         return this.transaction(() =>
