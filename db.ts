@@ -61,6 +61,26 @@ export type PMeta = {
     width: number;
     height: number;
 };
+export type ExtendedPMeta = {
+    gid: number;
+    index: number;
+    token: string;
+    name: string;
+    width: number;
+    height: number;
+    is_nsfw: boolean;
+    is_ad: boolean;
+};
+export type ExtendedPMetaRaw = {
+    gid: number;
+    index: number;
+    token: string;
+    name: string;
+    width: number;
+    height: number;
+    is_nsfw: number | null;
+    is_ad: number | null;
+};
 export type Tag = {
     id: number;
     tag: string;
@@ -75,7 +95,7 @@ export type EhFile = {
     height: number;
     is_original: boolean;
 };
-export type EhFileRawV1 = {
+type EhFileRawV1 = {
     id: number;
     gid: number;
     token: string;
@@ -92,7 +112,26 @@ export type EhFileRaw = {
     height: number;
     is_original: number;
 };
-const ALL_TABLES = ["version", "task", "gmeta", "pmeta", "tag", "gtag", "file"];
+export type EhFileMeta = {
+    token: string;
+    is_nsfw: boolean;
+    is_ad: boolean;
+};
+export type EhFileMetaRaw = {
+    token: string;
+    is_nsfw: number;
+    is_ad: number;
+};
+const ALL_TABLES = [
+    "version",
+    "task",
+    "gmeta",
+    "pmeta",
+    "tag",
+    "gtag",
+    "file",
+    "filemeta",
+];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
     ver TEXT,
@@ -151,6 +190,12 @@ const FILE_TABLE = `CREATE TABLE file (
     width INT,
     height INT,
     is_original BOOLEAN
+);`;
+const FILEMETA_TABLE = `CREATE TABLE filemeta (
+    token TEXT,
+    is_nsfw BOOLEAN,
+    is_ad BOOLEAN,
+    PRIMARY KEY (token)
 );`;
 
 export class EhDb {
@@ -315,6 +360,9 @@ export class EhDb {
         }
         if (!this.#exist_table.has("file")) {
             this.db.execute(FILE_TABLE);
+        }
+        if (!this.#exist_table.has("filemeta")) {
+            this.db.execute(FILEMETA_TABLE);
         }
         this.#updateExistsTable();
     }
@@ -559,11 +607,31 @@ export class EhDb {
             }
         }
     }
+    convert_extended_pmeta(m: ExtendedPMetaRaw[]) {
+        return m.map((m) => {
+            const n = m.is_nsfw ? true : false;
+            const a = m.is_ad ? true : false;
+            const t = <ExtendedPMeta> <unknown> m;
+            t.is_nsfw = n;
+            t.is_ad = a;
+            return t;
+        });
+    }
     convert_file(f: EhFileRaw[]) {
         return f.map((m) => {
             const b = m.is_original !== 0;
             const t = <EhFile> <unknown> m;
             t.is_original = b;
+            return t;
+        });
+    }
+    convert_filemeta(m: EhFileMetaRaw[]) {
+        return m.map((m) => {
+            const n = m.is_nsfw !== 0;
+            const a = m.is_ad !== 0;
+            const t = <EhFileMeta> <unknown> m;
+            t.is_nsfw = n;
+            t.is_ad = a;
             return t;
         });
     }
@@ -598,6 +666,14 @@ export class EhDb {
     dbunlock() {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
+    }
+    get_extended_pmeta(gid: number) {
+        return this.convert_extended_pmeta(
+            this.db.queryEntries<ExtendedPMetaRaw>(
+                "SELECT pmeta.*, filemeta.is_nsfw, filemeta.is_ad FROM pmeta LEFT JOIN filemeta ON filemeta.token = pmeta.token WHERE gid = ?;",
+                [gid],
+            ),
+        );
     }
     get_file(id: number) {
         const d = this.convert_file(this.db.queryEntries<EhFileRaw>(

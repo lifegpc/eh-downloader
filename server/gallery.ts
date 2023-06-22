@@ -1,10 +1,10 @@
-import { GMeta, PMeta, Tag } from "../db.ts";
+import { ExtendedPMeta, GMeta, Tag } from "../db.ts";
 import { JSONResult } from "./utils.ts";
 
 export type GalleryData = {
     meta: GMeta;
     tags: Tag[];
-    pages: PMeta[];
+    pages: ExtendedPMeta[];
 };
 
 export type GalleryResult = JSONResult<GalleryData>;

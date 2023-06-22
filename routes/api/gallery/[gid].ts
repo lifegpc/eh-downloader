@@ -15,7 +15,9 @@ export const handler: Handlers = {
         const data: GalleryData = {
             meta,
             tags: m.db.get_gtags_full(gid).sort((a, b) => a.id - b.id),
-            pages: m.db.get_pmeta(gid).sort((a, b) => a.index - b.index),
+            pages: m.db.get_extended_pmeta(gid).sort((a, b) =>
+                a.index - b.index
+            ),
         };
         return return_data(data);
     },
