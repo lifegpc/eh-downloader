@@ -72,19 +72,36 @@ export const handler: Handlers = {
                     typeof b.is_nsfw === "boolean" &&
                     typeof b.is_ad === "boolean"
                 ) {
-                    const excludes: Set<string> =
-                        // @ts-ignore Any
-                        Array.isArray(b.excludes) && b.excludes.every((d) =>
-                                typeof d === "string"
-                            )
-                            ? new Set(b.excludes)
-                            : new Set();
+                    const excludes: Set<string> = Array.isArray(b.excludes) &&
+                            // @ts-ignore Any
+                            b.excludes.every((d) => typeof d === "string")
+                        ? new Set(b.excludes)
+                        : new Set();
                     return put_gallery_filemeta(
                         b.gid,
                         b.is_nsfw,
                         b.is_ad,
                         excludes,
                     );
+                } else return return_error(3, "Invalid parameters.");
+            } else if (
+                Array.isArray(b.tokens) &&
+                // @ts-ignore Any
+                b.tokens.every((d) => typeof d === "string")
+            ) {
+                if (
+                    typeof b.is_nsfw === "boolean" &&
+                    typeof b.is_ad === "boolean"
+                ) {
+                    const m = get_task_manager();
+                    for (const token of b.tokens) {
+                        m.db.add_filemeta({
+                            token,
+                            is_nsfw: b.is_nsfw,
+                            is_ad: b.is_ad,
+                        });
+                    }
+                    return return_data({});
                 } else return return_error(3, "Invalid parameters.");
             }
             return return_error(5, "Unknown JSON format.");
@@ -102,6 +119,7 @@ export const handler: Handlers = {
             const gid = await parse_int(d.get("gid"), null);
             const is_nsfw = await parse_bool(d.get("is_nsfw"), null);
             const is_ad = await parse_bool(d.get("is_ad"), null);
+            const tokens = await get_string(d.get("tokens"));
             if (is_nsfw === null || is_ad === null) {
                 return return_error(3, "Invalid parameters.");
             }
@@ -111,6 +129,13 @@ export const handler: Handlers = {
                 const e = await get_string(d.get("excludes"));
                 const excludes = e ? new Set(e.split(",")) : new Set<string>();
                 return put_gallery_filemeta(gid, is_nsfw, is_ad, excludes);
+            } else if (tokens) {
+                const ts = new Set(tokens.split(","));
+                const m = get_task_manager();
+                for (const token of ts) {
+                    m.db.add_filemeta({ token, is_nsfw, is_ad });
+                }
+                return return_data({});
             }
         }
         return return_error(4, "Unknown format.");
