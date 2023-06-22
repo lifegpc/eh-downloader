@@ -766,7 +766,10 @@ export class EhDb {
             [gid],
         )[0][0];
     }
-    get_random_file(is_nsfw: boolean | null, is_ad: boolean | null) {
+    get_random_file(
+        is_nsfw: boolean | null = null,
+        is_ad: boolean | null = null,
+    ) {
         if (is_nsfw === null && is_ad === null) {
             const s = this.convert_file(
                 this.db.queryEntries<EhFileRaw>(
