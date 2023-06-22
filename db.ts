@@ -612,6 +612,9 @@ export class EhDb {
             [token],
         ));
     }
+    get_gallery_count() {
+        return this.db.query<[number]>("SELECT COUNT(*) FROM gmeta;")[0][0];
+    }
     get_gids(offset = 0, limit = 20) {
         return this.db.query<[number]>(
             "SELECT gid FROM gmeta LIMIT ? OFFSET ?;",
