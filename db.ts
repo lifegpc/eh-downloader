@@ -582,11 +582,17 @@ export class EhDb {
             return r;
         });
     }
-    check_update_meili_search_data_task() {
+    check_update_meili_search_data_task(gid?: number) {
+        const args = [TaskType.UpdateMeiliSearchData];
+        let wsql = "";
+        if (gid !== undefined) {
+            wsql = " AND gid = ?";
+            args.push(gid);
+        }
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ?;",
-                [TaskType.UpdateMeiliSearchData],
+                `SELECT * FROM task WHERE type = ?${wsql};`,
+                args,
             );
             return r.length ? r[0] : undefined;
         });
@@ -774,38 +780,30 @@ export class EhDb {
         is_nsfw: boolean | null = null,
         is_ad: boolean | null = null,
     ) {
-        if (is_nsfw === null && is_ad === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT * FROM file ORDER BY RANDOM() LIMIT 1;",
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else if (is_nsfw === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_ad],
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else if (is_ad === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_nsfw],
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? AND IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_nsfw, is_ad],
-                ),
-            );
-            return s.length ? s[0] : undefined;
+        const args = [];
+        let join_sql = "";
+        const where_sql = [];
+        if (is_nsfw !== null || is_ad !== null) {
+            join_sql = " LEFT JOIN filemeta ON file.token = filemeta.token";
+            if (is_nsfw !== null) {
+                where_sql.push("IFNULL(filemeta.is_nsfw, 0) = ?");
+                args.push(is_nsfw);
+            }
+            if (is_ad !== null) {
+                where_sql.push("IFNULL(filemeta.is_ad, 0) = ?");
+                args.push(is_ad);
+            }
         }
+        const wsql = where_sql.length
+            ? ` WHERE ${where_sql.join(" AND ")}`
+            : "";
+        const s = this.convert_file(
+            this.db.queryEntries<EhFileRaw>(
+                `SELECT file.* FROM file${join_sql}${wsql} ORDER BY RANDOM() LIMIT 1;`,
+                args,
+            ),
+        );
+        return s.length ? s[0] : undefined;
     }
     get_tasks() {
         return this.transaction(() =>

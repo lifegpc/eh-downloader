@@ -143,7 +143,7 @@ export class TaskManager extends EventTarget {
     }
     async add_update_meili_search_data_task(gid?: number) {
         this.#check_closed();
-        const otask = await this.db.check_update_meili_search_data_task();
+        const otask = await this.db.check_update_meili_search_data_task(gid);
         if (otask !== undefined) {
             console.log("The task is already in list.");
             return otask;
