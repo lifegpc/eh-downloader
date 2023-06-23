@@ -98,163 +98,162 @@ export default class Settings extends Component<SettingsProps> {
                         set_changed={set_changed}
                         set_settings={set_settings}
                     >
-                        <SettingsCheckbox
-                            name="download_original_img"
-                            checked={settings.download_original_img}
-                            description={t("settings.download_original_img")}
-                        />
-                        <SettingsCheckbox
-                            name="ex"
-                            checked={settings.ex}
-                            description={t("settings.ex")}
-                        />
-                        <SettingsCheckbox
-                            name="mpv"
-                            checked={settings.mpv}
-                            description={t("settings.mpv")}
-                        />
-                        <SettingsCheckbox
-                            name="export_zip_jpn_title"
-                            checked={settings.export_zip_jpn_title}
-                            description={t("settings.export_zip_jpn_title")}
-                        />
-                        <SettingsText
-                            name="base"
-                            value={settings.base}
-                            description={t("settings.base")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="ua"
-                            value={settings.ua ? settings.ua : ""}
-                            description={t("settings.ua")}
-                            type="text"
-                            outlined={true}
-                            ref={ref}
-                        >
-                            <Button
-                                onClick={() => {
-                                    if (ref.current) {
-                                        const ua = navigator.userAgent;
-                                        const t = ref.current;
-                                        t.update(ua);
-                                        t.set_value(ua);
-                                    }
-                                }}
-                            >
-                                {t("settings.ua_now")}
-                            </Button>
-                        </SettingsText>
-                        <SettingsText
-                            name="cookies"
-                            value={new_cookies}
-                            description={t("settings.cookies")}
-                            type="text"
-                            set_value={set_new_cookies}
-                            label={t(
-                                `settings.enter${
-                                    settings.cookies ? "_new" : ""
-                                }_cookies`,
-                            )}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="max_task_count"
-                            value={settings.max_task_count}
-                            description={t("settings.max_task_count")}
-                            type="number"
-                            min={1}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="max_retry_count"
-                            value={settings.max_retry_count}
-                            description={t("settings.max_retry_count")}
-                            type="number"
-                            min={1}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="max_download_img_count"
-                            value={settings.max_download_img_count}
-                            description={t("settings.max_download_img_count")}
-                            type="number"
-                            min={1}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="db_path"
-                            value={settings.db_path || ""}
-                            type="text"
-                            description={t("settings.db_path")}
-                            helpertext={t("settings.db_path_help")}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="port"
-                            value={settings.port}
-                            description={t("settings.port")}
-                            type="number"
-                            min={0}
-                            max={65535}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="hostname"
-                            value={settings.hostname}
-                            description={t("settings.hostname")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="meili_host"
-                            value={settings.meili_host || ""}
-                            description={t("settings.meili_host")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="meili_update_api_key"
-                            value={settings.meili_update_api_key || ""}
-                            description={t("settings.meili_update_api_key")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="meili_search_api_key"
-                            value={settings.meili_search_api_key || ""}
-                            description={t("settings.meili_search_api_key")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="ffmpeg_path"
-                            value={settings.ffmpeg_path}
-                            description={t("settings.ffmpeg_path")}
-                            type="text"
-                            outlined={true}
-                        />
-                        <SettingsSelect
-                            name="thumbnail_method"
-                            list={[{
-                                value: ThumbnailMethod.FFMPEG_BINARY,
-                                text: t("settings.thumbnail_method0"),
-                            }, {
-                                value: ThumbnailMethod.FFMPEG_API,
-                                text: t("settings.thumbnail_method1"),
-                            }]}
-                            description={t("settings.thumbnail_method")}
-                            selectedIndex={settings.thumbnail_method}
-                            outlined={true}
-                        />
-                        <SettingsText
-                            name="thumbnail_dir"
-                            value={settings.thumbnail_dir}
-                            description={t("settings.thumbnail_dir")}
-                            type="text"
-                            outlined={true}
-                        />
+                        <div class="check-box">
+                            <SettingsCheckbox
+                                name="download_original_img"
+                                checked={settings.download_original_img}
+                                description={t("settings.download_original_img")}
+                            />
+                            <SettingsCheckbox
+                                name="ex"
+                                checked={settings.ex}
+                                description={t("settings.ex")}
+                            />
+                            <SettingsCheckbox
+                                name="mpv"
+                                checked={settings.mpv}
+                                description={t("settings.mpv")}
+                            />
+                            <SettingsCheckbox
+                                name="export_zip_jpn_title"
+                                checked={settings.export_zip_jpn_title}
+                                description={t("settings.export_zip_jpn_title")}
+                            />
+                        </div>
+                        <div class="text-box">
+                            <SettingsSelect
+                                name="thumbnail_method"
+                                list={[{
+                                    value: ThumbnailMethod.FFMPEG_BINARY,
+                                    text: t("settings.thumbnail_method0"),
+                                }, {
+                                    value: ThumbnailMethod.FFMPEG_API,
+                                    text: t("settings.thumbnail_method1"),
+                                }]}
+                                description={t("settings.thumbnail_method")}
+                                selectedIndex={settings.thumbnail_method}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="port"
+                                value={settings.port}
+                                description={t("settings.port")}
+                                type="number"
+                                min={0}
+                                max={65535}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="base"
+                                value={settings.base}
+                                description={t("settings.base")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <div class="ua">
+                                <SettingsText
+                                    name="ua"
+                                    value={settings.ua ? settings.ua : ""}
+                                    description={t("settings.ua")}
+                                    type="text"
+                                    outlined={true}
+                                    ref={ref}
+                                >
+                                </SettingsText>
+                                <Button
+                                        onClick={() => {
+                                            if (ref.current) {
+                                                const ua = navigator.userAgent;
+                                                const t = ref.current;
+                                                t.update(ua);
+                                                t.set_value(ua);
+                                            }
+                                        }}
+                                    >
+                                        {t("settings.ua_now")}
+                                </Button>
+                            </div>
+                            <SettingsText
+                                name="max_task_count"
+                                value={settings.max_task_count}
+                                description={t("settings.max_task_count")}
+                                type="number"
+                                min={1}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="max_retry_count"
+                                value={settings.max_retry_count}
+                                description={t("settings.max_retry_count")}
+                                type="number"
+                                min={1}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="max_download_img_count"
+                                value={settings.max_download_img_count}
+                                description={t("settings.max_download_img_count")}
+                                type="number"
+                                min={1}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="db_path"
+                                value={settings.db_path || ""}
+                                type="text"
+                                description={t("settings.db_path")}
+                                helpertext={t("settings.db_path_help")}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="hostname"
+                                value={settings.hostname}
+                                description={t("settings.hostname")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="meili_host"
+                                value={settings.meili_host || ""}
+                                description={t("settings.meili_host")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="meili_update_api_key"
+                                value={settings.meili_update_api_key || ""}
+                                description={t("settings.meili_update_api_key")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="meili_search_api_key"
+                                value={settings.meili_search_api_key || ""}
+                                description={t("settings.meili_search_api_key")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="ffmpeg_path"
+                                value={settings.ffmpeg_path}
+                                description={t("settings.ffmpeg_path")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="cookies"
+                                value={new_cookies}
+                                description={t("settings.cookies")}
+                                type="text"
+                                set_value={set_new_cookies}
+                                label={t(
+                                    `settings.enter${
+                                        settings.cookies ? "_new" : ""
+                                    }_cookies`,
+                                )}
+                                outlined={true}
+                            />
+                        </div>
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>

@@ -19,6 +19,14 @@
     top: 64px;
 }
 
+
+.settings {
+    margin: 0 18%;
+    padding-top: 40px;
+    transition: 0.6s;
+}
+
+
 .settings div.text {
     width: 100%;
 }
@@ -59,4 +67,44 @@
 
 .settings div.text.outlined.label {
     margin-top: 6px;
+}
+
+.settings .text-box {
+    margin: 0 10px;
+}
+
+
+.settings .text-box .text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.settings .text-box .text .mdc-text-field::after{
+    width: 0;
+}
+.settings .text-box .text .mdc-text-field::before{
+    width: 0;
+}
+
+.settings .ua {
+    position: relative;
+}
+.settings .ua > button {
+    position: absolute;
+    top: 30px;
+    left: -10px;
+}
+
+
+
+@media (max-width:767px) { 
+ 
+}
+
+@media (max-width:1280px) {
+    .settings {
+        margin: 0;
+    }
 }
