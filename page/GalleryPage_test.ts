@@ -36,4 +36,18 @@ Deno.test({
     assertEquals(re.language, "Chinese");
     assertEquals(re.gid, 2552611);
     assertEquals(re.token, "3132307627");
+    assertEquals(re.new_version.length, 0);
+});
+
+Deno.test({
+    name: "GalleryPage_test2",
+    permissions: API_PERMISSION,
+}, async () => {
+    const cfg = await load_settings("./config.json");
+    const client = new Client(cfg);
+    const re = await client.fetchGalleryPage(2209409, "8c8b2b1fc3");
+    assertEquals(re.name, "[Fanbox] houk1se1 (2022.03.08 - 2022.05.01)");
+    assertEquals(re.japanese_name, "");
+    assertEquals(re.length, 42);
+    assertEquals(re.new_version[0], { gid: 2223198, token: "2a5788135e" });
 });

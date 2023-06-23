@@ -55,7 +55,9 @@ export class MeiliSearchServer {
     }
     #gallery_update(e: Event) {
         const ev = e as CustomEvent<number>;
-        this.updateGallery(ev.detail);
+        this.updateGallery(ev.detail).catch((e) => {
+            console.log(e);
+        });
     }
     async #updateGMetaSettings() {
         if (this.#gmeta) {

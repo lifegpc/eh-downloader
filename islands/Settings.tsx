@@ -98,7 +98,7 @@ export default class Settings extends Component<SettingsProps> {
                         set_changed={set_changed}
                         set_settings={set_settings}
                     >
-                        <div>
+                        <div class="check-box">
                             <SettingsCheckbox
                                 name="download_original_img"
                                 checked={settings.download_original_img}
@@ -120,7 +120,29 @@ export default class Settings extends Component<SettingsProps> {
                                 description={t("settings.export_zip_jpn_title")}
                             />
                         </div>
-                        <div>
+                        <div class="text-box">
+                            <SettingsSelect
+                                name="thumbnail_method"
+                                list={[{
+                                    value: ThumbnailMethod.FFMPEG_BINARY,
+                                    text: t("settings.thumbnail_method0"),
+                                }, {
+                                    value: ThumbnailMethod.FFMPEG_API,
+                                    text: t("settings.thumbnail_method1"),
+                                }]}
+                                description={t("settings.thumbnail_method")}
+                                selectedIndex={settings.thumbnail_method}
+                                outlined={true}
+                            />
+                            <SettingsText
+                                name="port"
+                                value={settings.port}
+                                description={t("settings.port")}
+                                type="number"
+                                min={0}
+                                max={65535}
+                                outlined={true}
+                            />
                             <SettingsText
                                 name="base"
                                 value={settings.base}
@@ -128,40 +150,29 @@ export default class Settings extends Component<SettingsProps> {
                                 type="text"
                                 outlined={true}
                             />
-                            <SettingsText
-                                name="ua"
-                                value={settings.ua ? settings.ua : ""}
-                                description={t("settings.ua")}
-                                type="text"
-                                outlined={true}
-                                ref={ref}
-                            >
-                                <Button
-                                    onClick={() => {
-                                        if (ref.current) {
-                                            const ua = navigator.userAgent;
-                                            const t = ref.current;
-                                            t.update(ua);
-                                            t.set_value(ua);
-                                        }
-                                    }}
+                            <div class="ua">
+                                <SettingsText
+                                    name="ua"
+                                    value={settings.ua ? settings.ua : ""}
+                                    description={t("settings.ua")}
+                                    type="text"
+                                    outlined={true}
+                                    ref={ref}
                                 >
-                                    {t("settings.ua_now")}
+                                </SettingsText>
+                                <Button
+                                        onClick={() => {
+                                            if (ref.current) {
+                                                const ua = navigator.userAgent;
+                                                const t = ref.current;
+                                                t.update(ua);
+                                                t.set_value(ua);
+                                            }
+                                        }}
+                                    >
+                                        {t("settings.ua_now")}
                                 </Button>
-                            </SettingsText>
-                            <SettingsText
-                                name="cookies"
-                                value={new_cookies}
-                                description={t("settings.cookies")}
-                                type="text"
-                                set_value={set_new_cookies}
-                                label={t(
-                                    `settings.enter${
-                                        settings.cookies ? "_new" : ""
-                                    }_cookies`,
-                                )}
-                                outlined={true}
-                            />
+                            </div>
                             <SettingsText
                                 name="max_task_count"
                                 value={settings.max_task_count}
@@ -192,15 +203,6 @@ export default class Settings extends Component<SettingsProps> {
                                 type="text"
                                 description={t("settings.db_path")}
                                 helpertext={t("settings.db_path_help")}
-                                outlined={true}
-                            />
-                            <SettingsText
-                                name="port"
-                                value={settings.port}
-                                description={t("settings.port")}
-                                type="number"
-                                min={0}
-                                max={65535}
                                 outlined={true}
                             />
                             <SettingsText
@@ -238,17 +240,17 @@ export default class Settings extends Component<SettingsProps> {
                                 type="text"
                                 outlined={true}
                             />
-                            <SettingsSelect
-                                name="thumbnail_method"
-                                list={[{
-                                    value: ThumbnailMethod.FFMPEG_BINARY,
-                                    text: t("settings.thumbnail_method0"),
-                                }, {
-                                    value: ThumbnailMethod.FFMPEG_API,
-                                    text: t("settings.thumbnail_method1"),
-                                }]}
-                                description={t("settings.thumbnail_method")}
-                                selectedIndex={settings.thumbnail_method}
+                            <SettingsText
+                                name="cookies"
+                                value={new_cookies}
+                                description={t("settings.cookies")}
+                                type="text"
+                                set_value={set_new_cookies}
+                                label={t(
+                                    `settings.enter${
+                                        settings.cookies ? "_new" : ""
+                                    }_cookies`,
+                                )}
                                 outlined={true}
                             />
                         </div>

@@ -27,5 +27,6 @@
     "ffmpeg_path": "The path to the ffmpeg binary: ",
     "thumbnail_method": "The method used to generate thumbnail: ",
     "thumbnail_method0": "ffmpeg binary",
-    "thumbnail_method1": "ffmpeg API"
+    "thumbnail_method1": "ffmpeg API",
+    "thumbnail_dir": "The folder used to store thumbnails: "
 }
