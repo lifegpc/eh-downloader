@@ -53,6 +53,6 @@
     top: 22px;
 }
 
-.settings div.text.outlined {
+.settings div.text.outlined.helper {
     margin-top: 5px;
 }
