@@ -23,5 +23,9 @@
     "hostname": "监听主机：",
     "meili_host": "Meilisearch服务器主机：",
     "meili_update_api_key": "用于更新画廊元数据的Meilisearch API密钥：",
-    "meili_search_api_key": "用于搜索的Meilisearch API密钥："
+    "meili_search_api_key": "用于搜索的Meilisearch API密钥：",
+    "ffmpeg_path": "FFMPEG二进制的位置：",
+    "thumbnail_method": "生成缩略图的方式：",
+    "thumbnail_method0": "FFMPEG二进制",
+    "thumbnail_method1": "FFMPEG API"
 }

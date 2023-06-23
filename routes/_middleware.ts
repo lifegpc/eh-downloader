@@ -7,7 +7,7 @@ import {
     GetFileResponseOptions,
 } from "../server/get_file_response.ts";
 
-const STATIC_FILES = ["/sw.js", "/sw.js.map"];
+const STATIC_FILES = ["/common.css", "/sw.js", "/sw.js.map"];
 
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     const url = new URL(req.url);

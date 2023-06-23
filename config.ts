@@ -18,7 +18,14 @@ export type ConfigType = {
     meili_host?: string;
     meili_search_api_key?: string;
     meili_update_api_key?: string;
+    ffmpeg_path: string;
+    thumbnail_method: ThumbnailMethod;
 };
+
+export enum ThumbnailMethod {
+    FFMPEG_BINARY,
+    FFMPEG_API,
+}
 
 export class Config {
     _data;
@@ -109,6 +116,14 @@ export class Config {
     get meili_update_api_key() {
         return this._return_string("meili_update_api_key");
     }
+    get ffmpeg_path() {
+        return this._return_string("ffmpeg_path") || "ffmpeg";
+    }
+    get thumbnail_method() {
+        const n = this._return_number("thumbnail") || 0;
+        if (n < 0 || n > 1) return ThumbnailMethod.FFMPEG_BINARY;
+        return n as ThumbnailMethod;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -127,6 +142,8 @@ export class Config {
             meili_host: this.meili_host,
             meili_search_api_key: this.meili_search_api_key,
             meili_update_api_key: this.meili_update_api_key,
+            ffmpeg_path: this.ffmpeg_path,
+            thumbnail_method: this.thumbnail_method,
         };
     }
 }

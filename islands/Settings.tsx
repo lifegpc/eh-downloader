@@ -5,11 +5,12 @@ import Dialog from "preact-material-components/Dialog";
 import Snackbar from "preact-material-components/Snackbar";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
-import { ConfigType } from "../config.ts";
+import { ConfigType, ThumbnailMethod } from "../config.ts";
 import SettingsCheckbox from "../components/SettingsCheckbox.tsx";
 import SettingsContext from "../components/SettingsContext.tsx";
 import SettingsText from "../components/SettingsText.tsx";
 import t from "../server/i18n.ts";
+import SettingsSelect from "../components/SettingsSelect.tsx";
 
 export type SettingsProps = {
     show: boolean;
@@ -122,12 +123,14 @@ export default class Settings extends Component<SettingsProps> {
                             value={settings.base}
                             description={t("settings.base")}
                             type="text"
+                            outlined={true}
                         />
                         <SettingsText
                             name="ua"
                             value={settings.ua ? settings.ua : ""}
                             description={t("settings.ua")}
                             type="text"
+                            outlined={true}
                             ref={ref}
                         >
                             <Button
@@ -154,6 +157,7 @@ export default class Settings extends Component<SettingsProps> {
                                     settings.cookies ? "_new" : ""
                                 }_cookies`,
                             )}
+                            outlined={true}
                         />
                         <SettingsText
                             name="max_task_count"
@@ -161,6 +165,7 @@ export default class Settings extends Component<SettingsProps> {
                             description={t("settings.max_task_count")}
                             type="number"
                             min={1}
+                            outlined={true}
                         />
                         <SettingsText
                             name="max_retry_count"
@@ -168,6 +173,7 @@ export default class Settings extends Component<SettingsProps> {
                             description={t("settings.max_retry_count")}
                             type="number"
                             min={1}
+                            outlined={true}
                         />
                         <SettingsText
                             name="max_download_img_count"
@@ -175,6 +181,7 @@ export default class Settings extends Component<SettingsProps> {
                             description={t("settings.max_download_img_count")}
                             type="number"
                             min={1}
+                            outlined={true}
                         />
                         <SettingsText
                             name="db_path"
@@ -182,6 +189,7 @@ export default class Settings extends Component<SettingsProps> {
                             type="text"
                             description={t("settings.db_path")}
                             helpertext={t("settings.db_path_help")}
+                            outlined={true}
                         />
                         <SettingsText
                             name="port"
@@ -190,30 +198,55 @@ export default class Settings extends Component<SettingsProps> {
                             type="number"
                             min={0}
                             max={65535}
+                            outlined={true}
                         />
                         <SettingsText
                             name="hostname"
                             value={settings.hostname}
                             description={t("settings.hostname")}
                             type="text"
+                            outlined={true}
                         />
                         <SettingsText
                             name="meili_host"
                             value={settings.meili_host || ""}
                             description={t("settings.meili_host")}
                             type="text"
+                            outlined={true}
                         />
                         <SettingsText
                             name="meili_update_api_key"
                             value={settings.meili_update_api_key || ""}
                             description={t("settings.meili_update_api_key")}
                             type="text"
+                            outlined={true}
                         />
                         <SettingsText
                             name="meili_search_api_key"
                             value={settings.meili_search_api_key || ""}
                             description={t("settings.meili_search_api_key")}
                             type="text"
+                            outlined={true}
+                        />
+                        <SettingsText
+                            name="ffmpeg_path"
+                            value={settings.ffmpeg_path}
+                            description={t("settings.ffmpeg_path")}
+                            type="text"
+                            outlined={true}
+                        />
+                        <SettingsSelect
+                            name="thumbnail_method"
+                            list={[{
+                                value: ThumbnailMethod.FFMPEG_BINARY,
+                                text: t("settings.thumbnail_method0"),
+                            }, {
+                                value: ThumbnailMethod.FFMPEG_API,
+                                text: t("settings.thumbnail_method1"),
+                            }]}
+                            description={t("settings.thumbnail_method")}
+                            selectedIndex={settings.thumbnail_method}
+                            outlined={true}
                         />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>

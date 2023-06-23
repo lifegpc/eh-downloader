@@ -44,3 +44,15 @@
 .settings div.text.helper label {
     margin-top: 14px;
 }
+
+.settings div.text.outlined .mdc-text-field label {
+    top: 14px;
+}
+
+.settings div.text.outlined .mdc-text-field.mdc-text-field--focused label {
+    top: 22px;
+}
+
+.settings div.text.outlined {
+    margin-top: 5px;
+}

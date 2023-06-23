@@ -30,6 +30,7 @@ export type SettingsTextProps<T extends keyof TextType> = {
     set_value?: StateUpdater<TextType[T]>;
     min?: DataType[T];
     max?: DataType[T];
+    outlined?: boolean;
 };
 
 export default class SettingsText<T extends keyof TextType>
@@ -99,6 +100,7 @@ export default class SettingsText<T extends keyof TextType>
         const id = `s-${this.props.name}`;
         let cn = "text";
         if (this.props.helpertext) cn += " helper";
+        if (this.props.outlined) cn += " outlined";
         return (
             <div class={cn} id={id}>
                 <label>{this.props.description}</label>
@@ -118,6 +120,7 @@ export default class SettingsText<T extends keyof TextType>
                     }}
                     min={this.props.min}
                     max={this.props.max}
+                    outlined={this.props.outlined}
                 />
                 {this.props.children}
             </div>

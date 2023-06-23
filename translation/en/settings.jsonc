@@ -23,5 +23,9 @@
     "hostname": "Listening host: ",
     "meili_host": "Meilisearch server host: ",
     "meili_update_api_key": "Meilisearch API key for updating gallery metadata: ",
-    "meili_search_api_key": "Meilisearch API key for searching: "
+    "meili_search_api_key": "Meilisearch API key for searching: ",
+    "ffmpeg_path": "The path to the ffmpeg binary: ",
+    "thumbnail_method": "The method used to generate thumbnail: ",
+    "thumbnail_method0": "ffmpeg binary",
+    "thumbnail_method1": "ffmpeg API"
 }
