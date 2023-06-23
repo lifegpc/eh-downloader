@@ -8,8 +8,10 @@ export const handler: Handlers = {
         const u = new URL(req.url);
         const is_nsfw = await parse_bool(u.searchParams.get("is_nsfw"), null);
         const is_ad = await parse_bool(u.searchParams.get("is_ad"), null);
+        const thumb = await parse_bool(u.searchParams.get("thumb"), false);
         const f = m.db.get_random_file(is_nsfw, is_ad);
         if (!f) return new Response("File not found.", { status: 404 });
-        return Response.redirect(`${u.origin}/api/file/${f.id}`);
+        const t = thumb ? "thumbnail" : "file";
+        return Response.redirect(`${u.origin}/api/${t}/${f.id}`);
     },
 };
