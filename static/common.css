@@ -73,35 +73,31 @@
     margin: 0 10px;
 }
 
-
 .settings .text-box .text {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-
-.settings .text-box .text .mdc-text-field::after{
+.settings .text-box .text .mdc-text-field::after {
     width: 0;
 }
-.settings .text-box .text .mdc-text-field::before{
+
+.settings .text-box .text .mdc-text-field::before {
     width: 0;
 }
 
 .settings .ua {
     position: relative;
 }
-.settings .ua > button {
+
+.settings .ua>button {
     position: absolute;
     top: 30px;
     left: -10px;
 }
 
-
-
-@media (max-width:767px) { 
- 
-}
+@media (max-width:767px) {}
 
 @media (max-width:1280px) {
     .settings {

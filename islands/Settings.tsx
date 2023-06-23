@@ -102,7 +102,9 @@ export default class Settings extends Component<SettingsProps> {
                             <SettingsCheckbox
                                 name="download_original_img"
                                 checked={settings.download_original_img}
-                                description={t("settings.download_original_img")}
+                                description={t(
+                                    "settings.download_original_img",
+                                )}
                             />
                             <SettingsCheckbox
                                 name="ex"
@@ -161,16 +163,16 @@ export default class Settings extends Component<SettingsProps> {
                                 >
                                 </SettingsText>
                                 <Button
-                                        onClick={() => {
-                                            if (ref.current) {
-                                                const ua = navigator.userAgent;
-                                                const t = ref.current;
-                                                t.update(ua);
-                                                t.set_value(ua);
-                                            }
-                                        }}
-                                    >
-                                        {t("settings.ua_now")}
+                                    onClick={() => {
+                                        if (ref.current) {
+                                            const ua = navigator.userAgent;
+                                            const t = ref.current;
+                                            t.update(ua);
+                                            t.set_value(ua);
+                                        }
+                                    }}
+                                >
+                                    {t("settings.ua_now")}
                                 </Button>
                             </div>
                             <SettingsText
@@ -192,7 +194,9 @@ export default class Settings extends Component<SettingsProps> {
                             <SettingsText
                                 name="max_download_img_count"
                                 value={settings.max_download_img_count}
-                                description={t("settings.max_download_img_count")}
+                                description={t(
+                                    "settings.max_download_img_count",
+                                )}
                                 type="number"
                                 min={1}
                                 outlined={true}
