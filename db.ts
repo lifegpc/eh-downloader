@@ -1,5 +1,9 @@
 import { DB } from "sqlite/mod.ts";
-import { compare as compare_ver, parse as parse_ver } from "std/semver/mod.ts";
+import {
+    compare as compare_ver,
+    format as format_ver,
+    parse as parse_ver,
+} from "std/semver/mod.ts";
 import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
@@ -401,7 +405,7 @@ export class EhDb {
         this.db.transaction(() => {
             this.db.query("INSERT OR REPLACE INTO version VALUES (?, ?);", [
                 "eh",
-                this.version.toString(),
+                format_ver(this.version),
             ]);
         });
     }

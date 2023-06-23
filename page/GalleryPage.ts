@@ -1,6 +1,7 @@
 import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
-import { initDOMParser, parse_bool } from "../utils.ts";
+import { initDOMParser, map, parse_bool } from "../utils.ts";
+import { parseUrl, UrlType } from "../url.ts";
 
 class GalleryPage {
     dom;
@@ -11,6 +12,7 @@ class GalleryPage {
     #meta_script: string | undefined = undefined;
     #gid: number | undefined = undefined;
     #token: string | undefined = undefined;
+    #new_version: Array<{ gid: number; token: string }> | undefined = undefined;
     constructor(html: string, client: Client) {
         const dom = (new DOMParser()).parseFromString(html, "text/html");
         if (!dom) {
@@ -85,6 +87,24 @@ class GalleryPage {
         const ele = this.doc.getElementById("gn");
         if (!ele) throw Error("Failed to find gallery's name.");
         return ele.innerText;
+    }
+    get new_version() {
+        if (this.#new_version === undefined) {
+            const eles = this.doc.querySelectorAll("#gnd > a");
+            const d = <{ gid: number; token: string }[]> map(eles, (e) => {
+                const b = e as Element;
+                const u = b.getAttribute("href");
+                if (!u) return null;
+                const d = parseUrl(u);
+                if (d?.type === UrlType.Gallery) {
+                    return { gid: d.gid, token: d.token };
+                } else {
+                    return null;
+                }
+            }).filter((d) => d !== null);
+            this.#new_version = d;
+            return d;
+        } else return this.#new_version;
     }
     get japanese_name() {
         return this.doc.getElementById("gj")?.innerText;
