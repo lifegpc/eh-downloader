@@ -129,10 +129,12 @@ export class Client {
      * Fetch a gallery page (use HTML)
      * @param gid Gallery ID
      * @param token Token
+     * @param page Page number
      * @returns
      */
-    async fetchGalleryPage(gid: number, token: string) {
-        const url = `https://${this.host}/g/${gid}/${token}/`;
+    async fetchGalleryPage(gid: number, token: string, page?: number) {
+        let url = `https://${this.host}/g/${gid}/${token}/`;
+        if (page) url += `?p=${page}`;
         const re = await this.get(url);
         if (re.status != 200) {
             throw new Error(

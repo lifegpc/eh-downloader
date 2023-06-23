@@ -3,6 +3,24 @@ import { Client } from "../client.ts";
 import { initDOMParser, map, parse_bool } from "../utils.ts";
 import { parseUrl, UrlType } from "../url.ts";
 
+type Page = {
+    token: string;
+    thumbnail: string;
+    name: string;
+};
+
+class Image {
+    base;
+    /**Page number*/
+    index;
+    #gp;
+    constructor(base: Page, index: number, gp: GalleryPage) {
+        this.base = base;
+        this.index = index;
+        this.#gp = gp;
+    }
+}
+
 class GalleryPage {
     dom;
     doc;
@@ -12,7 +30,9 @@ class GalleryPage {
     #meta_script: string | undefined = undefined;
     #gid: number | undefined = undefined;
     #token: string | undefined = undefined;
+    #mpv_enabled: boolean | undefined = undefined;
     #new_version: Array<{ gid: number; token: string }> | undefined = undefined;
+    #imagelist: Image[] | undefined = undefined;
     constructor(html: string, client: Client) {
         const dom = (new DOMParser()).parseFromString(html, "text/html");
         if (!dom) {
@@ -25,6 +45,39 @@ class GalleryPage {
         }
         this.doc = doc;
         this.client = client;
+    }
+    async #get_imagelist() {
+        function load_image(doc: Element): Page[] {
+            const eles = doc.querySelectorAll("#gdt > div[class^=gdt]");
+            return map(eles, (e) => {
+                const b = e as Element;
+                const a = b.querySelector("a");
+                if (!a) throw Error("Link not found.");
+                const href = a.getAttribute("href");
+                if (!href) throw Error("Link not found.");
+                const u = parseUrl(href);
+                if (!u || u.type !== UrlType.Single) {
+                    throw Error("Failed to parse url.");
+                }
+                const token = u.token;
+                const img = b.querySelector("img");
+                if (!img) throw Error("Image not found.");
+                const thumbnail = img.getAttribute("src");
+                if (!thumbnail) throw Error("Image source not found");
+                const name = img.getAttribute("title")?.match(/page \d+: (.*)/i)
+                    ?.at(1);
+                if (!name) throw Error("name not found");
+                return { name, token, thumbnail };
+            });
+        }
+        let b = load_image(this.doc);
+        // deno-lint-ignore no-this-alias
+        let now: GalleryPage = this;
+        while (now.has_next_page) {
+            now = await now.next_page();
+            b = b.concat(load_image(now.doc));
+        }
+        return b.map((v, i) => new Image(v, i + 1, this));
     }
     get favorited() {
         const o = this.gdd_data.get("Favorited")?.innerText;
@@ -57,6 +110,19 @@ class GalleryPage {
         }
         return this.#gid;
     }
+    get has_next_page() {
+        return this.doc.querySelector(".ptt td:last-child a") !== null;
+    }
+    get imagelist(): Promise<Image[]> {
+        return new Promise((resolve, reject) => {
+            if (this.#imagelist === undefined) {
+                this.#get_imagelist().then((imagelist) => {
+                    this.#imagelist = imagelist;
+                    resolve(imagelist);
+                }).catch(reject);
+            } else resolve(this.#imagelist);
+        });
+    }
     get language() {
         const o = this.gdd_data.get("Language")?.innerText;
         if (!o) return undefined;
@@ -83,6 +149,19 @@ class GalleryPage {
             throw Error("Failed to locate meta script.");
         } else return this.#meta_script;
     }
+    get mpv_enabled() {
+        if (this.#mpv_enabled === undefined) {
+            const e = this.doc.querySelector("#gdt a");
+            if (!e) throw Error("Page not found.");
+            const u = e.getAttribute("href");
+            if (!u) throw Error("Url not found.");
+            const p = parseUrl(u);
+            if (!p) throw Error("Failed to parse url.");
+            const mpv_enabled = p.type === UrlType.MPV;
+            this.#mpv_enabled = mpv_enabled;
+            return mpv_enabled;
+        } else return this.#mpv_enabled;
+    }
     get name() {
         const ele = this.doc.getElementById("gn");
         if (!ele) throw Error("Failed to find gallery's name.");
@@ -105,6 +184,18 @@ class GalleryPage {
             this.#new_version = d;
             return d;
         } else return this.#new_version;
+    }
+    async next_page() {
+        const url = this.doc.querySelector(".ptt td:last-child a")
+            ?.getAttribute("href");
+        if (!url) throw Error("Url not found.");
+        const re = await this.client.get(url);
+        if (re.status != 200) {
+            throw new Error(
+                `Fetch ${url} failed, status ${re.status} ${re.statusText}`,
+            );
+        }
+        return load_gallery_page(await re.text(), this.client);
     }
     get japanese_name() {
         return this.doc.getElementById("gj")?.innerText;
