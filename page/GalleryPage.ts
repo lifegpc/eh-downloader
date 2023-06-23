@@ -2,22 +2,25 @@ import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
 import { initDOMParser, map, parse_bool } from "../utils.ts";
 import { parseUrl, UrlType } from "../url.ts";
+import { SinglePage } from "./SinglePage.ts";
 
 type Page = {
     token: string;
     thumbnail: string;
     name: string;
+    index: number;
 };
 
 class Image {
     base;
-    /**Page number*/
-    index;
     #gp;
-    constructor(base: Page, index: number, gp: GalleryPage) {
+    data: SinglePage | undefined;
+    constructor(base: Page, gp: GalleryPage) {
         this.base = base;
-        this.index = index;
         this.#gp = gp;
+    }
+    get is_original() {
+        return this.data?.is_original;
     }
 }
 
@@ -56,10 +59,11 @@ class GalleryPage {
                 const href = a.getAttribute("href");
                 if (!href) throw Error("Link not found.");
                 const u = parseUrl(href);
-                if (!u || u.type !== UrlType.Single) {
+                if (!u || u.type !== UrlType.Single || u.index === undefined) {
                     throw Error("Failed to parse url.");
                 }
                 const token = u.token;
+                const index = u.index;
                 const img = b.querySelector("img");
                 if (!img) throw Error("Image not found.");
                 const thumbnail = img.getAttribute("src");
@@ -67,7 +71,7 @@ class GalleryPage {
                 const name = img.getAttribute("title")?.match(/page \d+: (.*)/i)
                     ?.at(1);
                 if (!name) throw Error("name not found");
-                return { name, token, thumbnail };
+                return { name, token, thumbnail, index };
             });
         }
         let b = load_image(this.doc);
@@ -77,7 +81,7 @@ class GalleryPage {
             now = await now.next_page();
             b = b.concat(load_image(now.doc));
         }
-        return b.map((v, i) => new Image(v, i + 1, this));
+        return b.map((v) => new Image(v, this));
     }
     get favorited() {
         const o = this.gdd_data.get("Favorited")?.innerText;
