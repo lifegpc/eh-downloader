@@ -101,6 +101,7 @@ export default class SettingsText<T extends keyof TextType>
         let cn = "text";
         if (this.props.helpertext) cn += " helper";
         if (this.props.outlined) cn += " outlined";
+        if (this.props.label) cn += " label";
         return (
             <div class={cn} id={id}>
                 <label>{this.props.description}</label>
