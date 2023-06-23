@@ -14,7 +14,9 @@ export const handler: Handlers<Task[]> = {
         const handle = (
             e: CustomEvent<Task | TaskProgress | { task: Task; error: string }>,
         ) => {
-            socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
+            if (socket.readyState === socket.OPEN) {
+                socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
+            }
         };
         const close_handle = () => {
             sendMessage({ type: "close" });
