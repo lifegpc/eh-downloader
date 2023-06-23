@@ -662,6 +662,32 @@ export class EhDb {
     delete_file(f: EhFile) {
         this.db.query("DELETE FROM file WHERE id = ?;", [f.id]);
     }
+    delete_files(token: string) {
+        const files = this.get_files(token);
+        this.db.query("DELETE FROM file WHERE token = ?;", [token]);
+        this.db.query("DELETE FROM filemeta WHERE token = ?;", [token]);
+        files.forEach((f) => {
+            try_remove_sync(f.path);
+            console.log("Deleted ", f.path);
+        });
+    }
+    delete_gallery(gid: number) {
+        this.db.query("DELETE FROM gmeta WHERE gid = ?;", [gid]);
+        this.db.query("DELETE FROM gtag WHERE gid = ?;", [gid]);
+        const tokens = new Set(
+            this.db.query<[string]>("SELECT token FROM pmeta WHERE gid = ?;", [
+                gid,
+            ]).map((v) => v[0]),
+        );
+        this.db.query("DELETE FROM pmeta WHERE gid = ?;", [gid]);
+        for (const token of tokens) {
+            const count = this.db.query<[number]>(
+                "SELECT COUNT(*) FROM pmeta WHERE token = ?;",
+                [token],
+            )[0][0];
+            if (count === 0) this.delete_files(token);
+        }
+    }
     delete_task(task: Task) {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
@@ -805,6 +831,12 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    async get_task(id: number) {
+        const s = await this.transaction(() =>
+            this.db.queryEntries<Task>("SELECT * FROM task WHERE id = ?;", [id])
+        );
+        return s.length ? s[0] : undefined;
+    }
     get_tasks() {
         return this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task;")
@@ -884,5 +916,13 @@ export class EhDb {
                 intro,
             ]);
         }
+    }
+    update_task(task: Task) {
+        return this.transaction(() => {
+            this.db.query("UPDATE task SET details = ? WHERE id = ?;", [
+                task.details,
+                task.id,
+            ]);
+        });
     }
 }

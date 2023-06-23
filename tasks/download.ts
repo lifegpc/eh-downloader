@@ -15,6 +15,17 @@ import {
 import { join, resolve } from "std/path/mod.ts";
 import { exists } from "std/fs/exists.ts";
 
+export type DownloadConfig = {
+    max_download_img_count?: number;
+    mpv?: boolean;
+    download_original_img?: boolean;
+    max_retry_count?: number;
+    remove_previous_gallery?: boolean;
+    replaced_gallery?: { gid: number; token: string }[];
+};
+
+export const DEFAULT_DOWNLOAD_CONFIG: DownloadConfig = {};
+
 class DownloadManager {
     #abort: AbortSignal;
     #force_abort: AbortSignal;
@@ -24,13 +35,13 @@ class DownloadManager {
     #task: Task;
     #manager: TaskManager;
     constructor(
-        cfg: Config,
+        max_download_img_count: number,
         abort: AbortSignal,
         force_abort: AbortSignal,
         task: Task,
         manager: TaskManager,
     ) {
-        this.#max_download_count = cfg.max_download_img_count;
+        this.#max_download_count = max_download_img_count;
         this.#running_tasks = [];
         this.#abort = abort;
         this.#force_abort = force_abort;
@@ -97,6 +108,7 @@ export async function download_task(
     abort: AbortSignal,
     force_abort: AbortSignal,
     manager: TaskManager,
+    dcfg: DownloadConfig,
 ) {
     console.log("Started to download gallery", task.gid);
     const gdatas = await client.fetchGalleryMetadataByAPI([
@@ -116,8 +128,27 @@ export async function download_task(
     }
     const base_path = join(cfg.base, task.gid.toString());
     await sure_dir(base_path);
-    const m = new DownloadManager(cfg, abort, force_abort, task, manager);
-    if (cfg.mpv) {
+    const max_download_img_count = dcfg.max_download_img_count !== undefined
+        ? dcfg.max_download_img_count
+        : cfg.max_download_img_count;
+    const m = new DownloadManager(
+        max_download_img_count,
+        abort,
+        force_abort,
+        task,
+        manager,
+    );
+    const mpv_enabled = dcfg.mpv !== undefined ? dcfg.mpv : cfg.mpv;
+    const download_original_img = dcfg.download_original_img !== undefined
+        ? dcfg.download_original_img
+        : cfg.download_original_img;
+    const max_retry_count = dcfg.max_retry_count !== undefined
+        ? dcfg.max_retry_count
+        : cfg.max_retry_count;
+    const remove_previous_gallery = dcfg.remove_previous_gallery !== undefined
+        ? dcfg.remove_previous_gallery
+        : cfg.remove_previous_gallery;
+    if (mpv_enabled) {
         const mpv = await client.fetchMPVPage(task.gid, task.token);
         m.set_total_page(mpv.pagecount);
         const names = mpv.imagelist.reduce(
@@ -134,7 +165,7 @@ export async function download_task(
                 if (ofiles.length) {
                     const t = ofiles[0];
                     if (
-                        (t.is_original || !cfg.download_original_img) &&
+                        (t.is_original || !download_original_img) &&
                         (await exists(t.path))
                     ) {
                         const p = db.get_pmeta_by_index(task.gid, i.index);
@@ -170,7 +201,7 @@ export async function download_task(
                     return new Promise<void>((resolve, reject) => {
                         const errors: unknown[] = [];
                         function try_load(a: number) {
-                            if (a >= cfg.max_retry_count) reject(errors);
+                            if (a >= max_retry_count) reject(errors);
                             i.load().then(resolve).catch((e) => {
                                 if (force_abort.aborted) {
                                     throw Error("aborted.");
@@ -186,7 +217,7 @@ export async function download_task(
                 assert(i.data);
                 const pmeta = i.to_pmeta();
                 if (pmeta) db.add_pmeta(pmeta);
-                const download_original = cfg.download_original_img &&
+                const download_original = download_original_img &&
                     !i.is_original;
                 if (download_original) console.log(i.index, i.data.o);
                 let path = resolve(join(base_path, i.name));
@@ -226,7 +257,7 @@ export async function download_task(
                         }
                         const errors: unknown[] = [];
                         function try_download(a: number) {
-                            if (a >= cfg.max_retry_count) {
+                            if (a >= max_retry_count) {
                                 reject(errors);
                             }
                             download().then(resolve).catch((e) => {
@@ -253,5 +284,30 @@ export async function download_task(
     await m.join();
     if (m.has_failed_task) throw Error("Some tasks failed.");
     if (abort.aborted || force_abort.aborted) throw Error("aborted");
+    if (remove_previous_gallery && gmeta.first_gid && gmeta.first_key) {
+        let replaced_gallery = dcfg.replaced_gallery;
+        if (replaced_gallery === undefined) {
+            const fg = await client.fetchGalleryPage(
+                gmeta.first_gid,
+                gmeta.first_key,
+            );
+            replaced_gallery = fg.new_version.filter((d) => d.gid < task.gid);
+            replaced_gallery.push({
+                gid: gmeta.first_gid,
+                token: gmeta.first_key,
+            });
+        }
+        replaced_gallery.forEach((g) => {
+            const gmeta = db.get_gmeta_by_gid(g.gid);
+            if (!gmeta) return;
+            console.log("Remove gallery ", g.gid);
+            if (manager.meilisearch) {
+                manager.meilisearch.target.dispatchEvent(
+                    new CustomEvent("gallery_remove", { detail: gmeta.gid }),
+                );
+            }
+            db.delete_gallery(g.gid);
+        });
+    }
     return task;
 }

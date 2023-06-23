@@ -139,6 +139,11 @@ export default class TaskManager extends Component<TaskManagerProps> {
                         task.progress = t.detail.detail;
                         sendTaskChangedEvent(t.detail.task_id);
                     }
+                } else if (t.type == "task_updated") {
+                    const task = tasks.value.get(t.detail.id);
+                    if (task) {
+                        task.base = t.detail;
+                    }
                 }
             };
             self.addEventListener("beforeunload", () => {

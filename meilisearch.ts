@@ -37,6 +37,7 @@ export class MeiliSearchServer {
     client;
     db;
     handle;
+    handle2;
     #gmeta?: Index;
     #inited = false;
     target;
@@ -50,8 +51,18 @@ export class MeiliSearchServer {
         this.handle = (e: Event) => {
             this.#gallery_update(e);
         };
+        this.handle2 = (e: Event) => {
+            this.#gallery_remove(e);
+        };
         this.target = new EventTarget();
         this.target.addEventListener("gallery_update", this.handle);
+        this.target.addEventListener("gallery_remove", this.handle2);
+    }
+    #gallery_remove(e: Event) {
+        const ev = e as CustomEvent<number>;
+        this.removeGallery(ev.detail).catch((e) => {
+            console.log(e);
+        });
     }
     #gallery_update(e: Event) {
         const ev = e as CustomEvent<number>;
@@ -78,6 +89,7 @@ export class MeiliSearchServer {
     }
     close() {
         this.target.removeEventListener("gallery_update", this.handle);
+        this.target.removeEventListener("gallery_remove", this.handle2);
     }
     async getIndex(uid: string, primaryKey?: string) {
         try {
@@ -111,6 +123,10 @@ export class MeiliSearchServer {
         this.#gmeta = await this.getIndex("gmeta", "gid");
         this.#updateGMetaSettings();
         this.#inited = true;
+    }
+    async removeGallery(gid: number) {
+        const gmeta = await this.gmeta;
+        await this.waitTask(gmeta.deleteDocument(gid));
     }
     async updateGallery(...gids: number[]) {
         const gmeta = await this.gmeta;

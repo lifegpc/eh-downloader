@@ -121,6 +121,13 @@ export default class Settings extends Component<SettingsProps> {
                                 checked={settings.export_zip_jpn_title}
                                 description={t("settings.export_zip_jpn_title")}
                             />
+                            <SettingsCheckbox
+                                name="remove_previous_gallery"
+                                checked={settings.remove_previous_gallery}
+                                description={t(
+                                    "settings.remove_previous_gallery",
+                                )}
+                            />
                         </div>
                         <div class="text-box">
                             <SettingsSelect
