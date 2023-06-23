@@ -248,6 +248,13 @@ export default class Settings extends Component<SettingsProps> {
                             selectedIndex={settings.thumbnail_method}
                             outlined={true}
                         />
+                        <SettingsText
+                            name="thumbnail_dir"
+                            value={settings.thumbnail_dir}
+                            description={t("settings.thumbnail_dir")}
+                            type="text"
+                            outlined={true}
+                        />
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>
                     <Button onClick={showDlg} disabled={disabled}>
