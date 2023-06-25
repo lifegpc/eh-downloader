@@ -1,6 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import { Component, ContextType } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { StateUpdater, useEffect, useState } from "preact/hooks";
 import Icon from "preact-material-components/Icon";
 import List from "preact-material-components/List";
 import TopAppBar from "preact-material-components/TopAppBar";
@@ -11,7 +11,8 @@ import t, { i18n_map, I18NMap } from "../server/i18n.ts";
 import TaskManager from "./TaskManager.tsx";
 import { initState, set_state } from "../server/state.ts";
 import NewTask from "../components/NewTask.tsx";
-import MyIcon from "../components/MyIcon.tsx";
+import { parse_bool } from "../server/parse.ts";
+import Switch from "preact-material-components/Switch";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -24,9 +25,24 @@ export default class Container extends Component<ContainerProps> {
         i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
-        const [darkmode, set_darkmode] = useState(false);
+        const [darkmode, set_darkmode1] = useState(false);
+        const set_darkmode: StateUpdater<boolean> = (u) => {
+            const v = typeof u === "function" ? u(darkmode) : u;
+            set_darkmode1(v);
+            localStorage.setItem("darkmode", JSON.stringify(v));
+            if (v) {
+                document.body.classList.add("dark-scheme");
+            } else {
+                document.body.classList.remove("dark-scheme");
+            }
+        };
         useEffect(() => {
             initState(set_state1);
+            const dm = parse_bool(localStorage.getItem("darkmode"), false);
+            set_darkmode1(dm);
+            if (dm) {
+                document.body.classList.add("dark-scheme");
+            }
         }, []);
         return (
             <div>
@@ -47,6 +63,14 @@ export default class Container extends Component<ContainerProps> {
                             </TopAppBar.Title>
                         </TopAppBar.Section>
                         <TopAppBar.Section align-end>
+                            <Switch
+                                class="darkmode"
+                                checked={darkmode}
+                                onClick={() => {
+                                    set_darkmode(!darkmode);
+                                }}
+                            />
+                            <Icon>{darkmode ? "dark_mode" : "light_mode"}</Icon>
                             <TopAppBar.Icon>more_vert</TopAppBar.Icon>
                         </TopAppBar.Section>
                     </TopAppBar.Row>

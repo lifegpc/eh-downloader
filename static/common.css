@@ -201,3 +201,7 @@ body {
 .dark-scheme .mdc-notched-outline__idle{
     color: white!important;
 }
+
+.mdc-top-app-bar__section--align-end > * {
+    margin: 0 5px;
+}
