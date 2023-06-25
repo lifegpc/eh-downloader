@@ -448,6 +448,12 @@ export class EhDb {
                 ofiles.slice(1).forEach((o) => {
                     this.delete_file(o);
                 });
+                ofiles.forEach((o) => {
+                    if (o.path !== f.path) {
+                        try_remove_sync(o.path);
+                        console.log("Deleted ", o.path);
+                    }
+                });
             }
         }
         if (f.id) {
