@@ -19,13 +19,11 @@
     top: 64px;
 }
 
-
 .settings {
     margin: 0 18%;
     padding-top: 40px;
     transition: 0.6s;
 }
-
 
 .settings div.text {
     width: 100%;
@@ -73,13 +71,11 @@
     margin: 0 10px;
 }
 
-
 .settings .text-box .text {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
 
 .settings .text-box .text .mdc-text-field::after{
     width: 0;
@@ -96,8 +92,6 @@
     top: 30px;
     left: -10px;
 }
-
-
 
 @media (max-width:767px) { 
  
