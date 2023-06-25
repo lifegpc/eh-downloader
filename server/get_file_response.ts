@@ -3,15 +3,15 @@ import mime from "mime";
 import { parse_range } from "./range_parser.ts";
 
 export type GetFileResponseOptions = {
-    boundary?: string;
+    boundary?: string | null;
     /**@default {4096} */
     chunk?: number;
     /**@default {false} */
     combineRange?: boolean;
-    if_modified_since?: string;
-    if_unmodified_since?: string;
-    mimetype?: string;
-    range?: string;
+    if_modified_since?: string | null;
+    if_unmodified_since?: string | null;
+    mimetype?: string | null;
+    range?: string | null;
 };
 
 export async function get_file_response(

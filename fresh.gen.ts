@@ -3,20 +3,21 @@
 // This file is automatically updated during development when running `dev.ts`.
 
 import * as $0 from "./routes/_middleware.ts";
-import * as $1 from "./routes/api/config.ts";
-import * as $2 from "./routes/api/deploy_id.ts";
-import * as $3 from "./routes/api/exit.ts";
-import * as $4 from "./routes/api/export/gallery/zip/[gid].ts";
-import * as $5 from "./routes/api/file/[id].ts";
-import * as $6 from "./routes/api/file/random.ts";
-import * as $7 from "./routes/api/filemeta.ts";
-import * as $8 from "./routes/api/filemeta/[token].ts";
-import * as $9 from "./routes/api/files/[token].ts";
-import * as $10 from "./routes/api/gallery/[gid].ts";
-import * as $11 from "./routes/api/status.ts";
-import * as $12 from "./routes/api/task.ts";
-import * as $13 from "./routes/api/thumbnail/[id].ts";
-import * as $14 from "./routes/index.tsx";
+import * as $1 from "./routes/api/_middleware.ts";
+import * as $2 from "./routes/api/config.ts";
+import * as $3 from "./routes/api/deploy_id.ts";
+import * as $4 from "./routes/api/exit.ts";
+import * as $5 from "./routes/api/export/gallery/zip/[gid].ts";
+import * as $6 from "./routes/api/file/[id].ts";
+import * as $7 from "./routes/api/file/random.ts";
+import * as $8 from "./routes/api/filemeta.ts";
+import * as $9 from "./routes/api/filemeta/[token].ts";
+import * as $10 from "./routes/api/files/[token].ts";
+import * as $11 from "./routes/api/gallery/[gid].ts";
+import * as $12 from "./routes/api/status.ts";
+import * as $13 from "./routes/api/task.ts";
+import * as $14 from "./routes/api/thumbnail/[id].ts";
+import * as $15 from "./routes/index.tsx";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -24,20 +25,21 @@ import * as $$2 from "./islands/TaskManager.tsx";
 const manifest = {
     routes: {
         "./routes/_middleware.ts": $0,
-        "./routes/api/config.ts": $1,
-        "./routes/api/deploy_id.ts": $2,
-        "./routes/api/exit.ts": $3,
-        "./routes/api/export/gallery/zip/[gid].ts": $4,
-        "./routes/api/file/[id].ts": $5,
-        "./routes/api/file/random.ts": $6,
-        "./routes/api/filemeta.ts": $7,
-        "./routes/api/filemeta/[token].ts": $8,
-        "./routes/api/files/[token].ts": $9,
-        "./routes/api/gallery/[gid].ts": $10,
-        "./routes/api/status.ts": $11,
-        "./routes/api/task.ts": $12,
-        "./routes/api/thumbnail/[id].ts": $13,
-        "./routes/index.tsx": $14,
+        "./routes/api/_middleware.ts": $1,
+        "./routes/api/config.ts": $2,
+        "./routes/api/deploy_id.ts": $3,
+        "./routes/api/exit.ts": $4,
+        "./routes/api/export/gallery/zip/[gid].ts": $5,
+        "./routes/api/file/[id].ts": $6,
+        "./routes/api/file/random.ts": $7,
+        "./routes/api/filemeta.ts": $8,
+        "./routes/api/filemeta/[token].ts": $9,
+        "./routes/api/files/[token].ts": $10,
+        "./routes/api/gallery/[gid].ts": $11,
+        "./routes/api/status.ts": $12,
+        "./routes/api/task.ts": $13,
+        "./routes/api/thumbnail/[id].ts": $14,
+        "./routes/index.tsx": $15,
     },
     islands: {
         "./islands/Container.tsx": $$0,
