@@ -448,6 +448,12 @@ export class EhDb {
                 ofiles.slice(1).forEach((o) => {
                     this.delete_file(o);
                 });
+                ofiles.forEach((o) => {
+                    if (o.path !== f.path) {
+                        try_remove_sync(o.path);
+                        console.log("Deleted ", o.path);
+                    }
+                });
             }
         }
         if (f.id) {
@@ -582,11 +588,17 @@ export class EhDb {
             return r;
         });
     }
-    check_update_meili_search_data_task() {
+    check_update_meili_search_data_task(gid?: number) {
+        const args = [TaskType.UpdateMeiliSearchData];
+        let wsql = "";
+        if (gid !== undefined) {
+            wsql = " AND gid = ?";
+            args.push(gid);
+        }
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ?;",
-                [TaskType.UpdateMeiliSearchData],
+                `SELECT * FROM task WHERE type = ?${wsql};`,
+                args,
             );
             return r.length ? r[0] : undefined;
         });
@@ -655,6 +667,32 @@ export class EhDb {
     }
     delete_file(f: EhFile) {
         this.db.query("DELETE FROM file WHERE id = ?;", [f.id]);
+    }
+    delete_files(token: string) {
+        const files = this.get_files(token);
+        this.db.query("DELETE FROM file WHERE token = ?;", [token]);
+        this.db.query("DELETE FROM filemeta WHERE token = ?;", [token]);
+        files.forEach((f) => {
+            try_remove_sync(f.path);
+            console.log("Deleted ", f.path);
+        });
+    }
+    delete_gallery(gid: number) {
+        this.db.query("DELETE FROM gmeta WHERE gid = ?;", [gid]);
+        this.db.query("DELETE FROM gtag WHERE gid = ?;", [gid]);
+        const tokens = new Set(
+            this.db.query<[string]>("SELECT token FROM pmeta WHERE gid = ?;", [
+                gid,
+            ]).map((v) => v[0]),
+        );
+        this.db.query("DELETE FROM pmeta WHERE gid = ?;", [gid]);
+        for (const token of tokens) {
+            const count = this.db.query<[number]>(
+                "SELECT COUNT(*) FROM pmeta WHERE token = ?;",
+                [token],
+            )[0][0];
+            if (count === 0) this.delete_files(token);
+        }
     }
     delete_task(task: Task) {
         return this.transaction(() => {
@@ -774,38 +812,36 @@ export class EhDb {
         is_nsfw: boolean | null = null,
         is_ad: boolean | null = null,
     ) {
-        if (is_nsfw === null && is_ad === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT * FROM file ORDER BY RANDOM() LIMIT 1;",
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else if (is_nsfw === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_ad],
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else if (is_ad === null) {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_nsfw],
-                ),
-            );
-            return s.length ? s[0] : undefined;
-        } else {
-            const s = this.convert_file(
-                this.db.queryEntries<EhFileRaw>(
-                    "SELECT file.* FROM file LEFT JOIN filemeta ON file.token = filemeta.token WHERE IFNULL(filemeta.is_nsfw, 0) = ? AND IFNULL(filemeta.is_ad, 0) = ? ORDER BY RANDOM() LIMIT 1;",
-                    [is_nsfw, is_ad],
-                ),
-            );
-            return s.length ? s[0] : undefined;
+        const args = [];
+        let join_sql = "";
+        const where_sql = [];
+        if (is_nsfw !== null || is_ad !== null) {
+            join_sql = " LEFT JOIN filemeta ON file.token = filemeta.token";
+            if (is_nsfw !== null) {
+                where_sql.push("IFNULL(filemeta.is_nsfw, 0) = ?");
+                args.push(is_nsfw);
+            }
+            if (is_ad !== null) {
+                where_sql.push("IFNULL(filemeta.is_ad, 0) = ?");
+                args.push(is_ad);
+            }
         }
+        const wsql = where_sql.length
+            ? ` WHERE ${where_sql.join(" AND ")}`
+            : "";
+        const s = this.convert_file(
+            this.db.queryEntries<EhFileRaw>(
+                `SELECT file.* FROM file${join_sql}${wsql} ORDER BY RANDOM() LIMIT 1;`,
+                args,
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
+    async get_task(id: number) {
+        const s = await this.transaction(() =>
+            this.db.queryEntries<Task>("SELECT * FROM task WHERE id = ?;", [id])
+        );
+        return s.length ? s[0] : undefined;
     }
     get_tasks() {
         return this.transaction(() =>
@@ -886,5 +922,13 @@ export class EhDb {
                 intro,
             ]);
         }
+    }
+    update_task(task: Task) {
+        return this.transaction(() => {
+            this.db.query("UPDATE task SET details = ? WHERE id = ?;", [
+                task.details,
+                task.id,
+            ]);
+        });
     }
 }

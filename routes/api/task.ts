@@ -14,7 +14,9 @@ export const handler: Handlers<Task[]> = {
         const handle = (
             e: CustomEvent<Task | TaskProgress | { task: Task; error: string }>,
         ) => {
-            socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
+            if (socket.readyState === socket.OPEN) {
+                socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
+            }
         };
         const close_handle = () => {
             sendMessage({ type: "close" });
@@ -26,6 +28,7 @@ export const handler: Handlers<Task[]> = {
             t.removeEventListener("task_finished", handle);
             t.removeEventListener("task_progress", handle);
             t.removeEventListener("task_error", handle);
+            t.removeEventListener("task_updated", handle);
             ExitTarget.removeEventListener("close", close_handle);
         };
         function sendMessage(mes: TaskServerSocketData) {
@@ -45,12 +48,9 @@ export const handler: Handlers<Task[]> = {
                     sendMessage({ type: "close" });
                     socket.close();
                 } else if (d.type == "new_download_task") {
-                    t.add_download_task(d.gid, d.token);
+                    t.add_download_task(d.gid, d.token, d.cfg);
                 } else if (d.type == "new_export_zip_task") {
-                    t.add_export_zip_task(d.gid, {
-                        output: d.output,
-                        jpn_title: d.jpn_title,
-                    });
+                    t.add_export_zip_task(d.gid, d.cfg);
                 } else if (d.type == "task_list") {
                     t.get_task_list().then((tasks) => {
                         sendMessage({
@@ -70,6 +70,7 @@ export const handler: Handlers<Task[]> = {
             t.addEventListener("task_finished", handle);
             t.addEventListener("task_progress", handle);
             t.addEventListener("task_error", handle);
+            t.addEventListener("task_updated", handle);
             ExitTarget.addEventListener("close", close_handle);
         };
         return response;

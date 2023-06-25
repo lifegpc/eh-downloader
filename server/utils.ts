@@ -33,3 +33,10 @@ export function return_error<T = unknown>(
 export function return_data<T = unknown>(data: T, status = 200) {
     return gen_response<T>({ ok: true, status: 0, data }, status);
 }
+
+export function return_json<T = unknown>(data: T, status = 200) {
+    return new Response(JSON.stringify(data), {
+        status,
+        headers: { "Content-Type": "application/json" },
+    });
+}

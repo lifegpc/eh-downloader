@@ -7,13 +7,25 @@ import { Sortable } from "sortable";
 import { TaskClientSocketData, TaskServerSocketData } from "../server/task.ts";
 import { get_ws_host } from "../server/utils.ts";
 import Task from "../components/Task.tsx";
+import Fab from "preact-material-components/Fab";
+import Icon from "preact-material-components/Icon";
+import { set_state } from "../server/state.ts";
 
 export type TaskManagerProps = {
+    base: string;
     show: boolean;
 };
 
 const tasks = signal(new Map<number, TaskDetail>());
 const task_list = signal(new Array<number>());
+export const task_ws = signal<WebSocket | undefined>(undefined);
+export function sendTaskMessage(mes: TaskClientSocketData) {
+    const ws = task_ws.value;
+    if (ws && ws.readyState === ws.OPEN) {
+        ws.send(JSON.stringify(mes));
+        return true;
+    } else return false;
+}
 
 type SortableEvent = CustomEvent & {
     oldIndex: number | undefined;
@@ -46,6 +58,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
         useEffect(() => {
             const ws = new WebSocket(`${get_ws_host()}/api/task`);
             console.log(ws);
+            task_ws.value = ws;
             function sendMessage(mes: TaskClientSocketData) {
                 ws.send(JSON.stringify(mes));
             }
@@ -139,6 +152,11 @@ export default class TaskManager extends Component<TaskManagerProps> {
                         task.progress = t.detail.detail;
                         sendTaskChangedEvent(t.detail.task_id);
                     }
+                } else if (t.type == "task_updated") {
+                    const task = tasks.value.get(t.detail.id);
+                    if (task) {
+                        task.base = t.detail;
+                    }
                 }
             };
             self.addEventListener("beforeunload", () => {
@@ -148,6 +166,20 @@ export default class TaskManager extends Component<TaskManagerProps> {
         if (!this.props.show) return null;
         return (
             <div class="task_manager">
+                <div id="task_head">
+                    <div></div>
+                    <div class="add">
+                        <Fab mini={true}>
+                            <Icon
+                                onClick={() => {
+                                    set_state(`${this.props.base}/new`);
+                                }}
+                            >
+                                add
+                            </Icon>
+                        </Fab>
+                    </div>
+                </div>
                 <div
                     id="task-list"
                     // @ts-ignore checked

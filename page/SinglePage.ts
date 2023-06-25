@@ -2,12 +2,18 @@ import { DOMParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
 import { initDOMParser } from "../utils.ts";
 
-class SinglePage {
+export class SinglePage {
     dom;
     doc;
     client;
     _meta: string | undefined;
     _gid: number | undefined;
+    #i2_data: string | undefined;
+    #i7_data: string | undefined;
+    #oxres: number | undefined;
+    #oyres: number | undefined;
+    #xres: number | undefined;
+    #yres: number | undefined;
     constructor(html: string, client: Client) {
         const dom = (new DOMParser()).parseFromString(html, "text/html");
         if (!dom) {
@@ -44,12 +50,37 @@ class SinglePage {
         }
         return this._gid;
     }
+    get i2_data() {
+        if (this.#i2_data === undefined) {
+            const ele = this.doc.querySelector("#i2 > div:not([class=sn])");
+            if (!ele) throw Error("Element not found.");
+            /**@ts-ignore */
+            const e = ele as HTMLElement;
+            const i2_data = e.innerText;
+            this.#i2_data = i2_data;
+            return i2_data;
+        } else return this.#i2_data;
+    }
+    get i7_data() {
+        if (this.#i7_data === undefined) {
+            const ele = this.doc.querySelector("#i7 a");
+            if (!ele) throw Error("Element not found.");
+            /**@ts-ignore */
+            const e = ele as HTMLElement;
+            const i7_data = e.innerText;
+            this.#i7_data = i7_data;
+            return i7_data;
+        } else return this.#i7_data;
+    }
     get img_url() {
         const img = this.doc.querySelector("#img");
         if (!img) throw Error("Unknown image url.");
         const url = img.getAttribute("src");
         if (!url) throw Error("Unknown image url.");
         return url;
+    }
+    get is_original() {
+        return this.original_url === undefined;
     }
     get meta() {
         if (this._meta === undefined) {
@@ -63,6 +94,9 @@ class SinglePage {
         }
         return this._meta;
     }
+    get name() {
+        return this.i2_data.match(/(.*?) ::/)?.at(1);
+    }
     async nextPage() {
         const url = this.nextPageUrl;
         if (!url) return null;
@@ -74,10 +108,39 @@ class SinglePage {
         if (a === null) return null;
         return a.getAttribute("href");
     }
+    get nl() {
+        const f = this.doc.getElementById("loadfail");
+        if (!f) throw Error("Failed to find loadfail link.");
+        const n = f.getAttribute("onclick");
+        if (!n) throw Error("Failed to get onclick attribute.");
+        const nl = n.match(/nl\('(.*?)'\)/)?.at(1);
+        if (!nl) throw Error("Failed to extract nl.");
+        return nl;
+    }
+    get origin_xres() {
+        if (this.is_original) return this.xres;
+        if (this.#oxres === undefined) {
+            const ox = this.i7_data.match(/(\d+) x \d+/)?.at(1);
+            if (!ox) throw Error("Failed to parse width.");
+            const oxres = parseInt(ox);
+            this.#oxres = oxres;
+            return oxres;
+        } else return this.#oxres;
+    }
+    get origin_yres() {
+        if (this.is_original) return this.yres;
+        if (this.#oyres === undefined) {
+            const oy = this.i7_data.match(/\d+ x (\d+)/)?.at(1);
+            if (!oy) throw Error("Failed to parse height.");
+            const oyres = parseInt(oy);
+            this.#oyres = oyres;
+            return oyres;
+        } else return this.#oyres;
+    }
     get original_url() {
         const a = this.doc.querySelector("#i7 a");
-        if (a == null) return null;
-        return a.getAttribute("href");
+        if (a == null) return undefined;
+        return a.getAttribute("href") || undefined;
     }
     get pageCount() {
         const e = this.doc.querySelector("#i2>div span:last-child");
@@ -94,6 +157,24 @@ class SinglePage {
         const a = this.doc.getElementById("prev");
         if (a === null) return null;
         return a.getAttribute("href");
+    }
+    get xres() {
+        if (this.#xres === undefined) {
+            const xr = this.i2_data.match(/.*? :: (\d+)/)?.at(1);
+            if (!xr) throw Error("Failed to parse width.");
+            const xres = parseInt(xr);
+            this.#xres = xres;
+            return xres;
+        } else return this.#xres;
+    }
+    get yres() {
+        if (this.#yres === undefined) {
+            const yr = this.i2_data.match(/.*? :: \d+ x (\d+)/)?.at(1);
+            if (!yr) throw Error("Failed to parse height.");
+            const yres = parseInt(yr);
+            this.#yres = yres;
+            return yres;
+        } else return this.#yres;
     }
 }
 

@@ -37,6 +37,7 @@ Deno.test({
     assertEquals(re.gid, 2552611);
     assertEquals(re.token, "3132307627");
     assertEquals(re.new_version.length, 0);
+    if (!re.mpv_enabled) assertEquals((await re.imagelist).length, 19);
 });
 
 Deno.test({
@@ -50,4 +51,21 @@ Deno.test({
     assertEquals(re.japanese_name, "");
     assertEquals(re.length, 42);
     assertEquals(re.new_version[0], { gid: 2223198, token: "2a5788135e" });
+    if (!re.mpv_enabled) assertEquals((await re.imagelist).length, 42);
+});
+
+Deno.test({
+    name: "GalleryPage_test3",
+    permissions: API_PERMISSION,
+}, async () => {
+    const cfg = await load_settings("./config.json");
+    const client = new Client(cfg);
+    const re = await client.fetchGalleryPage(2576265, "daa01f773d");
+    assertEquals(re.name, "[Fanbox] houk1se1 (2021.09.05 - 2023.06.07)");
+    assertEquals(
+        re.japanese_name,
+        "[Fanbox] ほうき星 (2021.09.05 - 2023.06.07)",
+    );
+    assertEquals(re.length, 820);
+    if (!re.mpv_enabled) assertEquals((await re.imagelist).length, 820);
 });

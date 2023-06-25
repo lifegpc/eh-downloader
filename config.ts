@@ -21,6 +21,7 @@ export type ConfigType = {
     ffmpeg_path: string;
     thumbnail_method: ThumbnailMethod;
     thumbnail_dir: string;
+    remove_previous_gallery: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -128,6 +129,9 @@ export class Config {
     get thumbnail_dir() {
         return this._return_string("thumbnail_dir") || "./thumbnails";
     }
+    get remove_previous_gallery() {
+        return this._return_bool("remove_previous_gallery") || false;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -149,6 +153,7 @@ export class Config {
             ffmpeg_path: this.ffmpeg_path,
             thumbnail_method: this.thumbnail_method,
             thumbnail_dir: this.thumbnail_dir,
+            remove_previous_gallery: this.remove_previous_gallery,
         };
     }
 }

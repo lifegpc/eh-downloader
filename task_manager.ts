@@ -5,7 +5,11 @@ import { MeiliSearchServer } from "./meilisearch.ts";
 import { check_running } from "./pid_check.ts";
 import { add_exit_handler } from "./signal_handler.ts";
 import { Task, TaskProgress, TaskProgressBasicType, TaskType } from "./task.ts";
-import { download_task } from "./tasks/download.ts";
+import {
+    DEFAULT_DOWNLOAD_CONFIG,
+    download_task,
+    DownloadConfig,
+} from "./tasks/download.ts";
 import {
     DEFAULT_EXPORT_ZIP_CONFIG,
     export_zip,
@@ -29,6 +33,7 @@ type EventMap = {
     task_finished: Task;
     task_progress: TaskProgress;
     task_error: { task: Task; error: string };
+    task_updated: Task;
 };
 
 type Detail<T extends Record<PropertyKey, unknown>> = {
@@ -96,7 +101,7 @@ export class TaskManager extends EventTarget {
     get aborts() {
         return this.#abort.signal;
     }
-    async add_download_task(gid: number, token: string) {
+    async add_download_task(gid: number, token: string, cfg?: DownloadConfig) {
         this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
         if (otask !== undefined) {
@@ -109,7 +114,7 @@ export class TaskManager extends EventTarget {
             id: 0,
             pid: Deno.pid,
             type: TaskType.Download,
-            details: null,
+            details: cfg ? JSON.stringify(cfg) : null,
         };
         return await this.#add_task(task);
     }
@@ -143,7 +148,7 @@ export class TaskManager extends EventTarget {
     }
     async add_update_meili_search_data_task(gid?: number) {
         this.#check_closed();
-        const otask = await this.db.check_update_meili_search_data_task();
+        const otask = await this.db.check_update_meili_search_data_task(gid);
         if (otask !== undefined) {
             console.log("The task is already in list.");
             return otask;
@@ -282,6 +287,9 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         this.dispatchEvent("task_started", task);
         if (task.type == TaskType.Download) {
+            const cfg: DownloadConfig = task.details
+                ? JSON.parse(task.details)
+                : DEFAULT_DOWNLOAD_CONFIG;
             this.running_tasks.set(
                 task.id,
                 {
@@ -293,6 +301,7 @@ export class TaskManager extends EventTarget {
                         this.#abort.signal,
                         this.#force_abort.signal,
                         this,
+                        cfg,
                     ),
                     base: task,
                 },
@@ -328,6 +337,15 @@ export class TaskManager extends EventTarget {
                 base: task,
             });
         }
+    }
+    async update_task(t: Task) {
+        const r = this.running_tasks.get(t.id);
+        if (r) {
+            r.base.details = t.details;
+        }
+        await this.db.update_task(t);
+        const a = await this.db.get_task(t.id);
+        if (a) this.dispatchEvent("task_updated", a);
     }
     async waiting_unfinished_task() {
         while (1) {

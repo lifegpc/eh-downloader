@@ -80,14 +80,16 @@
 .settings .text-box .text .mdc-text-field::after{
     width: 0;
 }
-.settings .text-box .text .mdc-text-field::before{
+
+.settings .text-box .text .mdc-text-field::before {
     width: 0;
 }
 
 .settings .ua {
     position: relative;
 }
-.settings .ua > button {
+
+.settings .ua>button {
     position: absolute;
     top: 30px;
     left: -10px;
@@ -101,4 +103,16 @@
     .settings {
         margin: 0;
     }
+}
+
+.task_manager #task_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.new_task .close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
