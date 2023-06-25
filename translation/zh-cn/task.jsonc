@@ -1,3 +1,8 @@
 {
-    "id": "任务ID："
+    "id": "任务ID：",
+    "all": "所有任务",
+    "running": "运行中",
+    "waiting": "等待中",
+    "failed": "已失败",
+    "finished": "已完成"
 }

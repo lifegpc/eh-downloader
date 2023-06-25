@@ -10,6 +10,7 @@ import Task from "../components/Task.tsx";
 import Fab from "preact-material-components/Fab";
 import Icon from "preact-material-components/Icon";
 import { set_state } from "../server/state.ts";
+import t from "../server/i18n.ts";
 
 export type TaskManagerProps = {
     base: string;
@@ -169,23 +170,23 @@ export default class TaskManager extends Component<TaskManagerProps> {
                 <div class="task_amounts">
                     <div class="mdc-theme--secondary-light">
                         <p>count</p>
-                        <p>Total Task</p>
+                        <p>{t("task.all")}</p>
                     </div>
                     <div class="btn-success">
                         <p>count</p>
-                        <p>Running</p>
+                        <p>{t("task.running")}</p>
                     </div>
                     <div class="btn-warning">
                         <p>count</p>
-                        <p>Waiting</p>
+                        <p>{t("task.waiting")}</p>
                     </div>
                     <div class="btn-danger">
                         <p>count</p>
-                        <p>Fail</p>
+                        <p>{t("task.failed")}</p>
                     </div>
                     <div class="btn-primary">
                         <p>count</p>
-                        <p>Finished</p>
+                        <p>{t("task.finished")}</p>
                     </div>
                 </div>
                 <div class="task_details">
