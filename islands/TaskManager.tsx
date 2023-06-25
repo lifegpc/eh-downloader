@@ -166,33 +166,29 @@ export default class TaskManager extends Component<TaskManagerProps> {
         if (!this.props.show) return null;
         return (
             <div class="task_manager">
-                <div id="task_head">
-                    <div></div>
-                    <div class="add">
-                        <Fab mini={true}>
-                            <Icon
-                                onClick={() => {
-                                    set_state(`${this.props.base}/new`);
-                                }}
-                            >
-                                add
-                            </Icon>
-                        </Fab>
+                <div class="task_amounts">
+                    <div class="mdc-theme--secondary-light">
+                        <p>count</p>
+                        <p>Total Task</p>
+                    </div>
+                    <div class="btn-success">
+                        <p>count</p>
+                        <p>Running</p>
+                    </div>
+                    <div class="btn-warning">
+                        <p>count</p>
+                        <p>Waiting</p>
+                    </div>
+                    <div class="btn-danger">
+                        <p>count</p>
+                        <p>Fail</p>
+                    </div>
+                    <div class="btn-primary">
+                        <p>count</p>
+                        <p>Finished</p>
                     </div>
                 </div>
-                <div
-                    id="task-list"
-                    // @ts-ignore checked
-                    ref={ul}
-                >
-                    {task_list.value.map((k) => {
-                        const t = tasks.value.get(k);
-                        if (t) {
-                            return <Task task={t} />;
-                        } else {
-                            return <div data-id={k}></div>;
-                        }
-                    })}
+                <div class="task_details">
                 </div>
             </div>
         );
