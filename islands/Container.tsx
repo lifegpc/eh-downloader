@@ -11,6 +11,7 @@ import t, { i18n_map, I18NMap } from "../server/i18n.ts";
 import TaskManager from "./TaskManager.tsx";
 import { initState, set_state } from "../server/state.ts";
 import NewTask from "../components/NewTask.tsx";
+import MyIcon from "../components/MyIcon.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -23,6 +24,7 @@ export default class Container extends Component<ContainerProps> {
         i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
+        const [darkmode, set_darkmode] = useState(false);
         useEffect(() => {
             initState(set_state1);
         }, []);
