@@ -1,4 +1,5 @@
 import { DOMParser } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { extname } from "std/path/mod.ts";
 import { Client } from "../client.ts";
 import { initDOMParser } from "../utils.ts";
 import { EhFile, PMeta } from "../db.ts";
@@ -121,6 +122,13 @@ class MPVImage {
     }
     get page_token() {
         return this.base.k;
+    }
+    get sampled_name() {
+        const n = this.base.n;
+        const e = extname(n);
+        const b = n.slice(0, n.length - e.length);
+        if (n === ".gif") return `${b}.gif`;
+        return `${b}.jpg`;
     }
     get src() {
         return this.data?.i;

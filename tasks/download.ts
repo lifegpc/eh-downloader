@@ -106,6 +106,7 @@ interface Image {
     is_original: boolean | undefined;
     name: string;
     page_token: string;
+    sampled_name: string;
     get_file(path: string): EhFile | undefined;
     get_original_file(path: string): EhFile | undefined;
     load(): Promise<void>;
@@ -222,7 +223,10 @@ export async function download_task(
         if (pmeta) db.add_pmeta(pmeta);
         const download_original = download_original_img &&
             !i.is_original;
-        let path = resolve(join(base_path, i.name));
+        const is_sampled = !download_original_img && !i.is_original;
+        let path = resolve(
+            join(base_path, is_sampled ? i.sampled_name : i.name),
+        );
         if (names[i.name] > 1) {
             path = add_suffix_to_path(path, i.page_token);
             console.log("Changed path to", path);

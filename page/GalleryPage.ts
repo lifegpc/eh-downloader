@@ -1,4 +1,5 @@
 import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { extname } from "std/path/mod.ts";
 import { Client } from "../client.ts";
 import { EhFile, PMeta } from "../db.ts";
 import { initDOMParser, map, parse_bool } from "../utils.ts";
@@ -74,6 +75,15 @@ class Image {
     }
     get page_token() {
         return this.base.token;
+    }
+    get sampled_name() {
+        const name = this.data?.name;
+        if (name) return name;
+        const n = this.base.name;
+        const e = extname(n);
+        const b = n.slice(0, n.length - e.length);
+        if (n === ".gif") return `${b}.gif`;
+        return `${b}.jpg`;
     }
     get src() {
         return this.data?.img_url;
