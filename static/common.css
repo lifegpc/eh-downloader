@@ -104,3 +104,15 @@
         margin: 0;
     }
 }
+
+.task_manager #task_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.new_task .close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}

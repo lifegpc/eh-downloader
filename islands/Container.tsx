@@ -1,6 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import { Component, ContextType } from "preact";
-import { StateUpdater, useEffect, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Icon from "preact-material-components/Icon";
 import List from "preact-material-components/List";
 import TopAppBar from "preact-material-components/TopAppBar";
@@ -9,6 +9,8 @@ import { GlobalCtx } from "../components/GlobalContext.tsx";
 import Settings from "./Settings.tsx";
 import t, { i18n_map, I18NMap } from "../server/i18n.ts";
 import TaskManager from "./TaskManager.tsx";
+import { initState, set_state } from "../server/state.ts";
+import NewTask from "../components/NewTask.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -21,26 +23,8 @@ export default class Container extends Component<ContainerProps> {
         i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
-        const set_state: StateUpdater<string> = (updater) => {
-            const v = typeof updater === "function" ? updater(state) : updater;
-            set_state1(v);
-            history.pushState(v, "", v);
-        };
         useEffect(() => {
-            const hash = document.location.hash;
-            if (!hash || hash == "#") {
-                set_state("#/");
-            } else {
-                set_state1(hash);
-            }
-            self.addEventListener("popstate", (e) => {
-                const s = e.state;
-                if (typeof s === "string") {
-                    set_state1(s);
-                } else {
-                    set_state1("#/");
-                }
-            });
+            initState(set_state1);
         }, []);
         return (
             <div>
@@ -96,7 +80,11 @@ export default class Container extends Component<ContainerProps> {
                 </List>
                 <div class="main">
                     <Settings show={state === "#/settings"} />
-                    <TaskManager show={state === "#/task_manager"} />
+                    <TaskManager
+                        base="#/task_manager"
+                        show={state === "#/task_manager"}
+                    />
+                    <NewTask show={state === "#/task_manager/new"} />
                 </div>
             </div>
         );
