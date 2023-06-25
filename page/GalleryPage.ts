@@ -1,5 +1,6 @@
 import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { Client } from "../client.ts";
+import { EhFile, PMeta } from "../db.ts";
 import { initDOMParser, map, parse_bool } from "../utils.ts";
 import { parseUrl, UrlType } from "../url.ts";
 import { SinglePage } from "./SinglePage.ts";
@@ -15,12 +16,130 @@ class Image {
     base;
     #gp;
     data: SinglePage | undefined;
+    redirected_url: string | undefined;
     constructor(base: Page, gp: GalleryPage) {
         this.base = base;
         this.#gp = gp;
     }
+    get_file(path: string): EhFile | undefined {
+        const width = this.xres;
+        if (width === undefined) return undefined;
+        const height = this.yres;
+        if (height === undefined) return undefined;
+        const is_original = this.is_original;
+        if (is_original === undefined) return undefined;
+        return {
+            id: 0,
+            token: this.page_token,
+            path,
+            width,
+            height,
+            is_original,
+        };
+    }
+    get_original_file(path: string): EhFile | undefined {
+        const width = this.origin_xres;
+        if (width === undefined) return undefined;
+        const height = this.origin_yres;
+        if (height === undefined) return undefined;
+        return {
+            id: 0,
+            token: this.page_token,
+            path,
+            width,
+            height,
+            is_original: true,
+        };
+    }
+    get index() {
+        return this.base.index;
+    }
     get is_original() {
         return this.data?.is_original;
+    }
+    get name() {
+        return this.base.name;
+    }
+    get original_imgurl() {
+        return this.data?.original_url;
+    }
+    get origin_xres() {
+        return this.data?.origin_xres;
+    }
+    get origin_yres() {
+        return this.data?.origin_yres;
+    }
+    get page_number() {
+        return this.base.index;
+    }
+    get page_token() {
+        return this.base.token;
+    }
+    get src() {
+        return this.data?.img_url;
+    }
+    get xres() {
+        return this.data?.xres;
+    }
+    get yres() {
+        return this.data?.yres;
+    }
+    async load() {
+        if (this.data === undefined) {
+            this.data = await this.#gp.client.fetchSignlePage(
+                this.#gp.gid,
+                this.page_token,
+                this.base.index,
+            );
+        } else {
+            this.data = await this.#gp.client.fetchSignlePage(
+                this.#gp.gid,
+                this.page_token,
+                this.base.index,
+                this.data.nl,
+            );
+        }
+    }
+    async #load_image(u: string) {
+        const re = await this.#gp.client.get(u);
+        if (re.status !== 200) {
+            re.body?.cancel();
+            return undefined;
+        }
+        return re;
+    }
+    async load_image(reload = true) {
+        const src = this.src;
+        if (src) {
+            const re = await this.#load_image(src);
+            if (re) return re;
+        }
+        if (!reload) return;
+        await this.load();
+        const src2 = this.src;
+        if (src2) return await this.#load_image(src2);
+    }
+    async load_original_image() {
+        if (this.redirected_url) {
+            const re = await this.#load_image(this.redirected_url);
+            if (re) return re;
+        }
+        const url = this.original_imgurl;
+        if (!url) return undefined;
+        this.redirected_url = await this.#gp.client.redirect(url);
+        return await this.#load_image(this.redirected_url || url);
+    }
+    to_pmeta(): PMeta | undefined {
+        if (!this.data) return undefined;
+        const gid = this.#gp.gid;
+        const index = this.base.index;
+        const token = this.page_token;
+        const name = this.name;
+        const width = this.origin_xres;
+        if (width === undefined) return undefined;
+        const height = this.origin_yres;
+        if (height === undefined) return undefined;
+        return { gid, index, token, name, width, height };
     }
 }
 

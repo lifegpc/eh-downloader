@@ -37,4 +37,5 @@ Deno.test({
     assertEquals(re2.is_original, false);
     assertEquals(re2.origin_xres, 4893);
     assertEquals(re2.origin_yres, 3446);
+    console.log(np.nl, re.nl, re2.nl);
 });

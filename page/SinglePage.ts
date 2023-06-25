@@ -80,7 +80,7 @@ export class SinglePage {
         return url;
     }
     get is_original() {
-        return this.original_url === null;
+        return this.original_url === undefined;
     }
     get meta() {
         if (this._meta === undefined) {
@@ -108,6 +108,15 @@ export class SinglePage {
         if (a === null) return null;
         return a.getAttribute("href");
     }
+    get nl() {
+        const f = this.doc.getElementById("loadfail");
+        if (!f) throw Error("Failed to find loadfail link.");
+        const n = f.getAttribute("onclick");
+        if (!n) throw Error("Failed to get onclick attribute.");
+        const nl = n.match(/nl\('(.*?)'\)/)?.at(1);
+        if (!nl) throw Error("Failed to extract nl.");
+        return nl;
+    }
     get origin_xres() {
         if (this.is_original) return this.xres;
         if (this.#oxres === undefined) {
@@ -130,8 +139,8 @@ export class SinglePage {
     }
     get original_url() {
         const a = this.doc.querySelector("#i7 a");
-        if (a == null) return null;
-        return a.getAttribute("href");
+        if (a == null) return undefined;
+        return a.getAttribute("href") || undefined;
     }
     get pageCount() {
         const e = this.doc.querySelector("#i2>div span:last-child");

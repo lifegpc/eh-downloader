@@ -94,10 +94,17 @@ export class Client {
      * @param gid Gallery ID
      * @param page_token Page token
      * @param index Page index
+     * @param nl Reload token
      * @returns
      */
-    async fetchSignlePage(gid: number, page_token: string, index: number) {
-        const url = `https://${this.host}/s/${page_token}/${gid}-${index}`;
+    async fetchSignlePage(
+        gid: number,
+        page_token: string,
+        index: number,
+        nl?: string,
+    ) {
+        const p = nl ? `?nl=${nl}` : "";
+        const url = `https://${this.host}/s/${page_token}/${gid}-${index}${p}`;
         const re = await this.get(url);
         if (re.status != 200) {
             throw new Error(
