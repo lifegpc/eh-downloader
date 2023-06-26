@@ -14,6 +14,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         }
         return new Response(null, { status: 204, headers });
     } else {
+        if (res.status === 101) return res;
         const headers = new Headers(res.headers);
         const origin = req.headers.get("origin");
         if (origin) {
