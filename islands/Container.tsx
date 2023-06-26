@@ -11,12 +11,24 @@ import t, { i18n_map, I18NMap } from "../server/i18n.ts";
 import TaskManager from "./TaskManager.tsx";
 import { initState, set_state } from "../server/state.ts";
 import NewTask from "../components/NewTask.tsx";
-import { parse_bool } from "../server/parse.ts";
-import Switch from "preact-material-components/Switch";
+import { parse_int } from "../server/parse.ts";
+import { detect_darkmode } from "../server/dark.ts";
 
 export type ContainerProps = {
     i18n: I18NMap;
 };
+
+enum DarkMode {
+    Auto,
+    Light,
+    Dark,
+}
+
+function darkmode_next(d: DarkMode) {
+    if (d === DarkMode.Auto) return DarkMode.Light;
+    if (d === DarkMode.Dark) return DarkMode.Auto;
+    return DarkMode.Dark;
+}
 
 export default class Container extends Component<ContainerProps> {
     static contextType = GlobalCtx;
@@ -25,12 +37,18 @@ export default class Container extends Component<ContainerProps> {
         i18n_map.value = this.props.i18n;
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
-        const [darkmode, set_darkmode1] = useState(false);
-        const set_darkmode: StateUpdater<boolean> = (u) => {
+        const [darkmode, set_darkmode1] = useState(DarkMode.Auto);
+        const set_darkmode: StateUpdater<DarkMode> = (u) => {
             const v = typeof u === "function" ? u(darkmode) : u;
             set_darkmode1(v);
             localStorage.setItem("darkmode", JSON.stringify(v));
-            if (v) {
+            if (v === DarkMode.Auto) {
+                if (detect_darkmode()) {
+                    document.body.classList.add("dark-scheme");
+                } else {
+                    document.body.classList.remove("dark-scheme");
+                }
+            } else if (v === DarkMode.Dark) {
                 document.body.classList.add("dark-scheme");
             } else {
                 document.body.classList.remove("dark-scheme");
@@ -38,9 +56,16 @@ export default class Container extends Component<ContainerProps> {
         };
         useEffect(() => {
             initState(set_state1);
-            const dm = parse_bool(localStorage.getItem("darkmode"), false);
+            const dm = parse_int(
+                localStorage.getItem("darkmode"),
+                DarkMode.Auto,
+            );
             set_darkmode1(dm);
-            if (dm) {
+            if (dm === DarkMode.Auto) {
+                if (detect_darkmode()) {
+                    document.body.classList.add("dark-scheme");
+                }
+            } else if (dm === DarkMode.Dark) {
                 document.body.classList.add("dark-scheme");
             }
         }, []);
@@ -63,14 +88,18 @@ export default class Container extends Component<ContainerProps> {
                             </TopAppBar.Title>
                         </TopAppBar.Section>
                         <TopAppBar.Section align-end>
-                            <Switch
-                                class="darkmode"
-                                checked={darkmode}
+                            <TopAppBar.Icon
                                 onClick={() => {
-                                    set_darkmode(!darkmode);
+                                    set_darkmode(darkmode_next(darkmode));
                                 }}
-                            />
-                            <Icon>{darkmode ? "dark_mode" : "light_mode"}</Icon>
+                                navigation
+                            >
+                                {darkmode === DarkMode.Auto
+                                    ? "brightness_auto"
+                                    : darkmode === DarkMode.Dark
+                                    ? "dark_mode"
+                                    : "light_mode"}
+                            </TopAppBar.Icon>
                             <TopAppBar.Icon>more_vert</TopAppBar.Icon>
                         </TopAppBar.Section>
                     </TopAppBar.Row>
