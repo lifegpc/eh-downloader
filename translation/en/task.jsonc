@@ -4,5 +4,6 @@
     "running": "Running",
     "waiting": "Waiting",
     "failed": "Failed",
-    "finished": "Finished"
+    "finished": "Finished",
+    "add": "Add task"
 }

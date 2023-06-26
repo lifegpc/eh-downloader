@@ -1,5 +1,5 @@
 import { Client } from "./client.ts";
-import { Config } from "./config.ts";
+import { Config, ConfigType } from "./config.ts";
 import { EhDb } from "./db.ts";
 import { MeiliSearchServer } from "./meilisearch.ts";
 import { check_running } from "./pid_check.ts";
@@ -28,6 +28,7 @@ export class AlreadyClosedError extends Error {
 }
 
 type EventMap = {
+    current_cfg_updated: ConfigType;
     new_task: Task;
     task_started: Task;
     task_finished: Task;

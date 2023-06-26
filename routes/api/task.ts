@@ -32,7 +32,9 @@ export const handler: Handlers<Task[]> = {
             ExitTarget.removeEventListener("close", close_handle);
         };
         function sendMessage(mes: TaskServerSocketData) {
-            socket.send(JSON.stringify(mes));
+            if (socket.readyState === socket.OPEN) {
+                socket.send(JSON.stringify(mes));
+            }
         }
         socket.onclose = () => {
             removeListener();

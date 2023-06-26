@@ -224,3 +224,45 @@ body {
     right: 50px;
     bottom: 50px;
 }
+
+div.new_task {
+    overflow: hidden;
+    width: 100vw;
+    height: calc(100vh - 64px);
+    max-width: 100vw;
+    max-height: calc(100vh - 64px);
+}
+
+div.new_task>div.container {
+    position: relative;
+    margin: 5% 10%;
+    height: calc(100% - 10% - 64px);
+    min-width: 400px;
+    width: calc(100% - 20%);
+}
+
+div.new_task .top {
+    display: flex;
+    min-height: 40px;
+    line-height: 40px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+div.new_task .top .title {
+    margin-left: 40px;
+    width: calc(100% - 80px);
+    font-size: 24px;
+    text-align: center;
+}
+
+div.new_task>div.container>div.content {
+    overflow-y: auto;
+    height: calc(100% - 80px);
+    min-height: 300px;
+}
+
+div.new_task>div.container>div.bottom {
+    line-height: 40px;
+    min-height: 40px;
+}

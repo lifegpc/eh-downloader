@@ -14,6 +14,7 @@ import NewTask from "../components/NewTask.tsx";
 import { parse_int } from "../server/parse.ts";
 import { detect_darkmode } from "../server/dark.ts";
 import { registeServiceWorker } from "../server/sw.ts";
+import { initCfg } from "../server/cfg.ts";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -75,6 +76,7 @@ export default class Container extends Component<ContainerProps> {
                     console.error(e);
                 },
             );
+            initCfg();
         }, []);
         return (
             <div>
