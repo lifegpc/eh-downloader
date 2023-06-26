@@ -59,6 +59,10 @@ body {
     min-width: 50%;
 }
 
+.settings #s-port .mdc-text-field {
+    min-width: 100px;
+}
+
 .settings div.text.helper {
     display: flex;
 }
