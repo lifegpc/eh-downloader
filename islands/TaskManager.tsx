@@ -167,6 +167,14 @@ export default class TaskManager extends Component<TaskManagerProps> {
         if (!this.props.show) return null;
         return (
             <div class="task_manager">
+                <Fab
+                    class="new_task"
+                    onClick={() => {
+                        set_state(`${this.props.base}/new`);
+                    }}
+                >
+                    <Icon>add</Icon>
+                </Fab>
                 <div class="task_amounts">
                     <div class="mdc-theme--secondary-light">
                         <p>count</p>

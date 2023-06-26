@@ -214,3 +214,9 @@ body {
 .mdc-top-app-bar__section--align-end>* {
     margin: 0 5px;
 }
+
+.task_manager .new_task {
+    position: fixed;
+    right: 50px;
+    bottom: 50px;
+}

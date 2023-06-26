@@ -27,7 +27,11 @@ self.addEventListener("activate", (event: ActivateEvent) => {
     event.waitUntil(deleteOldCaches());
 });
 
-const CACHES = ["/common.css", "/preact-material-components/style.css"];
+const CACHES = [
+    "/common.css",
+    "/hide-scrollbar.css",
+    "/preact-material-components/style.css",
+];
 
 function match_url(u: URL) {
     const pn = u.pathname;
