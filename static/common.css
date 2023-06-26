@@ -7,6 +7,7 @@ body {
     --mdc-theme-primary: #007bff;
     --mdc-theme-secondary: #007bff;
     --dark-backgroud: #343a40;
+    color-scheme: light;
 }
 
 .nav-menu {
