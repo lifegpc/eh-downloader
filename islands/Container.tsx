@@ -13,6 +13,7 @@ import { initState, set_state } from "../server/state.ts";
 import NewTask from "../components/NewTask.tsx";
 import { parse_int } from "../server/parse.ts";
 import { detect_darkmode } from "../server/dark.ts";
+import { registeServiceWorker } from "../server/sw.ts";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -68,6 +69,12 @@ export default class Container extends Component<ContainerProps> {
             } else if (dm === DarkMode.Dark) {
                 document.body.classList.add("dark-scheme");
             }
+            registeServiceWorker("/sw.js", { updateViaCache: "all" }).catch(
+                (e) => {
+                    console.error("Failed to registe service worker.");
+                    console.error(e);
+                },
+            );
         }, []);
         return (
             <div>
