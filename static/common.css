@@ -3,9 +3,10 @@ body {
     min-height: 100vh;
 }
 
-:root{
-    --mdc-theme-primary:#007bff;
-    --mdc-theme-secondary:#007bff;
+:root {
+    --mdc-theme-primary: #007bff;
+    --mdc-theme-secondary: #007bff;
+    --dark-backgroud: #343a40;
 }
 
 .nav-menu {
@@ -87,7 +88,7 @@ body {
     align-items: center;
 }
 
-.settings .text-box .text .mdc-text-field::after{
+.settings .text-box .text .mdc-text-field::after {
     width: 0;
 }
 
@@ -105,9 +106,7 @@ body {
     left: -10px;
 }
 
-@media (max-width:767px) { 
- 
-}
+@media (max-width:767px) {}
 
 @media (max-width:1280px) {
     .settings {
@@ -126,7 +125,7 @@ body {
     height: 64px;
 }
 
-.task_amounts > div {
+.task_amounts>div {
     flex: auto;
     text-align: center;
     display: flex;
@@ -136,72 +135,77 @@ body {
     color: aliceblue;
 }
 
-.task_amounts > div:first-child {
+.task_amounts>div:first-child {
     border-radius: 8px 0 0 8px;
     background-color: black;
 }
 
-.task_amounts > div:last-child{
+.task_amounts>div:last-child {
     border-radius: 0 8px 8px 0
 }
 
-.btn-success{
-    background-color:#28a745
+.btn-success {
+    background-color: #28a745
 }
 
-.btn-warning{
-    background-color:#ffc107
+.btn-warning {
+    background-color: #ffc107
 }
 
-.btn-danger{
-    background-color:#dc3545
+.btn-danger {
+    background-color: #dc3545
 }
 
-.btn-primary{
-    background-color:#007bff
+.btn-primary {
+    background-color: #007bff
 }
 
-.dark-scheme { 
-    background: #343a40; 
-    color:  white; 
+.dark-scheme {
+    background: var(--dark-backgroud);
+    color: white;
+    color-scheme: dark;
 }
 
 .dark-scheme .mdc-top-app-bar {
     background-color: black;
 }
 
-.dark-scheme .mdc-text-field__input{
-    color:white!important;
+.dark-scheme .mdc-text-field__input {
+    color: white !important;
 }
 
 .dark-scheme .mdc-select__native-control {
-    color:white!important;
+    color: white !important;
 }
 
 .dark-scheme .mdc-text-field__input {
-    color:white!important;
+    color: white !important;
 }
 
-.dark-scheme .mdc-floating-label{
-    color:white!important;
+.dark-scheme .mdc-floating-label {
+    color: white !important;
 }
 
-.dark-scheme .mdc-select-item{
-    background-color: black!important;
+.dark-scheme .mdc-select-item {
+    background-color: black !important;
 }
 
-.dark-scheme .mdc-list{
-    background-color:#272727;
+.dark-scheme .mdc-list {
+    background-color: #272727;
 }
 
-.dark-scheme .mdc-list-item{
+.dark-scheme .mdc-list-item {
     color: white;
 }
 
-.dark-scheme .mdc-notched-outline__idle{
-    color: white!important;
+.dark-scheme .mdc-notched-outline__idle {
+    color: white !important;
 }
 
-.mdc-top-app-bar__section--align-end > * {
+.dark-scheme .mdc-dialog__surface {
+    background-color: var(--dark-backgroud);
+}
+
+.mdc-top-app-bar__section--align-end>* {
     margin: 0 5px;
 }
