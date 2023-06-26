@@ -5,5 +5,9 @@
     "waiting": "Waiting",
     "failed": "Failed",
     "finished": "Finished",
-    "add": "Add task"
+    "add": "Add task",
+    "type": "Task type: ",
+    "download": "Download",
+    "export_zip": "Export as ZIP file",
+    "gallery_url": "Gallery URL: "
 }

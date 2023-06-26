@@ -5,5 +5,9 @@
     "waiting": "等待中",
     "failed": "已失败",
     "finished": "已完成",
-    "add": "新建任务"
+    "add": "新建任务",
+    "type": "任务类型：",
+    "download": "下载",
+    "export_zip": "导出为ZIP文件",
+    "gallery_url": "画廊地址："
 }
