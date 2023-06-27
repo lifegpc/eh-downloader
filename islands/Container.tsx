@@ -40,7 +40,6 @@ export default class Container extends Component<ContainerProps> {
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
         const [darkmode, set_darkmode1] = useState(DarkMode.Auto);
-        const [scrollHide, set_ScrollHide] = useState(false);
         const set_darkmode: StateUpdater<DarkMode> = (u) => {
             const v = typeof u === "function" ? u(darkmode) : u;
             set_darkmode1(v);

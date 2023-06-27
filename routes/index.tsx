@@ -32,7 +32,7 @@ export default function Index({ data }: PageProps<Props>) {
         <body>
             <Head>
                 {is_windows_chrome
-                    ? <link rel="stylesheet" href="hide-scrollbar.css" />
+                    ? <link rel="stylesheet" href="scrollBar.css" />
                     : null}
             </Head>
             <GlobalContext>
