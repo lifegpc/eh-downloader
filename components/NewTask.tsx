@@ -187,8 +187,8 @@ export default class NewTask extends Component<NewTaskProps> {
                 <div class="container">
                     <div class="top">
                         <div class="title">{t("task.add")}</div>
-                        <Fab class="close" mini={true}>
-                            <Icon onClick={close}>close</Icon>
+                        <Fab class="close" mini={true} onClick={close}>
+                            <Icon>close</Icon>
                         </Fab>
                     </div>
                     <div class="content">
