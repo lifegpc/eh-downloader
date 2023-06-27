@@ -39,6 +39,7 @@ body {
     margin: 0 18%;
     padding-top: 40px;
     transition: 0.6s;
+    overflow-x: hidden;
 }
 
 .settings div.text {
@@ -259,21 +260,48 @@ div.new_task>div.container>div.bottom {
     min-height: 40px;
 }
 
+@media (max-width:1280px) {
+    .settings {
+        margin: 0;
+        padding-top: 10px;
+    }
+}
 
 @media (max-width:767px) {
+    .settings {
+        padding-top: 0;
+    }
+
+    .settings label {
+        line-height: normal;
+    }
+
+    .settings .ua>button {
+        position: relative;
+        top: 0;
+    }
+
     .settings .text-box .text {
         flex-direction: column;
         align-items: start;
     }
 
     .settings .text-box .mdc-text-field {
-        margin: 10px 0;
+        margin: 0;
         width: 100%;
+    }
+
+    .settings .text-box .label .mdc-text-field {
+        margin-top: 5px;
+    }
+
+    button.mdc-button {
+        margin: 5px;
     }
 }
 
-@media (max-width:1280px) {
-    .settings {
-        margin: 0;
+@media (max-width: 599px) {
+    .main {
+        top: 56px;
     }
 }
