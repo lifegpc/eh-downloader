@@ -9,5 +9,9 @@
     "type": "Task type: ",
     "download": "Download",
     "export_zip": "Export as ZIP file",
-    "gallery_url": "Gallery URL: "
+    "gallery_url": "Gallery URL: ",
+    "gallery_id": "Gallery ID: ",
+    "gallery_token": "Gallery token: ",
+    "overwrite_cfg": "Overwrite default config.",
+    "submit_failed": "Failed to submit task."
 }

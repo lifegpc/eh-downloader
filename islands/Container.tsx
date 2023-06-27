@@ -12,7 +12,7 @@ import TaskManager from "./TaskManager.tsx";
 import { initState, set_state } from "../server/state.ts";
 import NewTask from "../components/NewTask.tsx";
 import { parse_int } from "../server/parse.ts";
-import { detect_darkmode } from "../server/dark.ts";
+import { addDarkModeListener, detect_darkmode } from "../server/dark.ts";
 import { registeServiceWorker } from "../server/sw.ts";
 import { initCfg } from "../server/cfg.ts";
 
@@ -78,6 +78,15 @@ export default class Container extends Component<ContainerProps> {
                 },
             );
             initCfg();
+            addDarkModeListener((e) => {
+                if (darkmode === DarkMode.Auto) {
+                    if (e.matches) {
+                        document.body.classList.add("dark-scheme");
+                    } else {
+                        document.body.classList.remove("dark-scheme");
+                    }
+                }
+            });
         }, []);
         return (
             <div>

@@ -29,7 +29,7 @@ self.addEventListener("activate", (event: ActivateEvent) => {
 
 const CACHES = [
     "/common.css",
-    "/hide-scrollbar.css",
+    "/scrollBar.css",
     "/preact-material-components/style.css",
 ];
 

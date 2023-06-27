@@ -2,6 +2,7 @@ import { signal } from "@preact/signals";
 import { ConfigType } from "../config.ts";
 import { get_ws_host } from "./utils.ts";
 import { ConfigClientSocketData, ConfigSeverSocketData } from "./config.ts";
+import { DEFAULT_DOWNLOAD_CONFIG, DownloadConfig } from "../tasks/download.ts";
 
 export const cfg = signal<ConfigType | undefined>(undefined);
 
@@ -22,4 +23,16 @@ export function initCfg() {
     self.addEventListener("beforeunload", () => {
         sendMessage({ type: "close" });
     });
+}
+
+export function generate_download_cfg(): DownloadConfig {
+    if (!cfg.value) return DEFAULT_DOWNLOAD_CONFIG;
+    const c = cfg.value;
+    return {
+        download_original_img: c.download_original_img,
+        max_download_img_count: c.max_download_img_count,
+        max_retry_count: c.max_retry_count,
+        mpv: c.mpv,
+        remove_previous_gallery: c.remove_previous_gallery,
+    };
 }

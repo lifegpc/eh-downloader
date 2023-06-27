@@ -55,13 +55,14 @@ body {
     margin: 0 18%;
     padding-top: 40px;
     transition: 0.6s;
+    overflow-x: hidden;
 }
 
 .settings div.text {
     width: 100%;
 }
 
-.settings label {
+.settings label, div.new_task div.bcheckbox label {
     line-height: 40px;
 }
 
@@ -71,8 +72,16 @@ body {
     bottom: auto;
 }
 
-.settings #s-cookies .mdc-text-field {
+.settings .text-box div.text:not(.helper, #s-port) .mdc-text-field {
     min-width: 50%;
+}
+
+.settings .text-box div.text.helper>div {
+    min-width: 50%;
+}
+
+.settings .text-box div.text.helper .mdc-text-field {
+    min-width: 100%;
 }
 
 .settings #s-port .mdc-text-field {
@@ -243,8 +252,8 @@ div.new_task {
 
 div.new_task>div.container {
     position: relative;
-    margin: 5% 10%;
-    height: calc(100% - 10% - 64px);
+    margin: 2.5% 10%;
+    height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
 }
@@ -266,6 +275,7 @@ div.new_task .top .title {
 
 div.new_task>div.container>div.content {
     overflow-y: auto;
+    overflow-x: hidden;
     height: calc(100% - 80px);
     min-height: 300px;
 }
@@ -275,21 +285,71 @@ div.new_task>div.container>div.bottom {
     min-height: 40px;
 }
 
+div.new_task div.content .text {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: start;
+}
 
-@media (max-width:767px) {
-    .settings .text-box .text{
-        flex-direction: column;
-        align-items: start;
-    }
-
-    .settings .text-box .mdc-text-field{
-        margin: 10px 0;
-        width: 100%;
-    }
+div.new_task div.content .text .mdc-text-field {
+    margin: 1px;
+    width: calc(100% - 2px);
 }
 
 @media (max-width:1280px) {
     .settings {
         margin: 0;
+        padding-top: 10px;
+    }
+}
+
+@media (max-width:810px) {
+    .settings {
+        padding-top: 0;
+    }
+
+    .settings>div:not(.check-box) label {
+        line-height: normal;
+    }
+
+    .settings .ua>button {
+        position: relative;
+        top: 0;
+    }
+
+    .settings .text-box .text {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .settings .text-box .mdc-text-field {
+        margin: 1px;
+        width: 100%;
+    }
+
+    .settings .text-box .label .mdc-text-field {
+        margin-top: 5px;
+    }
+
+    .settings .text-box div.text.helper>div {
+        min-width: 100%;
+    }
+
+    button.mdc-button {
+        margin: 5px;
+    }
+}
+
+@media (max-width: 599px) {
+    .main {
+        top: 56px;
+    }
+
+    div.new_task>div.container {
+        margin: 5px;
+        min-width: 0;
+        height: calc(100% - 74px);
+        width: calc(100% - 10px);
     }
 }

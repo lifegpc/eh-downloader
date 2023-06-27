@@ -1,6 +1,7 @@
-import { Component } from "preact";
+import { Component, ContextType } from "preact";
 import Select from "preact-material-components/Select";
 import { Ref, StateUpdater, useRef } from "preact/hooks";
+import { BCtx } from "./BContext.tsx";
 
 interface obj {
     toString(): string;
@@ -19,7 +20,8 @@ type Props<T extends obj> = {
     /**@default {false}*/
     outlined?: boolean;
     hintText?: string;
-    set_value: StateUpdater<T>;
+    set_value?: StateUpdater<T>;
+    name?: string;
 };
 
 type State = {
@@ -28,6 +30,8 @@ type State = {
 
 export default class SettingsSelect<T extends obj>
     extends Component<Props<T>, State> {
+    static contextType = BCtx;
+    declare context: ContextType<typeof BCtx>;
     ref: Ref<Select | undefined> | undefined;
     constructor(props: Props<T>) {
         super(props);
@@ -85,7 +89,14 @@ export default class SettingsSelect<T extends obj>
     }
     set_value(index: number) {
         const value = this.props.list[index].value;
-        this.props.set_value(value);
+        if (this.props.set_value) {
+            this.props.set_value(value);
+        } else if (this.context) {
+            this.context.set_value((v) => {
+                v[this.props.name || ""] = value;
+                return v;
+            });
+        }
     }
     update(index: number) {
         const e = this.ref?.current;
