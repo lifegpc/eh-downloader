@@ -1,3 +1,4 @@
+
 body {
     min-width: 100vw;
     min-height: 100vh;
@@ -113,14 +114,6 @@ body {
     position: absolute;
     top: 30px;
     left: -10px;
-}
-
-@media (max-width:767px) {}
-
-@media (max-width:1280px) {
-    .settings {
-        margin: 0;
-    }
 }
 
 .task_manager {
@@ -265,4 +258,23 @@ div.new_task>div.container>div.content {
 div.new_task>div.container>div.bottom {
     line-height: 40px;
     min-height: 40px;
+}
+
+
+@media (max-width:767px) {
+    .settings .text-box .text{
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .settings .text-box .mdc-text-field{
+        margin: 10px 0;
+        width: 100%;
+    }
+}
+
+@media (max-width:1280px) {
+    .settings {
+        margin: 0;
+    }
 }
