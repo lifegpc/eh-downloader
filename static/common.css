@@ -46,7 +46,7 @@ body {
     width: 100%;
 }
 
-.settings label {
+.settings label, div.new_task div.bcheckbox label {
     line-height: 40px;
 }
 
@@ -236,8 +236,8 @@ div.new_task {
 
 div.new_task>div.container {
     position: relative;
-    margin: 5% 10%;
-    height: calc(100% - 10% - 64px);
+    margin: 2.5% 10%;
+    height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
 }
@@ -259,6 +259,7 @@ div.new_task .top .title {
 
 div.new_task>div.container>div.content {
     overflow-y: auto;
+    overflow-x: hidden;
     height: calc(100% - 80px);
     min-height: 300px;
 }
@@ -266,6 +267,18 @@ div.new_task>div.container>div.content {
 div.new_task>div.container>div.bottom {
     line-height: 40px;
     min-height: 40px;
+}
+
+div.new_task div.content .text {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: start;
+}
+
+div.new_task div.content .text .mdc-text-field {
+    margin: 1px;
+    width: calc(100% - 2px);
 }
 
 @media (max-width:1280px) {
@@ -315,5 +328,12 @@ div.new_task>div.container>div.bottom {
 @media (max-width: 599px) {
     .main {
         top: 56px;
+    }
+
+    div.new_task>div.container {
+        margin: 5px;
+        min-width: 0;
+        height: calc(100% - 74px);
+        width: calc(100% - 10px);
     }
 }

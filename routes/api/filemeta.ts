@@ -51,7 +51,7 @@ export const handler: Handlers = {
         return return_error(400, "token is needed.");
     },
     async PUT(req, _ctx) {
-        const ct = req.headers.get("Content-Type").split(";")[0].trim() || "";
+        const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
         if (ct === "application/json") {
             if (!req.body) return_error(1, "Body not found.");
             let b = null;

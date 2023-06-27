@@ -9,5 +9,9 @@
     "type": "任务类型：",
     "download": "下载",
     "export_zip": "导出为ZIP文件",
-    "gallery_url": "画廊地址："
+    "gallery_url": "画廊地址：",
+    "gallery_id": "画廊ID：",
+    "gallery_token": "画廊令牌：",
+    "overwrite_cfg": "覆盖默认设置。",
+    "submit_failed": "提交任务失败"
 }
