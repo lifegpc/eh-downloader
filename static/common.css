@@ -56,8 +56,16 @@ body {
     bottom: auto;
 }
 
-.settings #s-cookies .mdc-text-field {
+.settings .text-box div.text:not(.helper, #s-port) .mdc-text-field {
     min-width: 50%;
+}
+
+.settings .text-box div.text.helper>div {
+    min-width: 50%;
+}
+
+.settings .text-box div.text.helper .mdc-text-field {
+    min-width: 100%;
 }
 
 .settings #s-port .mdc-text-field {
@@ -267,7 +275,7 @@ div.new_task>div.container>div.bottom {
     }
 }
 
-@media (max-width:767px) {
+@media (max-width:810px) {
     .settings {
         padding-top: 0;
     }
@@ -287,12 +295,16 @@ div.new_task>div.container>div.bottom {
     }
 
     .settings .text-box .mdc-text-field {
-        margin: 0;
+        margin: 1px;
         width: 100%;
     }
 
     .settings .text-box .label .mdc-text-field {
         margin-top: 5px;
+    }
+
+    .settings .text-box div.text.helper>div {
+        min-width: 100%;
     }
 
     button.mdc-button {
