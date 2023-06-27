@@ -280,7 +280,7 @@ div.new_task>div.container>div.bottom {
         padding-top: 0;
     }
 
-    .settings label {
+    .settings>div:not(.check-box) label {
         line-height: normal;
     }
 
