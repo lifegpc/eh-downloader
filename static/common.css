@@ -232,6 +232,18 @@ body {
     background-color: var(--dark-backgroud);
 }
 
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__idle{
+    border: white solid 1px;
+}
+
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover ~ .mdc-notched-outline__idle,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover ~ .mdc-notched-outline__idle{
+    border: var(--mdc-theme-primary) solid 1px;
+}
+
+.dark-scheme .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate) ~ .mdc-checkbox__background{
+    border-color: white;
+}
+
 .mdc-top-app-bar__section--align-end>* {
     margin: 0 5px;
 }
@@ -252,10 +264,11 @@ div.new_task {
 
 div.new_task>div.container {
     position: relative;
-    margin: 2.5% 10%;
+    margin: auto;
     height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
+    margin-top: 12rem;
 }
 
 div.new_task .top {
