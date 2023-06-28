@@ -232,16 +232,17 @@ body {
     background-color: var(--dark-backgroud);
 }
 
-.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__idle{
-    border: white solid 1px;
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__idle {
+    border-color: rgb(255, 255, 255)
 }
 
-.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover ~ .mdc-notched-outline__idle,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover ~ .mdc-notched-outline__idle{
-    border: var(--mdc-theme-primary) solid 1px;
+.dark-scheme .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate) ~ .mdc-checkbox__background {
+    border-color: rgb(255, 255, 255);
+    background-color: rgba(0,0,0,0)
 }
 
-.dark-scheme .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate) ~ .mdc-checkbox__background{
-    border-color: white;
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover ~ .mdc-notched-outline__idle,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover ~ .mdc-notched-outline__idle {
+    border-color: var(--mdc-theme-primary)
 }
 
 .mdc-top-app-bar__section--align-end>* {
@@ -268,7 +269,7 @@ div.new_task>div.container {
     height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
-    margin-top: 12rem;
+    margin-top: 8rem;
 }
 
 div.new_task .top {
