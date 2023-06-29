@@ -15,5 +15,9 @@
     "overwrite_cfg": "覆盖默认设置。",
     "submit_failed": "提交任务失败",
     "gallery_title": "画廊标题：",
-    "gallery_page": "页数："
+    "gallery_page": "页数：",
+    "ezcfg_output": "输出文件的位置：",
+    "ezcfg_jpn_title": "优先使用日语标题。",
+    "ezcfg_export_ad": "导出标记为广告的页面。",
+    "ezcfg_max_length": "Zip文件中文件名的最大长度："
 }

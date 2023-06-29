@@ -659,6 +659,7 @@ export class EhDb {
     }
     convert_gmeta(m: GMetaRaw[]): GMeta[] {
         return m.map((m) => {
+            if (m.expunged === undefined) return <GMeta> <unknown> m;
             const b = m.expunged !== 0;
             const t = <GMeta> <unknown> m;
             t.expunged = b;
@@ -751,6 +752,19 @@ export class EhDb {
             "SELECT gid FROM gmeta LIMIT ? OFFSET ?;",
             [limit, offset],
         ).map((n) => n[0]);
+    }
+    get_gmetas(offset = 0, limit = 20, fields = "*") {
+        return this.convert_gmeta(
+            this.db.queryEntries<GMetaRaw>(
+                `SELECT ${fields} FROM gmeta LIMIT ? OFFSET ?;`,
+                [limit, offset],
+            ),
+        );
+    }
+    get_gmetas_all(fields = "*") {
+        return this.convert_gmeta(
+            this.db.queryEntries<GMetaRaw>(`SELECT ${fields} FROM gmeta;`),
+        );
     }
     get_gmeta_by_gid(gid: number) {
         const s = this.convert_gmeta(

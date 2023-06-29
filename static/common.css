@@ -251,7 +251,7 @@ div.new_task>div.container {
     height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
-    margin-top: 8rem;
+    margin-top: 2.5%;
 }
 
 div.new_task .top {

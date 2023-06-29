@@ -15,5 +15,9 @@
     "overwrite_cfg": "Overwrite default config.",
     "submit_failed": "Failed to submit task.",
     "gallery_title": "Gallery title: ",
-    "gallery_page": "Number of pages: "
+    "gallery_page": "Number of pages: ",
+    "ezcfg_output": "The path to output file: ",
+    "ezcfg_jpn_title": "Use japanese title first.",
+    "ezcfg_export_ad": "Export pages which marked as ads.",
+    "ezcfg_max_length": "Maximum length of filenames in Zip files: "
 }

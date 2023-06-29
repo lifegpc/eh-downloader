@@ -8,3 +8,5 @@ export type GalleryData = {
 };
 
 export type GalleryResult = JSONResult<GalleryData>;
+
+export type GalleryListResult = JSONResult<GMeta[]>;

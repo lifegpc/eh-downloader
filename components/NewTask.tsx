@@ -9,7 +9,11 @@ import { StateUpdater, useRef, useState } from "preact/hooks";
 import { TaskType } from "../task.ts";
 import BTextField from "./BTextField.tsx";
 import { parseUrl, UrlType } from "../url.ts";
-import { generate_download_cfg } from "../server/cfg.ts";
+import {
+    cfg,
+    generate_download_cfg,
+    generate_export_zip_cfg,
+} from "../server/cfg.ts";
 import BCheckbox from "./BCheckbox.tsx";
 import BContext from "./BContext.tsx";
 import Button from "preact-material-components/Button";
@@ -17,6 +21,8 @@ import { sendTaskMessage } from "../islands/TaskManager.tsx";
 import Snackbar from "preact-material-components/Snackbar";
 import { GalleryResult } from "../server/gallery.ts";
 import { tw } from "twind";
+import { ExportZipConfig } from "../tasks/export_zip.ts";
+import GidDataList from "./GidDataList.tsx";
 
 export type NewTaskProps = {
     show: boolean;
@@ -46,6 +52,8 @@ export default class NewTask extends Component<NewTaskProps> {
         const [ezgid, set_ezgid1] = useState<number>();
         const [ginfo, set_ginfo] = useState<GalleryResult>();
         const [abort, set_abort] = useState<AbortController>();
+        const [ezcfg, set_ezcfg1] = useState(generate_export_zip_cfg());
+        const [overwrite_ezcfg, set_overwrite_ezcfg] = useState(false);
         if (task_type === TaskType.Download) {
             const set_url: StateUpdater<string> = (u) => {
                 const n = typeof u === "string" ? u : u(url || "");
@@ -70,10 +78,9 @@ export default class NewTask extends Component<NewTaskProps> {
                     set_url1(`https://e-hentai.org/g/${dgid}/${n}/`);
                 }
             };
-            const set_overwrite_cfg: StateUpdater<boolean> = (u) => {
-                const n = typeof u === "boolean" ? u : u(overwrite_cfg);
+            const set_overwrite_cfg = (n: boolean) => {
                 set_overwrite_cfg1(n);
-                if (n === true) {
+                if (n) {
                     set_dcfg(generate_download_cfg());
                 }
             };
@@ -176,6 +183,14 @@ export default class NewTask extends Component<NewTaskProps> {
                 };
             }
         } else if (task_type === TaskType.ExportZip) {
+            const export_ad = overwrite_ezcfg
+                ? ezcfg.export_ad || false
+                : false;
+            const jpn_title = overwrite_ezcfg
+                ? ezcfg.jpn_title || false
+                : cfg.value
+                ? cfg.value.export_zip_jpn_title
+                : false;
             const fetch_ginfo = (gid: number) => {
                 set_abort(new AbortController());
                 fetch(`/api/gallery/${gid}`).then(async (res) => {
@@ -201,15 +216,22 @@ export default class NewTask extends Component<NewTaskProps> {
             };
             let ginfo_div = null;
             if (ginfo?.ok) {
+                let title = ginfo.data.meta.title;
+                if (jpn_title && ginfo.data.meta.title_jpn) {
+                    title = ginfo.data.meta.title_jpn;
+                }
+                const count = export_ad
+                    ? ginfo.data.pages.length
+                    : ginfo.data.pages.reduce((p, c) => c.is_ad ? p : p + 1, 0);
                 ginfo_div = (
                     <div>
                         <div>
                             {t("task.gallery_title")}
-                            {ginfo.data.meta.title}
+                            {title}
                         </div>
                         <div>
                             {t("task.gallery_page")}
-                            {ginfo.data.pages.length}
+                            {count}
                         </div>
                     </div>
                 );
@@ -220,17 +242,71 @@ export default class NewTask extends Component<NewTaskProps> {
                     </div>
                 );
             }
+            const set_ezcfg: StateUpdater<ExportZipConfig> = (v) => {
+                set_ezcfg1(v);
+                this.forceUpdate();
+            };
+            const set_overwrite_cfg = (v: boolean) => {
+                set_overwrite_ezcfg(v);
+                if (v) {
+                    set_ezcfg(Object.assign(ezcfg, generate_export_zip_cfg()));
+                }
+            };
+            let cfg_div = null;
+            if (overwrite_ezcfg) {
+                cfg_div = (
+                    <div>
+                        <BContext set_value={set_ezcfg}>
+                            <BCheckbox
+                                id="ez-jpn_title"
+                                name="jpn_title"
+                                checked={ezcfg.jpn_title || false}
+                                description={t("task.ezcfg_jpn_title")}
+                            />
+                            <BCheckbox
+                                id="ez-export_ad"
+                                name="export_ad"
+                                checked={ezcfg.export_ad || false}
+                                description={t("task.ezcfg_export_ad")}
+                            />
+                            <BTextField
+                                name="output"
+                                value={ezcfg.output}
+                                description={t("task.ezcfg_output")}
+                                type="text"
+                                outlined={true}
+                            />
+                            <BTextField
+                                name="max_length"
+                                value={ezcfg.max_length}
+                                description={t("task.ezcfg_max_length")}
+                                type="number"
+                                outlined={true}
+                                min={0}
+                            />
+                        </BContext>
+                    </div>
+                );
+            }
             config_div = (
                 <div class="export_zip">
+                    <GidDataList id="gid-list" jpn_title={jpn_title} />
                     <BTextField
-                        id="ezgid"
                         value={ezgid}
                         description={t("task.gallery_id")}
                         type="number"
                         outlined={true}
                         set_value={set_ezgid}
+                        list="gid-list"
                     />
                     {ginfo_div}
+                    <BCheckbox
+                        id="ez-cfg"
+                        checked={overwrite_ezcfg}
+                        description={t("task.overwrite_cfg")}
+                        set_value={set_overwrite_cfg}
+                    />
+                    {cfg_div}
                 </div>
             );
         }

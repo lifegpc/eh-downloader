@@ -14,10 +14,11 @@ import * as $8 from "./routes/api/filemeta.ts";
 import * as $9 from "./routes/api/filemeta/[token].ts";
 import * as $10 from "./routes/api/files/[token].ts";
 import * as $11 from "./routes/api/gallery/[gid].ts";
-import * as $12 from "./routes/api/status.ts";
-import * as $13 from "./routes/api/task.ts";
-import * as $14 from "./routes/api/thumbnail/[id].ts";
-import * as $15 from "./routes/index.tsx";
+import * as $12 from "./routes/api/gallery/list.ts";
+import * as $13 from "./routes/api/status.ts";
+import * as $14 from "./routes/api/task.ts";
+import * as $15 from "./routes/api/thumbnail/[id].ts";
+import * as $16 from "./routes/index.tsx";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -36,10 +37,11 @@ const manifest = {
         "./routes/api/filemeta/[token].ts": $9,
         "./routes/api/files/[token].ts": $10,
         "./routes/api/gallery/[gid].ts": $11,
-        "./routes/api/status.ts": $12,
-        "./routes/api/task.ts": $13,
-        "./routes/api/thumbnail/[id].ts": $14,
-        "./routes/index.tsx": $15,
+        "./routes/api/gallery/list.ts": $12,
+        "./routes/api/status.ts": $13,
+        "./routes/api/task.ts": $14,
+        "./routes/api/thumbnail/[id].ts": $15,
+        "./routes/index.tsx": $16,
     },
     islands: {
         "./islands/Container.tsx": $$0,

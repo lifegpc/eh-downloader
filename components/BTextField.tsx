@@ -1,6 +1,6 @@
 import { Component, ComponentChildren, ContextType } from "preact";
 import TextField from "preact-material-components/TextField";
-import { Ref, StateUpdater, useRef } from "preact/hooks";
+import { Ref, useRef } from "preact/hooks";
 import { BCtx } from "./BContext.tsx";
 
 interface TextType {
@@ -33,6 +33,7 @@ type Props<T extends keyof TextType> = {
     max?: DataType[T];
     outlined?: boolean;
     id?: string;
+    list?: string;
 };
 
 export default class BTextField<T extends keyof TextType>
@@ -134,6 +135,7 @@ export default class BTextField<T extends keyof TextType>
                     min={this.props.min}
                     max={this.props.max}
                     outlined={this.props.outlined}
+                    list={this.props.list}
                 />
                 {this.props.children}
             </div>

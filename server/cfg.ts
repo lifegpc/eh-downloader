@@ -3,6 +3,10 @@ import { ConfigType } from "../config.ts";
 import { get_ws_host } from "./utils.ts";
 import { ConfigClientSocketData, ConfigSeverSocketData } from "./config.ts";
 import { DEFAULT_DOWNLOAD_CONFIG, DownloadConfig } from "../tasks/download.ts";
+import {
+    DEFAULT_EXPORT_ZIP_CONFIG,
+    ExportZipConfig,
+} from "../tasks/export_zip.ts";
 
 export const cfg = signal<ConfigType | undefined>(undefined);
 
@@ -34,5 +38,13 @@ export function generate_download_cfg(): DownloadConfig {
         max_retry_count: c.max_retry_count,
         mpv: c.mpv,
         remove_previous_gallery: c.remove_previous_gallery,
+    };
+}
+
+export function generate_export_zip_cfg(): ExportZipConfig {
+    if (!cfg.value) return DEFAULT_EXPORT_ZIP_CONFIG;
+    const c = cfg.value;
+    return {
+        jpn_title: c.export_zip_jpn_title,
     };
 }
