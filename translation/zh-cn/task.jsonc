@@ -13,5 +13,7 @@
     "gallery_id": "画廊ID：",
     "gallery_token": "画廊令牌：",
     "overwrite_cfg": "覆盖默认设置。",
-    "submit_failed": "提交任务失败"
+    "submit_failed": "提交任务失败",
+    "gallery_title": "画廊标题：",
+    "gallery_page": "页数："
 }

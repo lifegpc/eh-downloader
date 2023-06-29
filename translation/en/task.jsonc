@@ -13,5 +13,7 @@
     "gallery_id": "Gallery ID: ",
     "gallery_token": "Gallery token: ",
     "overwrite_cfg": "Overwrite default config.",
-    "submit_failed": "Failed to submit task."
+    "submit_failed": "Failed to submit task.",
+    "gallery_title": "Gallery title: ",
+    "gallery_page": "Number of pages: "
 }

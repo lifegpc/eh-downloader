@@ -15,6 +15,8 @@ import BContext from "./BContext.tsx";
 import Button from "preact-material-components/Button";
 import { sendTaskMessage } from "../islands/TaskManager.tsx";
 import Snackbar from "preact-material-components/Snackbar";
+import { GalleryResult } from "../server/gallery.ts";
+import { tw } from "twind";
 
 export type NewTaskProps = {
     show: boolean;
@@ -36,24 +38,27 @@ export default class NewTask extends Component<NewTaskProps> {
         const show_snack = (message: string) => {
             snack.current?.MDComponent?.show({ message });
         };
+        const [dgid, set_dgid1] = useState<number>();
+        const [token, set_token1] = useState<string>();
+        const [url, set_url1] = useState<string>();
+        const [dcfg, set_dcfg] = useState(generate_download_cfg());
+        const [overwrite_cfg, set_overwrite_cfg1] = useState(false);
+        const [ezgid, set_ezgid1] = useState<number>();
+        const [ginfo, set_ginfo] = useState<GalleryResult>();
+        const [abort, set_abort] = useState<AbortController>();
         if (task_type === TaskType.Download) {
-            const [gid, set_gid1] = useState<number>();
-            const [token, set_token1] = useState<string>();
-            const [url, set_url1] = useState<string>();
-            const [cfg, set_cfg] = useState(generate_download_cfg());
-            const [overwrite_cfg, set_overwrite_cfg1] = useState(false);
             const set_url: StateUpdater<string> = (u) => {
                 const n = typeof u === "string" ? u : u(url || "");
                 set_url1(n);
                 const p = parseUrl(n);
                 if (p && p.type !== UrlType.Single) {
-                    set_gid1(p.gid);
+                    set_dgid(p.gid);
                     set_token1(p.token);
                 }
             };
-            const set_gid: StateUpdater<number> = (u) => {
-                const g = typeof u === "number" ? u : u(gid || 0);
-                set_gid1(g);
+            const set_dgid: StateUpdater<number> = (u) => {
+                const g = typeof u === "number" ? u : u(dgid || 0);
+                set_dgid1(g);
                 if (g && token) {
                     set_url1(`https://e-hentai.org/g/${g}/${token}/`);
                 }
@@ -61,26 +66,26 @@ export default class NewTask extends Component<NewTaskProps> {
             const set_token: StateUpdater<string> = (u) => {
                 const n = typeof u === "string" ? u : u(url || "");
                 set_token1(n);
-                if (gid && n) {
-                    set_url1(`https://e-hentai.org/g/${gid}/${n}/`);
+                if (dgid && n) {
+                    set_url1(`https://e-hentai.org/g/${dgid}/${n}/`);
                 }
             };
             const set_overwrite_cfg: StateUpdater<boolean> = (u) => {
                 const n = typeof u === "boolean" ? u : u(overwrite_cfg);
                 set_overwrite_cfg1(n);
                 if (n === true) {
-                    set_cfg(generate_download_cfg());
+                    set_dcfg(generate_download_cfg());
                 }
             };
             let cfg_div = null;
             if (overwrite_cfg) {
                 cfg_div = (
                     <div>
-                        <BContext set_value={set_cfg}>
+                        <BContext set_value={set_dcfg}>
                             <BCheckbox
                                 id="d-download_original_img"
                                 name="download_original_img"
-                                checked={cfg.download_original_img || false}
+                                checked={dcfg.download_original_img || false}
                                 description={t(
                                     "settings.download_original_img",
                                 )}
@@ -88,13 +93,13 @@ export default class NewTask extends Component<NewTaskProps> {
                             <BCheckbox
                                 id="d-mpv"
                                 name="mpv"
-                                checked={cfg.mpv || false}
+                                checked={dcfg.mpv || false}
                                 description={t("settings.mpv")}
                             />
                             <BCheckbox
                                 id="d-remove_previous_gallery"
                                 name="remove_previous_gallery"
-                                checked={cfg.remove_previous_gallery || false}
+                                checked={dcfg.remove_previous_gallery || false}
                                 description={t(
                                     "settings.remove_previous_gallery",
                                 )}
@@ -102,7 +107,7 @@ export default class NewTask extends Component<NewTaskProps> {
                             <BTextField
                                 id="d-max_download_img_count"
                                 name="max_download_img_count"
-                                value={cfg.max_download_img_count || 3}
+                                value={dcfg.max_download_img_count || 3}
                                 description={t(
                                     "settings.max_download_img_count",
                                 )}
@@ -113,7 +118,7 @@ export default class NewTask extends Component<NewTaskProps> {
                             <BTextField
                                 id="d-max_retry_count"
                                 name="max_retry_count"
-                                value={cfg.max_retry_count || 3}
+                                value={dcfg.max_retry_count || 3}
                                 description={t("settings.max_retry_count")}
                                 type="number"
                                 min={1}
@@ -133,11 +138,11 @@ export default class NewTask extends Component<NewTaskProps> {
                         set_value={set_url}
                     />
                     <BTextField
-                        value={gid}
+                        value={dgid}
                         type="number"
                         description={t("task.gallery_id")}
                         outlined={true}
-                        set_value={set_gid}
+                        set_value={set_dgid}
                     />
                     <BTextField
                         value={token}
@@ -155,21 +160,79 @@ export default class NewTask extends Component<NewTaskProps> {
                     {cfg_div}
                 </div>
             );
-            if (gid && token) {
+            if (dgid && token) {
                 submit = () => {
                     return sendTaskMessage({
                         type: "new_download_task",
-                        gid,
+                        gid: dgid,
                         token,
-                        cfg: overwrite_cfg ? cfg : undefined,
+                        cfg: overwrite_cfg ? dcfg : undefined,
                     });
                 };
                 clean = () => {
-                    set_gid1(undefined);
+                    set_dgid1(undefined);
                     set_token1(undefined);
                     set_url1(undefined);
                 };
             }
+        } else if (task_type === TaskType.ExportZip) {
+            const fetch_ginfo = (gid: number) => {
+                set_abort(new AbortController());
+                fetch(`/api/gallery/${gid}`).then(async (res) => {
+                    try {
+                        set_ginfo(await res.json());
+                    } catch (e) {
+                        set_ginfo({
+                            ok: false,
+                            status: -1,
+                            error: e.toString(),
+                        });
+                    }
+                }).catch((e) => {
+                    set_ginfo({ ok: false, status: -1, error: e.toString() });
+                }).finally(() => {
+                    set_abort(undefined);
+                });
+            };
+            const set_ezgid = (g: number) => {
+                if (abort) abort.abort();
+                set_ezgid1(g);
+                if (!isNaN(g)) fetch_ginfo(g);
+            };
+            let ginfo_div = null;
+            if (ginfo?.ok) {
+                ginfo_div = (
+                    <div>
+                        <div>
+                            {t("task.gallery_title")}
+                            {ginfo.data.meta.title}
+                        </div>
+                        <div>
+                            {t("task.gallery_page")}
+                            {ginfo.data.pages.length}
+                        </div>
+                    </div>
+                );
+            } else if (ginfo?.ok === false) {
+                ginfo_div = (
+                    <div>
+                        <div class={tw`text-red-500`}>{ginfo.error}</div>
+                    </div>
+                );
+            }
+            config_div = (
+                <div class="export_zip">
+                    <BTextField
+                        id="ezgid"
+                        value={ezgid}
+                        description={t("task.gallery_id")}
+                        type="number"
+                        outlined={true}
+                        set_value={set_ezgid}
+                    />
+                    {ginfo_div}
+                </div>
+            );
         }
         const sub = () => {
             if (submit) {

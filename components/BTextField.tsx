@@ -16,6 +16,8 @@ interface DataType {
 }
 
 type Props<T extends keyof TextType> = {
+    /**@default {true} */
+    clear_cache?: boolean;
     value?: TextType[T];
     name?: string;
     description?: string;
@@ -26,7 +28,7 @@ type Props<T extends keyof TextType> = {
     fullwidth?: boolean;
     disabled?: boolean;
     children?: ComponentChildren;
-    set_value?: StateUpdater<TextType[T]>;
+    set_value?: (v: TextType[T]) => void;
     min?: DataType[T];
     max?: DataType[T];
     outlined?: boolean;
@@ -38,6 +40,24 @@ export default class BTextField<T extends keyof TextType>
     static contextType = BCtx;
     ref: Ref<TextField | undefined> | undefined;
     declare context: ContextType<typeof BCtx>;
+    clear() {
+        const e = this.ref?.current;
+        if (e) {
+            const b = e.base;
+            if (b) {
+                const t = b as HTMLElement;
+                const d = t.querySelector("input");
+                if (d) {
+                    d.value = "";
+                }
+            }
+        }
+    }
+    get clear_cache() {
+        return this.props.clear_cache !== undefined
+            ? this.props.clear_cache
+            : true;
+    }
     update(value: TextType[T]) {
         const e = this.ref?.current;
         if (e) {
@@ -67,13 +87,15 @@ export default class BTextField<T extends keyof TextType>
     }
     componentDidMount() {
         if (this.props.value !== undefined) this.update(this.props.value);
+        else if (this.clear_cache) this.clear();
     }
-    componentWillUpdate(
-        nextProps: Readonly<Props<T>>,
-        _nextState: Readonly<unknown>,
-        _nextContext: unknown,
-    ) {
-        if (nextProps.value !== undefined) this.update(nextProps.value);
+    componentDidUpdate(
+        previousProps: Readonly<Props<T>>,
+        previousState: Readonly<unknown>,
+        snapshot: unknown,
+    ): void {
+        if (this.props.value !== undefined) this.update(this.props.value);
+        else if (this.clear_cache) this.clear();
     }
     get_value(e: HTMLInputElement): TextType[T] {
         const type = this.props.type;
