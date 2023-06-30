@@ -35,6 +35,28 @@ body {
     top: 64px;
 }
 
+.b-text-field .datalist {
+    width: 100%;
+    display: none;
+}
+
+.b-text-field .datalist.open {
+    display: grid;
+}
+
+.b-text-field .datalist .mdc-list-item {
+    display: grid;
+}
+
+.b-text-field .datalist .mdc-list-item .value {
+    width: 100%;
+}
+
+.b-text-field .datalist .mdc-list-item .label {
+    width: 100%;
+    font-size: smaller;
+}
+
 .settings {
     margin: 0 18%;
     padding-top: 40px;

@@ -5,7 +5,7 @@ import Icon from "preact-material-components/Icon";
 import { set_state } from "../server/state.ts";
 import t from "../server/i18n.ts";
 import BSelect from "./BSelect.tsx";
-import { StateUpdater, useRef, useState } from "preact/hooks";
+import { StateUpdater, useEffect, useRef, useState } from "preact/hooks";
 import { TaskType } from "../task.ts";
 import BTextField from "./BTextField.tsx";
 import { parseUrl, UrlType } from "../url.ts";
@@ -22,13 +22,18 @@ import Snackbar from "preact-material-components/Snackbar";
 import { GalleryResult } from "../server/gallery.ts";
 import { tw } from "twind";
 import { ExportZipConfig } from "../tasks/export_zip.ts";
-import GidDataList from "./GidDataList.tsx";
+import { GMeta } from "../db.ts";
+import { GalleryListResult } from "../server/gallery.ts";
 
 export type NewTaskProps = {
     show: boolean;
 };
 
-export default class NewTask extends Component<NewTaskProps> {
+type State = {
+    gids?: GMeta[];
+};
+
+export default class NewTask extends Component<NewTaskProps, State> {
     static contextType = GlobalCtx;
     declare context: ContextType<typeof GlobalCtx>;
     render() {
@@ -54,6 +59,20 @@ export default class NewTask extends Component<NewTaskProps> {
         const [abort, set_abort] = useState<AbortController>();
         const [ezcfg, set_ezcfg1] = useState(generate_export_zip_cfg());
         const [overwrite_ezcfg, set_overwrite_ezcfg] = useState(false);
+        const fetchGidsData = async () => {
+            const re = await fetch(
+                "/api/gallery/list?all=1&fields=gid,title,title_jpn",
+            );
+            const d: GalleryListResult = await re.json();
+            if (d.ok) {
+                this.setState({ ...this.state, gids: d.data });
+            }
+        };
+        useEffect(() => {
+            if (task_type === TaskType.ExportZip) {
+                fetchGidsData().catch((e) => console.error(e));
+            }
+        }, [task_type]);
         if (task_type === TaskType.Download) {
             const set_url: StateUpdater<string> = (u) => {
                 const n = typeof u === "string" ? u : u(url || "");
@@ -288,16 +307,22 @@ export default class NewTask extends Component<NewTaskProps> {
                     </div>
                 );
             }
+            const datalist: { value: number; label?: string }[] = [];
+            if (this.state.gids) {
+                this.state.gids.forEach((g) => {
+                    const t = jpn_title && g.title_jpn ? g.title_jpn : g.title;
+                    datalist.push({ value: g.gid, label: t });
+                });
+            }
             config_div = (
                 <div class="export_zip">
-                    <GidDataList id="gid-list" jpn_title={jpn_title} />
                     <BTextField
                         value={ezgid}
                         description={t("task.gallery_id")}
                         type="number"
                         outlined={true}
                         set_value={set_ezgid}
-                        list="gid-list"
+                        datalist={datalist}
                     />
                     {ginfo_div}
                     <BCheckbox

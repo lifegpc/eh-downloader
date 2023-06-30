@@ -1,7 +1,8 @@
 import { Component, ComponentChildren, ContextType } from "preact";
 import TextField from "preact-material-components/TextField";
-import { Ref, useRef } from "preact/hooks";
+import { Ref, useRef, useState } from "preact/hooks";
 import { BCtx } from "./BContext.tsx";
+import List from "preact-material-components/List";
 
 interface TextType {
     text: string;
@@ -34,6 +35,7 @@ type Props<T extends keyof TextType> = {
     outlined?: boolean;
     id?: string;
     list?: string;
+    datalist?: { value: TextType[T]; label?: string }[];
 };
 
 export default class BTextField<T extends keyof TextType>
@@ -98,6 +100,22 @@ export default class BTextField<T extends keyof TextType>
         if (this.props.value !== undefined) this.update(this.props.value);
         else if (this.clear_cache) this.clear();
     }
+    get value(): TextType[T] | undefined {
+        const e = this.ref?.current;
+        if (e) {
+            const b = e.base;
+            if (b) {
+                const t = b as HTMLElement;
+                const d = t.querySelector("input");
+                if (d) {
+                    const n = this.get_value(d);
+                    if (typeof n === "number" && isNaN(n)) return undefined;
+                    return n;
+                }
+            }
+        }
+        return undefined;
+    }
     get_value(e: HTMLInputElement): TextType[T] {
         const type = this.props.type;
         // @ts-ignore Checked
@@ -107,10 +125,41 @@ export default class BTextField<T extends keyof TextType>
     }
     render() {
         this.ref = useRef<TextField>();
-        let cn = "text";
+        let cn = "b-text-field text";
+        let datalist_div = null;
+        const [display_datalist, set_display_datalist] = useState(false);
         if (this.props.helpertext) cn += " helper";
         if (this.props.outlined) cn += " outlined";
         if (this.props.label) cn += " label";
+        if (this.props.datalist && this.props.datalist.length) {
+            cn += " datalist";
+            let cn2 = "datalist";
+            if (display_datalist) cn2 += " open";
+            const v = this.value?.toString();
+            datalist_div = (
+                <List class={cn2}>
+                    {this.props.datalist.map((d) => {
+                        if (v !== undefined) {
+                            if (!d.value.toString().startsWith(v)) return null;
+                        }
+                        let label_div = null;
+                        if (d.label) {
+                            label_div = <div class="label">{d.label}</div>;
+                        }
+                        return (
+                            <List.Item
+                                onMousedown={() => {
+                                    this.set_value(d.value);
+                                }}
+                            >
+                                <div class="value">{d.value}</div>
+                                {label_div}
+                            </List.Item>
+                        );
+                    })}
+                </List>
+            );
+        }
         let desc = null;
         if (this.props.description) {
             desc = <label>{this.props.description}</label>;
@@ -136,7 +185,10 @@ export default class BTextField<T extends keyof TextType>
                     max={this.props.max}
                     outlined={this.props.outlined}
                     list={this.props.list}
+                    onFocus={() => set_display_datalist(true)}
+                    onBlur={() => set_display_datalist(false)}
                 />
+                {datalist_div}
                 {this.props.children}
             </div>
         );
