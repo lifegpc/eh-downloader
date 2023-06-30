@@ -41,10 +41,11 @@ body {
     max-height: 386px;
     height: auto;
     overflow: auto;
-    border: solid 1px rgba(0,0,0,0.24);
+    border: solid 1px rgba(0, 0, 0, 0.24);
     border-radius: 3px;
     position: absolute;
     top: 182px;
+    background: white;
     z-index: 10;
 }
 
@@ -55,7 +56,8 @@ body {
 .b-text-field .datalist .mdc-list-item {
     display: grid;
 }
-.b-text-field .datalist .mdc-list-item:hover{
+
+.b-text-field .datalist .mdc-list-item:hover {
     color: white;
     background-color: var(--mdc-theme-primary);
 }
@@ -274,7 +276,7 @@ body {
 }
 
 div.new_task {
-    overflow: hidden;
+    overflow: auto;
     width: 100vw;
     height: calc(100vh - 64px);
     max-width: 100vw;
