@@ -1,6 +1,5 @@
 import { Component, ContextType } from "preact";
 import Checkbox from "preact-material-components/Checkbox";
-import { StateUpdater } from "preact/hooks";
 import { BCtx } from "./BContext.tsx";
 
 type Props = {
@@ -8,7 +7,7 @@ type Props = {
     checked: boolean;
     name?: string;
     description?: string;
-    set_value?: StateUpdater<boolean>;
+    set_value?: (v: boolean) => void;
 };
 
 export default class BCheckbox extends Component<Props, unknown> {

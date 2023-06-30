@@ -35,6 +35,41 @@ body {
     top: 64px;
 }
 
+.b-text-field .datalist {
+    width: 100%;
+    display: none;
+    max-height: 386px;
+    height: auto;
+    overflow: auto;
+    border: solid 1px rgba(0,0,0,0.24);
+    border-radius: 3px;
+    position: absolute;
+    top: 182px;
+    z-index: 10;
+}
+
+.b-text-field .datalist.open {
+    display: grid;
+}
+
+.b-text-field .datalist .mdc-list-item {
+    display: grid;
+}
+.b-text-field .datalist .mdc-list-item:hover{
+    color: white;
+    background-color: var(--mdc-theme-primary);
+}
+
+
+.b-text-field .datalist .mdc-list-item .value {
+    width: 100%;
+}
+
+.b-text-field .datalist .mdc-list-item .label {
+    width: 100%;
+    font-size: smaller;
+}
+
 .settings {
     margin: 0 18%;
     padding-top: 40px;
@@ -216,17 +251,18 @@ body {
     background-color: var(--dark-backgroud);
 }
 
-.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__idle{
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__idle {
     border-color: white;
 }
 
-.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover ~ .mdc-notched-outline__idle, .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover ~ .mdc-notched-outline__idle{
+.dark-scheme .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline__idle, .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline__idle {
     border-color: var(--mdc-theme-primary);
 }
 
-.dark-scheme .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate) ~ .mdc-checkbox__background{
+.dark-scheme .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate)~.mdc-checkbox__background {
     border-color: white;
 }
+
 .mdc-top-app-bar__section--align-end>* {
     margin: 0 5px;
 }
@@ -251,7 +287,7 @@ div.new_task>div.container {
     height: calc(100% - 5% - 64px);
     min-width: 400px;
     width: calc(100% - 20%);
-    margin-top: 8rem;
+    margin-top: 2.5%;
 }
 
 div.new_task .top {
@@ -291,6 +327,7 @@ div.new_task div.content .text {
 div.new_task div.content .text .mdc-text-field {
     margin: 1px;
     width: calc(100% - 2px);
+    position: relative;
 }
 
 @media (max-width:1280px) {
