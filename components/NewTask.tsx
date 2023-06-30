@@ -336,6 +336,22 @@ export default class NewTask extends Component<NewTaskProps, State> {
                     {cfg_div}
                 </div>
             );
+            if (ezgid && ginfo?.ok && ginfo.data.meta.gid === ezgid) {
+                submit = () => {
+                    return sendTaskMessage({
+                        type: "new_export_zip_task",
+                        gid: ezgid,
+                        cfg: overwrite_ezcfg ? ezcfg : undefined,
+                    });
+                };
+                clean = () => {
+                    set_ezcfg((c) => {
+                        c.output = undefined;
+                        return c;
+                    });
+                    set_ezgid1(undefined);
+                };
+            }
         }
         const sub = () => {
             if (submit) {
