@@ -38,6 +38,14 @@ body {
 .b-text-field .datalist {
     width: 100%;
     display: none;
+    max-height: 386px;
+    height: auto;
+    overflow: auto;
+    border: solid 1px rgba(0,0,0,0.24);
+    border-radius: 3px;
+    position: absolute;
+    top: 182px;
+    z-index: 10;
 }
 
 .b-text-field .datalist.open {
@@ -47,6 +55,11 @@ body {
 .b-text-field .datalist .mdc-list-item {
     display: grid;
 }
+.b-text-field .datalist .mdc-list-item:hover{
+    color: white;
+    background-color: var(--mdc-theme-primary);
+}
+
 
 .b-text-field .datalist .mdc-list-item .value {
     width: 100%;
@@ -314,6 +327,7 @@ div.new_task div.content .text {
 div.new_task div.content .text .mdc-text-field {
     margin: 1px;
     width: calc(100% - 2px);
+    position: relative;
 }
 
 @media (max-width:1280px) {
