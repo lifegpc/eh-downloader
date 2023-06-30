@@ -309,44 +309,7 @@ export default class NewTask extends Component<NewTaskProps, State> {
                     </div>
                 );
             }
-            const datalist: { value: number; label?: string }[] = [
-                {
-                    value: 0,
-                    label: "点兔",
-                },
-                {
-                    value: 1,
-                    label: "点兔",
-                },
-                {
-                    value: 2,
-                    label: "点兔",
-                },
-                {
-                    value: 3,
-                    label: "点兔",
-                },
-                {
-                    value: 4,
-                    label: "点兔",
-                },
-                {
-                    value: 5,
-                    label: "点兔",
-                },
-                {
-                    value: 6,
-                    label: "点兔",
-                },
-                {
-                    value: 7,
-                    label: "点兔",
-                },
-                {
-                    value: 8,
-                    label: "点兔",
-                },
-            ];
+            const datalist: { value: number; label?: string }[] = [];
             if (this.state.gids) {
                 this.state.gids.forEach((g) => {
                     const t = jpn_title && g.title_jpn ? g.title_jpn : g.title;
