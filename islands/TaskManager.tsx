@@ -196,7 +196,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
                         const t = tasks.value.get(k);
                         if (t) {
                             if (!(flags & map_taskstatus(t.status))) {
-                                return null;
+                                return <div data-id={k}></div>;
                             }
                             return <Task task={t} />;
                         } else {
