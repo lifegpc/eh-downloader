@@ -349,6 +349,7 @@ export default class NewTask extends Component<NewTaskProps, State> {
                         c.output = undefined;
                         return c;
                     });
+                    set_ginfo(undefined);
                     set_ezgid1(undefined);
                 };
             }
