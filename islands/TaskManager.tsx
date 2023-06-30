@@ -1,5 +1,5 @@
 import { Component, ContextType } from "preact";
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import { TaskDetail, TaskStatus } from "../task.ts";
@@ -11,11 +11,19 @@ import Fab from "preact-material-components/Fab";
 import Icon from "preact-material-components/Icon";
 import { set_state } from "../server/state.ts";
 import t from "../server/i18n.ts";
+import { TaskFilterBar, TaskStatusFlag } from "../components/TaskFilterBar.tsx";
 
 export type TaskManagerProps = {
     base: string;
     show: boolean;
 };
+
+function map_taskstatus(s: TaskStatus) {
+    if (s === TaskStatus.Wait) return TaskStatusFlag.Waiting;
+    else if (s === TaskStatus.Running) return TaskStatusFlag.Running;
+    else if (s === TaskStatus.Finished) return TaskStatusFlag.Finished;
+    return TaskStatusFlag.None;
+}
 
 const tasks = signal(new Map<number, TaskDetail>());
 const task_list = signal(new Array<number>());
@@ -165,6 +173,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
             });
         }, []);
         if (!this.props.show) return null;
+        const [flags, set_flags] = useState(TaskStatusFlag.All);
         return (
             <div class="task_manager">
                 <Fab
@@ -176,28 +185,24 @@ export default class TaskManager extends Component<TaskManagerProps> {
                     <Icon>add</Icon>
                 </Fab>
                 <div class="task_amounts">
-                    <div class="mdc-theme--secondary-light">
-                        <p>count</p>
-                        <p>{t("task.all")}</p>
-                    </div>
-                    <div class="btn-success">
-                        <p>count</p>
-                        <p>{t("task.running")}</p>
-                    </div>
-                    <div class="btn-warning">
-                        <p>count</p>
-                        <p>{t("task.waiting")}</p>
-                    </div>
-                    <div class="btn-danger">
-                        <p>count</p>
-                        <p>{t("task.failed")}</p>
-                    </div>
-                    <div class="btn-primary">
-                        <p>count</p>
-                        <p>{t("task.finished")}</p>
-                    </div>
+                    <TaskFilterBar value={flags} set_value={set_flags} />
                 </div>
-                <div class="task_details">
+                <div
+                    class="task_details"
+                    // @ts-ignore Checked
+                    ref={ul}
+                >
+                    {task_list.value.map((k) => {
+                        const t = tasks.value.get(k);
+                        if (t) {
+                            if (!(flags & map_taskstatus(t.status))) {
+                                return null;
+                            }
+                            return <Task task={t} />;
+                        } else {
+                            return <div data-id={k}></div>;
+                        }
+                    })}
                 </div>
             </div>
         );

@@ -172,25 +172,6 @@ body {
     height: 64px;
 }
 
-.task_amounts>div {
-    flex: auto;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: aliceblue;
-}
-
-.task_amounts>div:first-child {
-    border-radius: 8px 0 0 8px;
-    background-color: black;
-}
-
-.task_amounts>div:last-child {
-    border-radius: 0 8px 8px 0
-}
-
 .btn-success {
     background-color: #28a745
 }
