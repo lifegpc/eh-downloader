@@ -74,24 +74,26 @@ export default class NewTask extends Component<NewTaskProps, State> {
             }
         }, [task_type]);
         if (task_type === TaskType.Download) {
-            const set_url: StateUpdater<string> = (u) => {
-                const n = typeof u === "string" ? u : u(url || "");
+            const set_url: StateUpdater<string | undefined> = (u) => {
+                const n = typeof u === "string" ? u : u ? u(url) : u;
                 set_url1(n);
-                const p = parseUrl(n);
-                if (p && p.type !== UrlType.Single) {
-                    set_dgid(p.gid);
-                    set_token1(p.token);
+                if (n) {
+                    const p = parseUrl(n);
+                    if (p && p.type !== UrlType.Single) {
+                        set_dgid(p.gid);
+                        set_token1(p.token);
+                    }
                 }
             };
-            const set_dgid: StateUpdater<number> = (u) => {
-                const g = typeof u === "number" ? u : u(dgid || 0);
+            const set_dgid: StateUpdater<number | undefined> = (u) => {
+                const g = typeof u === "number" ? u : u ? u(dgid) : u;
                 set_dgid1(g);
                 if (g && token) {
                     set_url1(`https://e-hentai.org/g/${g}/${token}/`);
                 }
             };
-            const set_token: StateUpdater<string> = (u) => {
-                const n = typeof u === "string" ? u : u(url || "");
+            const set_token: StateUpdater<string | undefined> = (u) => {
+                const n = typeof u === "string" ? u : u ? u(url) : u;
                 set_token1(n);
                 if (dgid && n) {
                     set_url1(`https://e-hentai.org/g/${dgid}/${n}/`);
@@ -228,10 +230,10 @@ export default class NewTask extends Component<NewTaskProps, State> {
                     set_abort(undefined);
                 });
             };
-            const set_ezgid = (g: number) => {
+            const set_ezgid = (g: number | undefined) => {
                 if (abort) abort.abort();
                 set_ezgid1(g);
-                if (!isNaN(g)) fetch_ginfo(g);
+                if (g !== undefined && !isNaN(g)) fetch_ginfo(g);
             };
             let ginfo_div = null;
             if (ginfo?.ok) {

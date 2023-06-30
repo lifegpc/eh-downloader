@@ -29,7 +29,7 @@ type Props<T extends keyof TextType> = {
     fullwidth?: boolean;
     disabled?: boolean;
     children?: ComponentChildren;
-    set_value?: (v: TextType[T]) => void;
+    set_value?: (v?: TextType[T]) => void;
     min?: DataType[T];
     max?: DataType[T];
     outlined?: boolean;
@@ -78,7 +78,7 @@ export default class BTextField<T extends keyof TextType>
             }
         }
     }
-    set_value(value: TextType[T]) {
+    set_value(value?: TextType[T]) {
         if (this.props.set_value) {
             this.props.set_value(value);
         } else if (this.context) {
@@ -108,16 +108,15 @@ export default class BTextField<T extends keyof TextType>
                 const t = b as HTMLElement;
                 const d = t.querySelector("input");
                 if (d) {
-                    const n = this.get_value(d);
-                    if (typeof n === "number" && isNaN(n)) return undefined;
-                    return n;
+                    return this.get_value(d);
                 }
             }
         }
         return undefined;
     }
-    get_value(e: HTMLInputElement): TextType[T] {
+    get_value(e: HTMLInputElement): TextType[T] | undefined {
         const type = this.props.type;
+        if (!e.value.length) return undefined;
         // @ts-ignore Checked
         if (type === "text" || type === "password") return e.value;
         // @ts-ignore Checked
