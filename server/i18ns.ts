@@ -3,6 +3,7 @@ import { parse } from "std/jsonc/mod.ts";
 import { join } from "std/path/mod.ts";
 import { I18NMap } from "./i18n.ts";
 import { pick } from "accept-language-parser/";
+import { get_host } from "./utils.ts";
 
 const whole_maps = new Map<string, I18NMap>();
 const LANGUAGES = ["zh-cn"];
@@ -67,6 +68,6 @@ export function i18n_handle_request(req: Request) {
                 params.append(p[0], p[1]);
             }
         }
-        return Response.redirect(`${u.origin}${u.pathname}?${params}`);
+        return Response.redirect(`${get_host(req)}${u.pathname}?${params}`);
     }
 }

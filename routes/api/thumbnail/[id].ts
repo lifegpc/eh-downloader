@@ -10,6 +10,7 @@ import {
     get_file_response,
     GetFileResponseOptions,
 } from "../../../server/get_file_response.ts";
+import { get_host } from "../../../server/utils.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -52,7 +53,7 @@ export const handler: Handlers = {
         }
         if (!force) {
             if (cfg.width > f.width || cfg.height > f.height) {
-                return Response.redirect(`${u.origin}/api/file/${f.id}`);
+                return Response.redirect(`${get_host(req)}/api/file/${f.id}`);
             }
         }
         const output = generate_filename(b, f, cfg);

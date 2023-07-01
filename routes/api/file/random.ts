@@ -1,6 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool } from "../../../server/parse_form.ts";
+import { get_host } from "../../../server/utils.ts";
 
 export const handler: Handlers = {
     async GET(req, _ctx) {
@@ -12,6 +13,6 @@ export const handler: Handlers = {
         const f = m.db.get_random_file(is_nsfw, is_ad);
         if (!f) return new Response("File not found.", { status: 404 });
         const t = thumb ? "thumbnail" : "file";
-        return Response.redirect(`${u.origin}/api/${t}/${f.id}`);
+        return Response.redirect(`${get_host(req)}/api/${t}/${f.id}`);
     },
 };
