@@ -19,10 +19,12 @@ export const handler: Handlers = {
                     m.cfg.meili_update_api_key,
             }
             : undefined;
+        const no_user = m.db.get_user_count() === 0;
         return return_data<StatusData>({
             ffmpeg_binary_enabled,
             meilisearch_enabled,
             meilisearch,
+            no_user,
         });
     },
 };

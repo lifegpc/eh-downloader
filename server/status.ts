@@ -5,4 +5,5 @@ export type StatusData = {
         host: string;
         key: string;
     };
+    no_user: boolean;
 };

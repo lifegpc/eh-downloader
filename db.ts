@@ -10,6 +10,7 @@ import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
 import { sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
+import { generate as randomstring } from "randomstring";
 
 type SqliteMaster = {
     type: string;
@@ -126,6 +127,38 @@ export type EhFileMetaRaw = {
     is_nsfw: number;
     is_ad: number;
 };
+export enum UserPermisson {
+    None = 0,
+    ReadGallery = 1 << 0,
+    EditGallery = 1 << 1,
+    All = ~(~0 << 2),
+}
+export type User = {
+    id: number;
+    username: string;
+    password: Uint8Array;
+    is_admin: boolean;
+    permissions: UserPermisson;
+};
+type UserRaw = {
+    id: number;
+    username: string;
+    password: Uint8Array;
+    is_admin: number;
+    permissions: UserPermisson;
+};
+export type Token = {
+    id: number;
+    uid: number;
+    token: string;
+    expired: Date;
+};
+type TokenRaw = {
+    id: number;
+    uid: number;
+    token: string;
+    expired: string;
+};
 const ALL_TABLES = [
     "version",
     "task",
@@ -135,6 +168,8 @@ const ALL_TABLES = [
     "gtag",
     "file",
     "filemeta",
+    "user",
+    "token",
 ];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
@@ -200,6 +235,19 @@ const FILEMETA_TABLE = `CREATE TABLE filemeta (
     is_nsfw BOOLEAN,
     is_ad BOOLEAN,
     PRIMARY KEY (token)
+);`;
+const USER_TABLE = `CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    password BLOB,
+    is_admin BOOLEAN,
+    permissions INT
+);`;
+const TOKEN_TABLE = `CREATE TABLE token (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid TEXT,
+    token TEXT,
+    expired TEXT
 );`;
 
 export class EhDb {
@@ -368,6 +416,12 @@ export class EhDb {
         if (!this.#exist_table.has("filemeta")) {
             this.db.execute(FILEMETA_TABLE);
         }
+        if (!this.#exist_table.has("user")) {
+            this.db.execute(USER_TABLE);
+        }
+        if (!this.#exist_table.has("token")) {
+            this.db.execute(TOKEN_TABLE);
+        }
         this.#updateExistsTable();
     }
     #read_version() {
@@ -518,6 +572,19 @@ export class EhDb {
             )[0];
         });
     }
+    add_token(uid: number, added: number): Token {
+        let token = randomstring();
+        while (this.get_token(token)) {
+            token = randomstring();
+        }
+        this.db.query(
+            "INSERT INTO token (uid, token, expired) VALUES (?, ?, ?);",
+            [uid, token, new Date(added + 2592000000)],
+        );
+        const t = this.get_token(token);
+        if (!t) throw Error("Failed to add token.");
+        return t;
+    }
     begin(type: SqliteTransactionType) {
         try {
             this.db.execute(`BEGIN ${type} TRANSACTION;`);
@@ -663,6 +730,23 @@ export class EhDb {
             const b = m.expunged !== 0;
             const t = <GMeta> <unknown> m;
             t.expunged = b;
+            return t;
+        });
+    }
+    convert_token(m: TokenRaw[]) {
+        return m.map((m) => {
+            const e = new Date(m.expired);
+            const t = <Token> <unknown> m;
+            t.expired = e;
+            return t;
+        });
+    }
+    convert_user(m: UserRaw[]) {
+        return m.map((m) => {
+            const a = m.is_admin !== 0;
+            const t = <User> <unknown> m;
+            t.is_admin = a;
+            if (t.is_admin) t.permissions = UserPermisson.All;
             return t;
         });
     }
@@ -875,6 +959,27 @@ export class EhDb {
                 Deno.pid,
             ])
         );
+    }
+    get_token(token: string) {
+        const s = this.convert_token(
+            this.db.queryEntries<TokenRaw>(
+                "SELECT * FROM token WHERE token = ?;",
+                [token],
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
+    get_user_by_name(name: string) {
+        const s = this.convert_user(
+            this.db.queryEntries<UserRaw>(
+                "SELECT * FROM user WHERE username = ?;",
+                [name],
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
+    get_user_count() {
+        return this.db.query<[number]>("SELECT COUNT(*) FROM user;")[0][0];
     }
     optimize() {
         this.db.execute("VACUUM;");
