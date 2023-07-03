@@ -1,6 +1,39 @@
 import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { get_task_manager } from "../../server.ts";
+import { parse_cookies } from "../../server/cookies.ts";
+import { return_error } from "../../server/utils.ts";
+
+function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
+    if (req.method === "OPTIONS") return true;
+    const m = get_task_manager();
+    if (m.db.get_user_count() === 0) return true;
+    const u = new URL(req.url);
+    let token: string | null | undefined = req.headers.get("X-TOKEN");
+    const cookies = parse_cookies(req.headers.get("Cookies"));
+    if (!token) {
+        token = cookies.get("token");
+    }
+    if (!token) {
+        if (u.pathname === "/api/token" && req.method === "PUT") return true;
+        if (u.pathname === "/api/status" && req.method === "GET") return true;
+        return false;
+    }
+    const t = m.db.get_token(token);
+    const now = (new Date()).getTime();
+    if (!t || t.expired.getTime() < now) return false;
+    const user = m.db.get_user(t.uid);
+    if (!user) {
+        m.db.delete_token(token);
+        return false;
+    }
+    ctx.state.user = user;
+    return true;
+}
 
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
+    if (!handle_auth(req, ctx)) {
+        return return_error(401, "Unauthorized");
+    }
     const res = await ctx.next();
     if (req.method === "OPTIONS" && res.status === 405) {
         const headers = new Headers();

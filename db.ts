@@ -127,7 +127,7 @@ export type EhFileMetaRaw = {
     is_nsfw: number;
     is_ad: number;
 };
-export enum UserPermisson {
+export enum UserPermission {
     None = 0,
     ReadGallery = 1 << 0,
     EditGallery = 1 << 1,
@@ -138,14 +138,14 @@ export type User = {
     username: string;
     password: Uint8Array;
     is_admin: boolean;
-    permissions: UserPermisson;
+    permissions: UserPermission;
 };
 type UserRaw = {
     id: number;
     username: string;
     password: Uint8Array;
     is_admin: number;
-    permissions: UserPermisson;
+    permissions: UserPermission;
 };
 export type Token = {
     id: number;
@@ -537,6 +537,15 @@ export class EhDb {
             pmeta,
         );
     }
+    add_root_user(username: string, password: Uint8Array) {
+        this.db.query("INSERT OR REPLACE INTO user VALUES (?, ?, ?, ?, ?);", [
+            0,
+            username,
+            password,
+            true,
+            UserPermission.All,
+        ]);
+    }
     add_task(task: Task) {
         return this.transaction(() => {
             this.db.query(
@@ -584,6 +593,33 @@ export class EhDb {
         const t = this.get_token(token);
         if (!t) throw Error("Failed to add token.");
         return t;
+    }
+    add_user(user: User) {
+        if (user.id === 0) {
+            this.db.query(
+                "INSERT INTO user (username, password, is_admin, permissions) VALUES (?, ?, ?, ?);",
+                [
+                    user.username,
+                    user.password,
+                    user.is_admin,
+                    user.permissions,
+                ],
+            );
+        } else {
+            this.db.query(
+                "INSERT OR REPLACE INTO user VALUES (?, ?, ?, ?, ?);",
+                [
+                    user.id,
+                    user.username,
+                    user.password,
+                    user.is_admin,
+                    user.permissions,
+                ],
+            );
+        }
+        const u = this.get_user_by_name(user.username);
+        if (!u) throw Error("Failed to add/update user.");
+        return u;
     }
     begin(type: SqliteTransactionType) {
         try {
@@ -746,7 +782,7 @@ export class EhDb {
             const a = m.is_admin !== 0;
             const t = <User> <unknown> m;
             t.is_admin = a;
-            if (t.is_admin) t.permissions = UserPermisson.All;
+            if (t.is_admin) t.permissions = UserPermission.All;
             return t;
         });
     }
@@ -783,6 +819,9 @@ export class EhDb {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
         });
+    }
+    delete_token(token: string) {
+        this.db.query("DELETE FROM token WHERE token = ?;", [token]);
     }
     async flock() {
         if (!this.#file) return;
@@ -965,6 +1004,15 @@ export class EhDb {
             this.db.queryEntries<TokenRaw>(
                 "SELECT * FROM token WHERE token = ?;",
                 [token],
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
+    get_user(id: number) {
+        const s = this.convert_user(
+            this.db.queryEntries<UserRaw>(
+                "SELECT * FROM user WHERE id = ?;",
+                [id],
             ),
         );
         return s.length ? s[0] : undefined;

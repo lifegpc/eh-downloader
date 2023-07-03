@@ -9,7 +9,34 @@ import isEqual from "lodash/isEqual";
 const USER_PASSWORD_ERROR = "Incorrect username or password.";
 
 export const handler: Handlers = {
-    async POST(req, _ctx) {
+    async DELETE(req, _ctx) {
+        const data = await req.formData();
+        const t = await get_string(data.get("token"));
+        if (!t) return return_error(1, "token not specified.");
+        const m = get_task_manager();
+        const token = m.db.get_token(t);
+        if (!token) return return_error(404, "token not found.");
+        m.db.delete_token(t);
+        return return_data(true);
+    },
+    GET(req, _ctx) {
+        const u = new URL(req.url);
+        const t = u.searchParams.get("token");
+        if (!t) return return_error(1, "token not specififed.");
+        const m = get_task_manager();
+        const token = m.db.get_token(t);
+        if (!token) return return_error(404, "token not found.");
+        const user = m.db.get_user(token.uid);
+        m.db.delete_token(t);
+        if (!user) return return_error(404, "user not found.");
+        return return_data({
+            token,
+            name: user.username,
+            is_admin: user.is_admin,
+            permissions: user.permissions,
+        });
+    },
+    async PUT(req, _ctx) {
         const data = await req.formData();
         const username = await get_string(data.get("username"));
         if (!username) return return_error(1, "username not specified.");
@@ -34,12 +61,12 @@ export const handler: Handlers = {
         const u = m.db.get_user_by_name(username);
         if (!u) return return_error(4, USER_PASSWORD_ERROR);
         const pa = new Uint8Array(
-            await pbkdf2Hmac(u.password, t.toString(), 1000, 64),
+            await pbkdf2Hmac(u.password, t.toString(), 1000, 64, "SHA-512"),
         );
         if (!isEqual(pa, password)) {
             return return_error(4, USER_PASSWORD_ERROR);
         }
         const token = m.db.add_token(u.id, now);
-        return return_data(token);
+        return return_data(token, 201);
     },
 };
