@@ -15,6 +15,8 @@ import { parse_int } from "../server/parse.ts";
 import { addDarkModeListener, detect_darkmode } from "../server/dark.ts";
 import { registeServiceWorker } from "../server/sw.ts";
 import { initCfg } from "../server/cfg.ts";
+import { load_dmodule } from "../server/dmodule.ts";
+import CreateRootUser from "../components/CreateRootUser.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -85,6 +87,9 @@ export default class Container extends Component<ContainerProps> {
                         document.body.classList.remove("dark-scheme");
                     }
                 }
+            });
+            load_dmodule().catch((e) => {
+                console.error(e);
             });
         }, []);
         return (
@@ -158,6 +163,7 @@ export default class Container extends Component<ContainerProps> {
                         show={state === "#/task_manager"}
                     />
                     <NewTask show={state === "#/task_manager/new"} />
+                    <CreateRootUser show={state === "#/create_root_user"} />
                 </div>
             </div>
         );
