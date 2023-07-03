@@ -6,6 +6,6 @@ export const MdOutlinedTextField = signal<
 >(undefined);
 
 export async function load_dmodule() {
-    const m = await import("./md3/md-outlined-text-field.ts");
-    MdOutlinedTextField.value = m.default;
+    MdOutlinedTextField.value =
+        (await import("./md3/md-outlined-text-field.ts")).default;
 }

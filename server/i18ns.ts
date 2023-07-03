@@ -7,8 +7,8 @@ import { get_host } from "./utils.ts";
 
 const whole_maps = new Map<string, I18NMap>();
 const LANGUAGES = ["zh-cn"];
-type MODULE = "common" | "settings" | "task";
-const MODULES: MODULE[] = ["common", "settings", "task"];
+type MODULE = "common" | "settings" | "task" | "user";
+const MODULES: MODULE[] = ["common", "settings", "task", "user"];
 
 export async function load_translation(signal?: AbortSignal) {
     const base = import.meta.resolve("../translation").slice(8);

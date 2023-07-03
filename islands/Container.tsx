@@ -42,6 +42,7 @@ export default class Container extends Component<ContainerProps> {
         const [display, set_display] = useState(false);
         const [state, set_state1] = useState("#/");
         const [darkmode, set_darkmode1] = useState(DarkMode.Auto);
+        const [dmodule_loaded, set_dmodule_loaded] = useState(false);
         const set_darkmode: StateUpdater<DarkMode> = (u) => {
             const v = typeof u === "function" ? u(darkmode) : u;
             set_darkmode1(v);
@@ -88,10 +89,24 @@ export default class Container extends Component<ContainerProps> {
                     }
                 }
             });
-            load_dmodule().catch((e) => {
+            load_dmodule().then(() => set_dmodule_loaded(true)).catch((e) => {
                 console.error(e);
             });
         }, []);
+        let main = null;
+        if (dmodule_loaded) {
+            main = (
+                <div class="main">
+                    <Settings show={state === "#/settings"} />
+                    <TaskManager
+                        base="#/task_manager"
+                        show={state === "#/task_manager"}
+                    />
+                    <NewTask show={state === "#/task_manager/new"} />
+                    <CreateRootUser show={state === "#/create_root_user"} />
+                </div>
+            );
+        }
         return (
             <div>
                 <Head>
@@ -156,15 +171,7 @@ export default class Container extends Component<ContainerProps> {
                         <Icon>settings</Icon>
                     </List.Item>
                 </List>
-                <div class="main">
-                    <Settings show={state === "#/settings"} />
-                    <TaskManager
-                        base="#/task_manager"
-                        show={state === "#/task_manager"}
-                    />
-                    <NewTask show={state === "#/task_manager/new"} />
-                    <CreateRootUser show={state === "#/create_root_user"} />
-                </div>
+                {main}
             </div>
         );
     }

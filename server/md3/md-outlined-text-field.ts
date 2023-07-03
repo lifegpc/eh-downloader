@@ -9,4 +9,5 @@ const MdOutlinedTextField = createComponent({
     react: Preact,
 });
 
+export { _MdOutlinedTextField as MdOutlinedTextField };
 export default MdOutlinedTextField;
