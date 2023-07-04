@@ -33,12 +33,11 @@ export default class CreateRootUser extends Component<Props> {
                     set_value={set_password}
                 />
                 <Button
-                    disabled={false}
+                    disabled={!username && !password}
                     onClick={() => {
-                        console.log("Click");
                     }}
                 >
-                    Login
+                    {t("user.login")}
                 </Button>
             </div>
         );

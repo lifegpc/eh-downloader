@@ -344,6 +344,8 @@ div.new_task div.content .text .mdc-text-field {
     --md-sys-color-surface-tint: #4CDADA;
     --md-sys-color-outline-variant: #3F4948;
     --md-sys-color-scrim: #000000;
+    --md-sys-color-surface-container: var(--dark-backgroud);
+    --md-sys-color-surface-container-highest: #335c84;
 }
 
 .b-text-field.md3.label md-outlined-text-field {
