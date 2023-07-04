@@ -1,6 +1,8 @@
 import { signal } from "@preact/signals";
 import type {
     MdDialog as _MdDialog,
+    MdMenu as _MdMenu,
+    MdMenuItem as _MdMenuItem,
     MdOutlinedButton as _MdOutlinedButton,
     MdOutlinedSelect as _MdOutlinedSelect,
     MdOutlinedTextField as _MdOutlinedTextField,
@@ -33,6 +35,10 @@ export const MdDialog = signal<typeof _MdDialog | undefined>(undefined);
 
 export const MdTextButton = signal<typeof _MdTextButton | undefined>(undefined);
 
+export const MdMenu = signal<typeof _MdMenu | undefined>(undefined);
+
+export const MdMenuItem = signal<typeof _MdMenuItem | undefined>(undefined);
+
 export async function load_dmodule() {
     const md3 = await import("./md3.ts");
     MdOutlinedTextField.value = md3.MdOutlinedTextField;
@@ -42,4 +48,6 @@ export async function load_dmodule() {
     MdOutlinedSelect.value = md3.MdOutlinedSelect;
     MdDialog.value = md3.MdDialog;
     MdTextButton.value = md3.MdTextButton;
+    MdMenu.value = md3.MdMenu;
+    MdMenuItem.value = md3.MdMenuItem;
 }
