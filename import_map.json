@@ -24,7 +24,7 @@
         "ua-parser-js": "https://esm.sh/ua-parser-js@1.0.35",
         "pbkdf2-hmac": "https://esm.sh/pbkdf2-hmac@1.2.1",
         "randomstring": "https://esm.sh/randomstring@1.3.0",
-        "@material/web/": "https://esm.sh/@material/web@1.0.0-pre.12/",
+        "@material/web/": "https://unpkg.lifegpc.workers.dev/@material/web@1.0.0-pre.12/",
         "@lit-labs/react/": "https://esm.sh/@lit-labs/react@1.2.0/"
     }
 }

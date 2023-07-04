@@ -1,8 +1,10 @@
 import { Component, ComponentChildren, ContextType } from "preact";
 import { BCtx } from "./BContext.tsx";
 import { Ref, useRef, useState } from "preact/hooks";
-import type _TextField from "../server/md3/md-outlined-text-field.ts";
-import type { MdOutlinedTextField as _TextFieldE } from "../server/md3/md-outlined-text-field.ts";
+import type {
+    _MdOutlinedTextField as _TextFieldE,
+    MdOutlinedTextField as _TextField,
+} from "../server/md3.ts";
 import { MdOutlinedTextField } from "../server/dmodule.ts";
 import List from "preact-material-components/List";
 
