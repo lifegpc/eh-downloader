@@ -28,8 +28,7 @@ type State = {
     selectedIndex: number;
 };
 
-export default class SettingsSelect<T extends obj>
-    extends Component<Props<T>, State> {
+export default class BSelect<T extends obj> extends Component<Props<T>, State> {
     static contextType = BCtx;
     declare context: ContextType<typeof BCtx>;
     ref: Ref<Select | undefined> | undefined;

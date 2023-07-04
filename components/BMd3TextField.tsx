@@ -1,10 +1,7 @@
 import { Component, ComponentChildren, ContextType } from "preact";
 import { BCtx } from "./BContext.tsx";
-import { Ref, useRef, useState } from "preact/hooks";
-import type {
-    _MdOutlinedTextField as _TextFieldE,
-    MdOutlinedTextField as _TextField,
-} from "../server/md3.ts";
+import { useState } from "preact/hooks";
+import type { _MdOutlinedTextField as _TextField } from "../server/md3.ts";
 import { MdOutlinedTextField } from "../server/dmodule.ts";
 import List from "preact-material-components/List";
 
@@ -41,14 +38,13 @@ type Props<T extends keyof TextType> = {
 export default class BMd3TextField<T extends keyof TextType>
     extends Component<Props<T>, unknown> {
     static contextType = BCtx;
-    ref: Ref<typeof _TextField | null> | undefined;
     declare context: ContextType<typeof BCtx>;
     get clear_cache() {
         return this.props.clear_cache !== undefined
             ? this.props.clear_cache
             : true;
     }
-    get_value(e: _TextFieldE): TextType[T] | undefined {
+    get_value(e: _TextField): TextType[T] | undefined {
         const type = this.props.type;
         if (!e.value.length) return undefined;
         // @ts-ignore Checked
@@ -57,7 +53,6 @@ export default class BMd3TextField<T extends keyof TextType>
         return e.valueAsNumber;
     }
     render() {
-        this.ref = useRef(null);
         if (!MdOutlinedTextField.value) return null;
         let datalist_div = null;
         const [display_datalist, set_display_datalist] = useState(false);
@@ -111,8 +106,6 @@ export default class BMd3TextField<T extends keyof TextType>
             <div class={cn} id={this.props.id}>
                 {desc}
                 <TextField
-                    /**@ts-ignore */
-                    ref={this.ref}
                     value={value}
                     type={this.props.type}
                     label={this.props.label}
@@ -123,7 +116,7 @@ export default class BMd3TextField<T extends keyof TextType>
                     /**@ts-ignore */
                     onInput={(ev: InputEvent) => {
                         if (ev.target) {
-                            const e = ev.target as _TextFieldE;
+                            const e = ev.target as _TextField;
                             this.set_value(this.get_value(e));
                         }
                     }}

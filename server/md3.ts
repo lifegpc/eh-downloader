@@ -3,6 +3,8 @@ import { MdOutlinedButton as _MdOutlinedButton } from "@material/web/button/outl
 import { MdTonalButton as _MdTonalButton } from "@material/web/button/tonal-button.js?dts=1";
 import { MdSelectOption as _MdSelectOption } from "@material/web/select/select-option.js?dts=1";
 import { MdOutlinedSelect as _MdOutlinedSelect } from "@material/web/select/outlined-select.js?dts=1";
+import { MdDialog as _MdDialog } from "@material/web/dialog/dialog.js?dts=1";
+import { MdTextButton as _MdTextButton } from "@material/web/button/text-button.js?dts=1";
 import { createComponent } from "@lit-labs/react/?target=es2022";
 import * as Preact from "preact/compat";
 
@@ -41,8 +43,34 @@ export const MdOutlinedSelect = createComponent({
     react: Preact,
 });
 
+export type DialogAction = {
+    action: string;
+};
+
+export const MdDialog = createComponent({
+    tagName: "md-dialog",
+    elementClass: _MdDialog,
+    // @ts-ignore Checked
+    react: Preact,
+    events: {
+        "onopening": "opening",
+        "onopened": "opened",
+        "onclosing": "closing",
+        "onclosed": "closed",
+    },
+});
+
+export const MdTextButton = createComponent({
+    tagName: "md-text-button",
+    elementClass: _MdTextButton,
+    // @ts-ignore Checked
+    react: Preact,
+});
+
 export { _MdOutlinedTextField };
 export { _MdOutlinedButton };
 export { _MdTonalButton };
 export { _MdSelectOption };
 export { _MdOutlinedSelect };
+export { _MdDialog };
+export { _MdTextButton };

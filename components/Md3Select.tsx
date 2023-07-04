@@ -1,5 +1,6 @@
 import { Component, VNode } from "preact";
 import { MdOutlinedSelect, MdSelectOption } from "../server/dmodule.ts";
+import type { _MdOutlinedSelect } from "../server/md3.ts";
 
 type OProps = {
     value: string;
@@ -42,6 +43,7 @@ type Props = {
     hasTrailingIcon?: boolean;
     displayText?: string;
     selectedIndex?: number;
+    set_index?: (index: number) => void;
 };
 
 type State = {
@@ -82,6 +84,13 @@ export default class Md3Select extends Component<Props, State> {
                 hasTrailingIcon={this.props.hasTrailingIcon}
                 displayText={this.props.displayText}
                 selectedIndex={this.state.selectedIndex}
+                onChange={(e) => {
+                    const t = e.target as _MdOutlinedSelect;
+                    this.setState({ selectedIndex: t.selectedIndex });
+                    if (this.props.set_index) {
+                        this.props.set_index(t.selectedIndex);
+                    }
+                }}
             >
                 {/**@ts-ignore */}
                 {this.props.children}

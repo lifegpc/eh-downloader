@@ -1,7 +1,6 @@
 import { Component, ContextType } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Button from "preact-material-components/Button";
-import Dialog from "preact-material-components/Dialog";
 import Snackbar from "preact-material-components/Snackbar";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
@@ -11,6 +10,8 @@ import SettingsContext from "../components/SettingsContext.tsx";
 import SettingsText from "../components/SettingsText.tsx";
 import t from "../server/i18n.ts";
 import SettingsSelect from "../components/SettingsSelect.tsx";
+import type { _MdDialog, DialogAction } from "../server/md3.ts";
+import { MdDialog, MdTextButton } from "../server/dmodule.ts";
 
 export type SettingsProps = {
     show: boolean;
@@ -21,6 +22,10 @@ export default class Settings extends Component<SettingsProps> {
     declare context: ContextType<typeof GlobalCtx>;
     render() {
         if (!this.props.show) return;
+        if (!MdDialog.value) return;
+        if (!MdTextButton.value) return;
+        const Dialog = MdDialog.value;
+        const TextButton = MdTextButton.value;
         const [settings, set_settings] = useState<ConfigType | undefined>();
         const [error, set_error] = useState<string | undefined>();
         const [changed, set_changed] = useState<Set<string>>(new Set());
@@ -69,13 +74,13 @@ export default class Settings extends Component<SettingsProps> {
             data = <div class={tw`text-red-500`}>{error}</div>;
         } else if (settings) {
             const ref = useRef<SettingsText<"text">>();
-            const dlg = useRef<Dialog>();
+            const dlg = useRef<_MdDialog>();
             const showDlg = () => {
                 if (!changed.size) {
                     show_snack(t("settings.no_changed"));
                     return;
                 }
-                dlg.current?.MDComponent?.show();
+                dlg.current?.show();
             };
             const save = () => {
                 set_disabled(true);
@@ -141,7 +146,6 @@ export default class Settings extends Component<SettingsProps> {
                                 }]}
                                 description={t("settings.thumbnail_method")}
                                 selectedIndex={settings.thumbnail_method}
-                                outlined={true}
                             />
                             <SettingsText
                                 name="port"
@@ -270,16 +274,25 @@ export default class Settings extends Component<SettingsProps> {
                     <Button onClick={showDlg} disabled={disabled}>
                         {t("common.save")}
                     </Button>
-                    <Dialog ref={dlg} onAccept={save}>
-                        <Dialog.Header>{t("settings.save_dlg")}</Dialog.Header>
-                        <Dialog.Footer>
-                            <Dialog.FooterButton accept={true}>
+                    <Dialog
+                        /**@ts-ignore */
+                        ref={dlg}
+                        onclosed={(ev) => {
+                            const e = ev as CustomEvent<DialogAction>;
+                            if (e.detail.action === "yes") {
+                                save();
+                            }
+                        }}
+                    >
+                        <span slot="headline">{t("settings.save_dlg")}</span>
+                        <div slot="footer">
+                            <TextButton dialog-action="yes">
                                 {t("common.yes")}
-                            </Dialog.FooterButton>
-                            <Dialog.FooterButton cancel={true}>
+                            </TextButton>
+                            <TextButton dialog-action="close">
                                 {t("common.no")}
-                            </Dialog.FooterButton>
-                        </Dialog.Footer>
+                            </TextButton>
+                        </div>
                     </Dialog>
                 </div>
             );
