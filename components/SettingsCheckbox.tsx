@@ -1,6 +1,6 @@
 import { Component, ContextType } from "preact";
 import { SettingsCtx } from "./SettingsContext.tsx";
-import { ConfigType } from "../config.ts";
+import type { ConfigType } from "../config.ts";
 import Checkbox from "preact-material-components/Checkbox";
 
 export type SettingsCheckboxProps = {

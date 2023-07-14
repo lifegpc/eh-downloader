@@ -1,7 +1,7 @@
 import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { extname } from "std/path/mod.ts";
 import { Client } from "../client.ts";
-import { EhFile, PMeta } from "../db.ts";
+import type { EhFile, PMeta } from "../db.ts";
 import { initDOMParser, map, parse_bool } from "../utils.ts";
 import { parseUrl, UrlType } from "../url.ts";
 import { SinglePage } from "./SinglePage.ts";

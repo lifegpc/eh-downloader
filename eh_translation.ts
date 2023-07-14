@@ -1,4 +1,4 @@
-import { EhDb } from "./db.ts";
+import type { EhDb } from "./db.ts";
 import { asyncForEach } from "./utils.ts";
 
 export type GHAuthor = {

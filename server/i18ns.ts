@@ -1,7 +1,7 @@
 import { exists } from "std/fs/exists.ts";
 import { parse } from "std/jsonc/mod.ts";
 import { join } from "std/path/mod.ts";
-import { I18NMap } from "./i18n.ts";
+import type { I18NMap } from "./i18n.ts";
 import { pick } from "accept-language-parser/";
 import { get_host } from "./utils.ts";
 
@@ -11,7 +11,10 @@ type MODULE = "common" | "settings" | "task" | "user";
 const MODULES: MODULE[] = ["common", "settings", "task", "user"];
 
 export async function load_translation(signal?: AbortSignal) {
-    const base = import.meta.resolve("../translation").slice(8);
+    let base = import.meta.resolve("../translation").slice(7);
+    if (Deno.build.os === "windows") {
+        base = base.slice(1);
+    }
     const enmap: I18NMap = {};
     for (const m of MODULES) {
         const t = await Deno.readTextFile(join(base, "en", m + ".jsonc"), {

@@ -1,6 +1,6 @@
 import { join } from "std/path/mod.ts";
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
-import { EhDb } from "../db.ts";
+import type { EhDb } from "../db.ts";
 import {
     addZero,
     asyncForEach,

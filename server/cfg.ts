@@ -1,12 +1,12 @@
 import { signal } from "@preact/signals";
 import { ConfigType } from "../config.ts";
 import { get_ws_host } from "./utils.ts";
-import { ConfigClientSocketData, ConfigSeverSocketData } from "./config.ts";
-import { DEFAULT_DOWNLOAD_CONFIG, DownloadConfig } from "../tasks/download.ts";
-import {
-    DEFAULT_EXPORT_ZIP_CONFIG,
-    ExportZipConfig,
-} from "../tasks/export_zip.ts";
+import type {
+    ConfigClientSocketData,
+    ConfigSeverSocketData,
+} from "./config.ts";
+import type { DownloadConfig } from "../tasks/download.ts";
+import type { ExportZipConfig } from "../tasks/export_zip.ts";
 
 export const cfg = signal<ConfigType | undefined>(undefined);
 
@@ -30,7 +30,7 @@ export function initCfg() {
 }
 
 export function generate_download_cfg(): DownloadConfig {
-    if (!cfg.value) return DEFAULT_DOWNLOAD_CONFIG;
+    if (!cfg.value) return {};
     const c = cfg.value;
     return {
         download_original_img: c.download_original_img,
@@ -42,7 +42,7 @@ export function generate_download_cfg(): DownloadConfig {
 }
 
 export function generate_export_zip_cfg(): ExportZipConfig {
-    if (!cfg.value) return DEFAULT_EXPORT_ZIP_CONFIG;
+    if (!cfg.value) return {};
     const c = cfg.value;
     return {
         jpn_title: c.export_zip_jpn_title,

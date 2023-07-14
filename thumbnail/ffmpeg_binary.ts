@@ -1,4 +1,4 @@
-import { ThumbnailConfig } from "./base.ts";
+import type { ThumbnailConfig } from "./base.ts";
 
 export async function check_ffmpeg_binary(p: string) {
     const cmd = new Deno.Command(p, {

@@ -5,7 +5,7 @@ import {
     MeiliSearchApiError,
 } from "meilisearch";
 import { sleep } from "./utils.ts";
-import { EhDb } from "./db.ts";
+import type { EhDb } from "./db.ts";
 import isEqual from "lodash/isEqual";
 
 const GMetaSettings: Record<string, unknown> = {

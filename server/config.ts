@@ -1,4 +1,4 @@
-import { ConfigType } from "../config.ts";
+import type { ConfigType } from "../config.ts";
 
 export type ConfigClientSocketData = { type: "close" };
 export type ConfigSeverSocketData = { type: "close" } | {

@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
-import { StatusData } from "../../server/status.ts";
+import type { StatusData } from "../../server/status.ts";
 import { return_data } from "../../server/utils.ts";
 import { check_ffmpeg_binary } from "../../thumbnail/ffmpeg_binary.ts";
 

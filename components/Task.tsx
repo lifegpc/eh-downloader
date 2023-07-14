@@ -1,6 +1,6 @@
 import { Component } from "preact";
 import Icon from "preact-material-components/Icon";
-import { TaskDetail, TaskStatus, TaskType } from "../task.ts";
+import type { TaskDetail } from "../task.ts";
 import t from "../server/i18n.ts";
 
 type Props = {

@@ -1,7 +1,7 @@
 import { assert } from "std/testing/asserts.ts";
 import { Client } from "../client.ts";
-import { Config } from "../config.ts";
-import { EhDb, EhFile, PMeta } from "../db.ts";
+import type { Config } from "../config.ts";
+import type { EhDb, EhFile, PMeta } from "../db.ts";
 import { Task, TaskDownloadProgess, TaskType } from "../task.ts";
 import { TaskManager } from "../task_manager.ts";
 import {

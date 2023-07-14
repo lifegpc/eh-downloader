@@ -19,11 +19,11 @@ import BContext from "./BContext.tsx";
 import Button from "preact-material-components/Button";
 import { sendTaskMessage } from "../islands/TaskManager.tsx";
 import Snackbar from "preact-material-components/Snackbar";
-import { GalleryResult } from "../server/gallery.ts";
+import type { GalleryResult } from "../server/gallery.ts";
 import { tw } from "twind";
-import { ExportZipConfig } from "../tasks/export_zip.ts";
-import { GMeta } from "../db.ts";
-import { GalleryListResult } from "../server/gallery.ts";
+import type { ExportZipConfig } from "../tasks/export_zip.ts";
+import type { GMeta } from "../db.ts";
+import type { GalleryListResult } from "../server/gallery.ts";
 
 export type NewTaskProps = {
     show: boolean;

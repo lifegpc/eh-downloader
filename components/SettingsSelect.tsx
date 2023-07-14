@@ -1,8 +1,8 @@
 import { Component, ContextType } from "preact";
 import { SettingsCtx } from "./SettingsContext.tsx";
-import { ConfigType } from "../config.ts";
+import type { ConfigType } from "../config.ts";
 import Md3Select from "./Md3Select.tsx";
-import { Ref, StateUpdater, useRef } from "preact/hooks";
+import { StateUpdater } from "preact/hooks";
 
 interface obj {
     toString(): string;

@@ -1,6 +1,6 @@
 import { join } from "std/path/mod.ts";
 import { filterFilename } from "../utils.ts";
-import { EhFile } from "../db.ts";
+import type { EhFile } from "../db.ts";
 
 export type ThumbnailConfig = {
     width: number;

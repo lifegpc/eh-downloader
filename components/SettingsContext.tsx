@@ -1,6 +1,6 @@
 import { Component, ComponentChild, createContext } from "preact";
 import { StateUpdater } from "preact/hooks";
-import { ConfigType } from "../config.ts";
+import type { ConfigType } from "../config.ts";
 
 export const SettingsCtx = createContext<State | null>(null);
 

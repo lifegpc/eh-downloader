@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
-import { GalleryData } from "../../../server/gallery.ts";
+import type { GalleryData } from "../../../server/gallery.ts";
 import { return_data, return_error } from "../../../server/utils.ts";
 
 export const handler: Handlers = {

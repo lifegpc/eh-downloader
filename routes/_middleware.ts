@@ -12,7 +12,10 @@ const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     const url = new URL(req.url);
     if (url.pathname == "/sw.js") {
-        const base = import.meta.resolve("../static").slice(8);
+        let base = import.meta.resolve("../static").slice(7);
+        if (Deno.build.os === "windows") {
+            base = base.slice(1);
+        }
         const map_file = join(base, "sw.meta.json");
         if (!(await checkMapFile(map_file))) {
             const data = await build({
@@ -57,7 +60,10 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         }
     }
     if (STATIC_FILES.includes(url.pathname)) {
-        const base = import.meta.resolve("../static").slice(8);
+        let base = import.meta.resolve("../static").slice(7);
+        if (Deno.build.os === "windows") {
+            base = base.slice(1);
+        }
         const file = join(base, url.pathname.slice(1));
         const opts: GetFileResponseOptions = {};
         opts.range = req.headers.get("Range");

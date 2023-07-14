@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
-import { EhFiles } from "../../../server/files.ts";
+import type { EhFiles } from "../../../server/files.ts";
 import { return_data } from "../../../server/utils.ts";
 
 export const handler: Handlers = {

@@ -1,4 +1,4 @@
-import { ExtendedPMeta, GMeta, Tag } from "../db.ts";
+import type { ExtendedPMeta, GMeta, Tag } from "../db.ts";
 import { JSONResult } from "./utils.ts";
 
 export type GalleryData = {

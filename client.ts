@@ -1,4 +1,4 @@
-import { Config } from "./config.ts";
+import type { Config } from "./config.ts";
 import { load_gallery_metadata } from "./page/GalleryMetadata.ts";
 import { load_gallery_page } from "./page/GalleryPage.ts";
 import { load_mpv_page } from "./page/MPVPage.ts";

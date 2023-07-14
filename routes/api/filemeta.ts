@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { EhFileMeta } from "../../db.ts";
+import type { EhFileMeta } from "../../db.ts";
 import { get_task_manager } from "../../server.ts";
 import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";

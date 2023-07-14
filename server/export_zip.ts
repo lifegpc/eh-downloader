@@ -1,6 +1,6 @@
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
-import { EhDb, PMeta } from "../db.ts";
-import { ExportZipConfig } from "../tasks/export_zip.ts";
+import type { EhDb, PMeta } from "../db.ts";
+import type { ExportZipConfig } from "../tasks/export_zip.ts";
 import { addZero, configureZipJs, limitFilename } from "../utils.ts";
 
 export function get_export_zip_response(

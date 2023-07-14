@@ -2,9 +2,13 @@ import { Component, ContextType } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
-import { TaskDetail, TaskStatus } from "../task.ts";
+import type { TaskDetail } from "../task.ts";
+import { TaskStatus } from "../task.ts";
 import { Sortable } from "sortable";
-import { TaskClientSocketData, TaskServerSocketData } from "../server/task.ts";
+import type {
+    TaskClientSocketData,
+    TaskServerSocketData,
+} from "../server/task.ts";
 import { get_ws_host } from "../server/utils.ts";
 import Task from "../components/Task.tsx";
 import Fab from "preact-material-components/Fab";

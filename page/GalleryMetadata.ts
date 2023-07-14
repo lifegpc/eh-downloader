@@ -1,5 +1,5 @@
 import { unescape } from "std/html/mod.ts";
-import { GMeta } from "../db.ts";
+import type { GMeta } from "../db.ts";
 
 export type GalleryMetadataTorrentInfo = {
     hash: string;

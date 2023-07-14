@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
-import { Task, TaskProgress } from "../../task.ts";
-import {
+import type { Task, TaskProgress } from "../../task.ts";
+import type {
     TaskClientSocketData,
     TaskServerSocketData,
 } from "../../server/task.ts";
