@@ -31,11 +31,8 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
         return check();
     }
     ctx.state.user = user;
-    if (is_from_cookie) {
-        if (t.expired.getTime() - 2505600000 < now) {
-            ctx.state.new_token = m.db.update_token(t.token, now);
-        }
-    }
+    ctx.state.is_from_cookie = is_from_cookie;
+    ctx.state.token = t;
     return true;
 }
 
@@ -62,14 +59,23 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         if (origin) {
             headers.set("Access-Control-Allow-Origin", "*");
         }
-        if (ctx.state.new_token) {
-            const t = <Token> ctx.state.new_token;
-            headers.append(
-                "Set-Cookie",
-                `token=${t.token}; Expires=${t.expired.toUTCString()}${
-                    t.http_only ? "; HttpOnly" : ""
-                }${t.secure ? "; Secure" : ""}`,
-            );
+        if (ctx.state.is_from_cookie && ctx.state.token) {
+            const m = get_task_manager();
+            const ot = <Token> ctx.state.token;
+            const now = (new Date()).getTime();
+            if (ot.expired.getTime() - 2505600000 < now) {
+                try {
+                    const t = m.db.update_token(ot.token, now);
+                    headers.append(
+                        "Set-Cookie",
+                        `token=${t.token}; Expires=${t.expired.toUTCString()}${
+                            t.http_only ? "; HttpOnly" : ""
+                        }${t.secure ? "; Secure" : ""}`,
+                    );
+                } catch {
+                    null;
+                }
+            }
         }
         return new Response(res.body, {
             status: res.status,
