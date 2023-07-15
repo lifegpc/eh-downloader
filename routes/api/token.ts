@@ -69,7 +69,7 @@ export const handler: Handlers = {
         if (!isEqual(pa, password)) {
             return return_error(4, USER_PASSWORD_ERROR);
         }
-        const token = m.db.add_token(u.id, now);
+        const token = m.db.add_token(u.id, now, http_only, secure);
         const headers: HeadersInit = {};
         if (set_cookie) {
             headers["Set-Cookie"] =

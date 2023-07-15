@@ -152,12 +152,16 @@ export type Token = {
     uid: number;
     token: string;
     expired: Date;
+    http_only: boolean;
+    secure: boolean;
 };
 type TokenRaw = {
     id: number;
     uid: number;
     token: string;
     expired: string;
+    http_only: number;
+    secure: number;
 };
 const ALL_TABLES = [
     "version",
@@ -247,7 +251,9 @@ const TOKEN_TABLE = `CREATE TABLE token (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     uid INT,
     token TEXT,
-    expired TEXT
+    expired TEXT,
+    http_only BOOLEAN,
+    secure BOOLEAN
 );`;
 
 export class EhDb {
@@ -259,7 +265,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = parse_ver("1.0.0-8");
+    readonly version = parse_ver("1.0.0-9");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -384,6 +390,11 @@ export class EhDb {
             if (compare_ver(v, parse_ver("1.0.0-8")) === -1) {
                 this.db.execute("DROP TABLE token;");
                 this.db.execute(TOKEN_TABLE);
+            }
+            if (compare_ver(v, parse_ver("1.0.0-9")) === -1) {
+                this.db.execute("ALTER TABLE token ADD http_only BOOLEAN;");
+                this.db.execute("ALTER TABLE token ADD secure BOOLEAN;");
+                this.db.execute("UPDATE token SET http_only = 1, secure = 0;");
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -585,14 +596,19 @@ export class EhDb {
             )[0];
         });
     }
-    add_token(uid: number, added: number): Token {
+    add_token(
+        uid: number,
+        added: number,
+        http_only: boolean,
+        secure: boolean,
+    ): Token {
         let token = randomstring();
         while (this.get_token(token)) {
             token = randomstring();
         }
         this.db.query(
-            "INSERT INTO token (uid, token, expired) VALUES (?, ?, ?);",
-            [uid, token, new Date(added + 2592000000)],
+            "INSERT INTO token (uid, token, expired, http_only, secure) VALUES (?, ?, ?, ?, ?);",
+            [uid, token, new Date(added + 2592000000), http_only, secure],
         );
         const t = this.get_token(token);
         if (!t) throw Error("Failed to add token.");
@@ -776,8 +792,12 @@ export class EhDb {
     convert_token(m: TokenRaw[]) {
         return m.map((m) => {
             const e = new Date(m.expired);
+            const h = m.http_only !== 0;
+            const s = m.secure !== 0;
             const t = <Token> <unknown> m;
             t.expired = e;
+            t.http_only = h;
+            t.secure = s;
             return t;
         });
     }
@@ -1101,5 +1121,14 @@ export class EhDb {
                 task.id,
             ]);
         });
+    }
+    update_token(token: string, added: number): Token {
+        this.db.query(
+            "UPDATE token SET expired = ? WHERE token = ?;",
+            [new Date(added + 2592000000), token],
+        );
+        const t = this.get_token(token);
+        if (!t) throw Error("Failed to update token.");
+        return t;
     }
 }

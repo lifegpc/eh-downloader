@@ -2,16 +2,19 @@ import { MiddlewareHandlerContext } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
 import { parse_cookies } from "../../server/cookies.ts";
 import { return_error } from "../../server/utils.ts";
+import type { Token } from "../../db.ts";
 
 function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
     if (req.method === "OPTIONS") return true;
     const m = get_task_manager();
     if (m.db.get_user_count() === 0) return true;
     const u = new URL(req.url);
+    let is_from_cookie = false;
     let token: string | null | undefined = req.headers.get("X-TOKEN");
     const cookies = parse_cookies(req.headers.get("Cookie"));
     if (!token) {
         token = cookies.get("token");
+        is_from_cookie = true;
     }
     const check = () => {
         if (u.pathname === "/api/token" && req.method === "PUT") return true;
@@ -28,6 +31,11 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
         return check();
     }
     ctx.state.user = user;
+    if (is_from_cookie) {
+        if (t.expired.getTime() - 2505600000 < now) {
+            ctx.state.new_token = m.db.update_token(t.token, now);
+        }
+    }
     return true;
 }
 
@@ -53,6 +61,15 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const origin = req.headers.get("origin");
         if (origin) {
             headers.set("Access-Control-Allow-Origin", "*");
+        }
+        if (ctx.state.new_token) {
+            const t = <Token> ctx.state.new_token;
+            headers.append(
+                "Set-Cookie",
+                `token=${t.token}; Expires=${t.expired.toUTCString()}${
+                    t.http_only ? "; HttpOnly" : ""
+                }${t.secure ? "; Secure" : ""}`,
+            );
         }
         return new Response(res.body, {
             status: res.status,
