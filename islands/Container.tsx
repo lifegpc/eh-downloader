@@ -18,6 +18,7 @@ import { initCfg } from "../server/cfg.ts";
 import { load_dmodule } from "../server/dmodule.ts";
 import CreateRootUser from "../components/CreateRootUser.tsx";
 import { check_auth_status } from "../server/auth.ts";
+import Login from "../components/Login.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -108,6 +109,7 @@ export default class Container extends Component<ContainerProps> {
                     />
                     <NewTask show={state === "#/task_manager/new"} />
                     <CreateRootUser show={state === "#/create_root_user"} />
+                    <Login show={state === "#/login"} />
                 </div>
             );
         }
