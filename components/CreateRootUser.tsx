@@ -51,6 +51,9 @@ export default class CreateRootUser extends Component<Props> {
             b.append("password", p2);
             b.append("t", t.toString());
             b.append("set_cookie", "1");
+            if (document.location.protocol === "https:") {
+                b.append("secure", "1");
+            }
             const re2 = await fetch("/api/token", { method: "PUT", body: b });
             const token = await re2.json();
             if (!token.ok) {
