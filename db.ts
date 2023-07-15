@@ -245,7 +245,7 @@ const USER_TABLE = `CREATE TABLE user (
 );`;
 const TOKEN_TABLE = `CREATE TABLE token (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    uid TEXT,
+    uid INT,
     token TEXT,
     expired TEXT
 );`;
@@ -259,7 +259,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = parse_ver("1.0.0-7");
+    readonly version = parse_ver("1.0.0-8");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -380,6 +380,10 @@ export class EhDb {
                 }
                 this.db.execute("DROP TABLE file_origin;");
                 need_optimize = true;
+            }
+            if (compare_ver(v, parse_ver("1.0.0-8")) === -1) {
+                this.db.execute("DROP TABLE token;");
+                this.db.execute(TOKEN_TABLE);
             }
             this.#write_version();
             if (need_optimize) this.optimize();

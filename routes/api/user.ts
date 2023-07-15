@@ -2,6 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import { User, UserPermission } from "../../db.ts";
 import { get_task_manager } from "../../server.ts";
 import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
+import type { BUser } from "../../server/user.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 
@@ -24,7 +25,7 @@ export const handler: Handlers = {
         if (user && !user.is_admin && us.id !== user.id) {
             return return_error(403, "Permission denied.");
         }
-        return return_data({
+        return return_data<BUser>({
             id: us.id,
             username: us.username,
             is_admin: us.is_admin,

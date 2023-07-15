@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 import { decode } from "std/encoding/base64.ts";
-import { get_string, parse_int } from "../../server/parse_form.ts";
+import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import { get_task_manager } from "../../server.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
@@ -57,6 +57,9 @@ export const handler: Handlers = {
         if (t > now + 60000 || t < now - 60000) {
             return return_error(3, "Time is not corrected.");
         }
+        const set_cookie = await parse_bool(data.get("set_cookie"), false);
+        const http_only = await parse_bool(data.get("http_only"), true);
+        const secure = await parse_bool(data.get("secure"), false);
         const m = get_task_manager();
         const u = m.db.get_user_by_name(username);
         if (!u) return return_error(4, USER_PASSWORD_ERROR);
@@ -67,6 +70,13 @@ export const handler: Handlers = {
             return return_error(4, USER_PASSWORD_ERROR);
         }
         const token = m.db.add_token(u.id, now);
-        return return_data(token, 201);
+        const headers: HeadersInit = {};
+        if (set_cookie) {
+            headers["Set-Cookie"] =
+                `token=${token.token}; Expires=${token.expired.toUTCString()}${
+                    http_only ? "; HttpOnly" : ""
+                }${secure ? "; Secure" : ""}`;
+        }
+        return return_data(token, 201, headers);
     },
 };

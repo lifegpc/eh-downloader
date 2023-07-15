@@ -17,6 +17,7 @@ import { registeServiceWorker } from "../server/sw.ts";
 import { initCfg } from "../server/cfg.ts";
 import { load_dmodule } from "../server/dmodule.ts";
 import CreateRootUser from "../components/CreateRootUser.tsx";
+import { check_auth_status } from "../server/auth.ts";
 
 export type ContainerProps = {
     i18n: I18NMap;
@@ -60,7 +61,6 @@ export default class Container extends Component<ContainerProps> {
             }
         };
         useEffect(() => {
-            initState(set_state1);
             const dm = parse_int(
                 localStorage.getItem("darkmode"),
                 DarkMode.Auto,
@@ -90,6 +90,10 @@ export default class Container extends Component<ContainerProps> {
                 }
             });
             load_dmodule().then(() => set_dmodule_loaded(true)).catch((e) => {
+                console.error(e);
+            });
+            initState(set_state1);
+            check_auth_status().catch((e) => {
                 console.error(e);
             });
         }, []);

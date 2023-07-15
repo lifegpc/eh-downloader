@@ -13,14 +13,17 @@ export type JSONResult<T> = {
     error: string;
 };
 
-function gen_response<T>(d: JSONResult<T>, status = 200) {
+function gen_response<T>(
+    d: JSONResult<T>,
+    status = 200,
+    headers: HeadersInit = {},
+) {
     if (d.status !== 0) {
         status = (d.status >= 400 && d.status < 600) ? d.status : 400;
     }
-    return new Response(JSON.stringify(d), {
-        status,
-        headers: { "Content-Type": "application/json" },
-    });
+    const h = new Headers(headers);
+    h.set("Content-Type", "application/json");
+    return new Response(JSON.stringify(d), { status, headers: h });
 }
 
 export function return_error<T = unknown>(
@@ -30,8 +33,12 @@ export function return_error<T = unknown>(
     return gen_response<T>({ ok: false, status, error });
 }
 
-export function return_data<T = unknown>(data: T, status = 200) {
-    return gen_response<T>({ ok: true, status: 0, data }, status);
+export function return_data<T = unknown>(
+    data: T,
+    status = 200,
+    headers: HeadersInit = {},
+) {
+    return gen_response<T>({ ok: true, status: 0, data }, status, headers);
 }
 
 export function return_json<T = unknown>(data: T, status = 200) {
