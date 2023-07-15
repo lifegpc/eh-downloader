@@ -389,7 +389,11 @@ export class EhDb {
             }
             if (compare_ver(v, parse_ver("1.0.0-8")) === -1) {
                 this.db.execute("DROP TABLE token;");
-                this.db.execute(TOKEN_TABLE);
+                this.db.execute(`CREATE TABLE token (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uid INT,
+                    token TEXT,
+                    expired TEXT);`);
             }
             if (compare_ver(v, parse_ver("1.0.0-9")) === -1) {
                 this.db.execute("ALTER TABLE token ADD http_only BOOLEAN;");
