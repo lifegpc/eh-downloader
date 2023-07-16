@@ -60,42 +60,49 @@ export default class CreateRootUser extends Component<Props> {
         const Button = MdTonalButton.value;
         const TextButton = MdTextButton.value;
         return (
-            <div>
-                <BMd3TextField
-                    label={t("user.username")}
-                    type="text"
-                    value={username}
-                    set_value={set_username}
-                />
-                <BMd3TextField
-                    label={t("user.password")}
-                    type="password"
-                    value={password}
-                    set_value={set_password}
-                />
-                <TextButton
-                    onClick={() => {
-                        localStorage.setItem("skip_create_root_user", "1");
-                        set_state("#/");
-                    }}
-                >
-                    {t("user.skip")}
-                </TextButton>
-                <Button
-                    disabled={disabled || !username || !password}
-                    onClick={() => {
-                        if (!username || !password) return;
-                        create_user(username, password).then(() => {
-                            set_disabled(false);
-                            set_state("#/");
-                        }).catch((e) => {
-                            console.error(e);
-                            set_disabled(false);
-                        });
-                    }}
-                >
-                    {t("user.create_root_user")}
-                </Button>
+            <div class="regiest-box">
+                <div class="regiest-content">
+                    <BMd3TextField
+                        label={t("user.username")}
+                        type="text"
+                        value={username}
+                        set_value={set_username}
+                    />
+                    <BMd3TextField
+                        label={t("user.password")}
+                        type="password"
+                        value={password}
+                        set_value={set_password}
+                    />
+                    <div class="regiest-action-content">
+                        <TextButton
+                            onClick={() => {
+                                localStorage.setItem(
+                                    "skip_create_root_user",
+                                    "1",
+                                );
+                                set_state("#/");
+                            }}
+                        >
+                            {t("user.skip")}
+                        </TextButton>
+                        <Button
+                            disabled={disabled || !username || !password}
+                            onClick={() => {
+                                if (!username || !password) return;
+                                create_user(username, password).then(() => {
+                                    set_disabled(false);
+                                    set_state("#/");
+                                }).catch((e) => {
+                                    console.error(e);
+                                    set_disabled(false);
+                                });
+                            }}
+                        >
+                            {t("user.create_root_user")}
+                        </Button>
+                    </div>
+                </div>
             </div>
         );
     }
