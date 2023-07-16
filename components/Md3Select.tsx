@@ -25,6 +25,7 @@ class Md3Option extends Component<OProps> {
 }
 
 type Props = {
+    id?: string;
     children: VNode<Md3Option>[] | VNode<Md3Option>;
     /**@default {false} */
     quick?: boolean;
@@ -71,6 +72,7 @@ export default class Md3Select extends Component<Props, State> {
         const Select = MdOutlinedSelect.value;
         return (
             <Select
+                id={this.props.id}
                 quick={this.props.quick}
                 required={this.props.required}
                 disabled={this.props.disabled}

@@ -378,7 +378,6 @@ export default class NewTask extends Component<NewTaskProps, State> {
                         <div class="type">
                             {t("task.type")}
                             <BSelect
-                                outlined={true}
                                 list={[{
                                     value: TaskType.Download,
                                     text: t("task.download"),
