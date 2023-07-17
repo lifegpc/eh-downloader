@@ -3,7 +3,7 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import GlobalContext from "../components/GlobalContext.tsx";
 import Container from "../islands/Container.tsx";
 import { get_i18nmap, i18n_handle_request } from "../server/i18ns.ts";
-import parse_ua from "ua-parser-js";
+import { UserAgent } from "std/http/user_agent.ts";
 
 type Props = {
     lang: string;
@@ -25,7 +25,7 @@ export const handler: Handlers<Props> = {
 
 export default function Index({ data }: PageProps<Props>) {
     const i18n = get_i18nmap(data.lang);
-    const ua = parse_ua(data.userAgent || "");
+    const ua = new UserAgent(data.userAgent || "");
     const is_windows_chrome = ua.browser.name === "Chrome" &&
         ua.os.name === "Windows";
     return (
