@@ -22,6 +22,7 @@ import Login from "../components/Login.tsx";
 
 export type ContainerProps = {
     i18n: I18NMap;
+    lang: string;
 };
 
 enum DarkMode {
@@ -117,6 +118,10 @@ export default class Container extends Component<ContainerProps> {
             <div>
                 <Head>
                     <title>{t("common.title")}</title>
+                    <link
+                        rel="manifest"
+                        href={`/manifest.json?lang=${this.props.lang}`}
+                    />
                     <GlobalCtx.Provider value={this.context}>
                         <StyleSheet href="https://fonts.googleapis.com/icon?family=Material+Icons" />
                         <StyleSheet href="preact-material-components/style.css" />

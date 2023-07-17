@@ -21,6 +21,7 @@ import * as $15 from "./routes/api/thumbnail/[id].ts";
 import * as $16 from "./routes/api/token.ts";
 import * as $17 from "./routes/api/user.ts";
 import * as $18 from "./routes/index.tsx";
+import * as $19 from "./routes/manifest.json.ts";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -46,6 +47,7 @@ const manifest = {
         "./routes/api/token.ts": $16,
         "./routes/api/user.ts": $17,
         "./routes/index.tsx": $18,
+        "./routes/manifest.json.ts": $19,
     },
     islands: {
         "./islands/Container.tsx": $$0,

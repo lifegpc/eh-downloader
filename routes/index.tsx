@@ -36,7 +36,7 @@ export default function Index({ data }: PageProps<Props>) {
                     : null}
             </Head>
             <GlobalContext>
-                <Container i18n={i18n} />
+                <Container i18n={i18n} lang={data.lang} />
             </GlobalContext>
         </body>
     );

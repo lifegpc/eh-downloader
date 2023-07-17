@@ -31,6 +31,8 @@ const CACHES = [
     "/common.css",
     "/scrollBar.css",
     "/preact-material-components/style.css",
+    "/favicon.ico",
+    "/logo.svg",
 ];
 
 function match_url(u: URL) {
