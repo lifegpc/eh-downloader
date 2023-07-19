@@ -20,5 +20,10 @@
         "jsx": "react-jsx",
         "jsxImportSource": "preact",
         "lib": ["es2022", "dom", "dom.iterable", "deno.window"]
+    },
+    "lint": {
+        "rules": {
+            "tags": ["fresh", "recommended"]
+        }
     }
 }
