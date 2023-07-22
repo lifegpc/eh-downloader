@@ -57,7 +57,6 @@ export default class Task extends Component<Props, State> {
         if (!(this.props.flags & map_taskstatus(task.status))) {
             return <div data-id={task.base.id}></div>;
         }
-        console.log(task);
         let error_div = null;
         if (task.status === TaskStatus.Failed) {
             error_div = (

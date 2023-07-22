@@ -364,6 +364,7 @@ export async function download_task(
                 const errors: unknown[] = [];
                 function try_download(a: number) {
                     if (a >= max_retry_count) {
+                        m.remove_details(i.index);
                         reject(errors);
                     }
                     download().then(resolve).catch((e) => {
