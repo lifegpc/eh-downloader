@@ -1,4 +1,4 @@
-import { assertEquals } from "std/testing/asserts.ts";
+import { assertEquals } from "std/assert/mod.ts";
 import { parse_bool, parse_int } from "./parse_form.ts";
 
 Deno.test("parse_bool_test", async () => {

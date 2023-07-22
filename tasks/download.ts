@@ -1,4 +1,4 @@
-import { assert } from "std/testing/asserts.ts";
+import { assert } from "std/assert/mod.ts";
 import { Client } from "../client.ts";
 import type { Config } from "../config.ts";
 import type { EhDb, EhFile, PMeta } from "../db.ts";

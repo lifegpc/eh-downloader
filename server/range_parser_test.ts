@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "std/testing/asserts.ts";
+import { assert, assertEquals } from "std/assert/mod.ts";
 import { parse_range } from "./range_parser.ts";
 
 Deno.test("parse_range_test", () => {

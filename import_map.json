@@ -1,6 +1,6 @@
 {
     "imports": {
-        "std/": "https://deno.land/std@0.194.0/",
+        "std/": "https://deno.land/std@0.195.0/",
         "deno_dom/": "https://deno.land/x/deno_dom@v0.1.38/",
         "sqlite/": "https://deno.land/x/sqlite@v3.7.2/",
         "zipjs/": "https://deno.land/x/zipjs@v2.7.16/",

@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "std/testing/asserts.ts";
+import { assert, assertEquals } from "std/assert/mod.ts";
 import { Client } from "../client.ts";
 import { load_settings } from "../config.ts";
 import { API_PERMISSION } from "../test_base.ts";
