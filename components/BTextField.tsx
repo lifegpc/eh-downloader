@@ -36,6 +36,9 @@ type Props<T extends keyof TextType> = {
     id?: string;
     list?: string;
     datalist?: { value: TextType[T]; label?: string }[];
+    onPaste?: (
+        clipboard: string,
+    ) => { text: string; overwrite?: boolean } | undefined;
 };
 
 export default class BTextField<T extends keyof TextType>
@@ -186,6 +189,26 @@ export default class BTextField<T extends keyof TextType>
                     list={this.props.list}
                     onFocus={() => set_display_datalist(true)}
                     onBlur={() => set_display_datalist(false)}
+                    onPaste={this.props.onPaste
+                        ? ((e: ClipboardEvent) => {
+                            if (!this.props.onPaste) return;
+                            console.log(e);
+                            const clipboard =
+                                e.clipboardData?.getData("text") || "";
+                            const v = this.props.onPaste(clipboard);
+                            if (!v) return;
+                            e.preventDefault();
+                            if (e.target) {
+                                const i = e.target as HTMLInputElement;
+                                if (v.overwrite) {
+                                    i.value = v.text;
+                                } else {
+                                    i.setRangeText(v.text);
+                                }
+                                this.set_value(this.get_value(i));
+                            }
+                        })
+                        : undefined}
                 />
                 {datalist_div}
                 {this.props.children}
