@@ -3,6 +3,7 @@ import { load_gallery_metadata } from "./page/GalleryMetadata.ts";
 import { load_gallery_page } from "./page/GalleryPage.ts";
 import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
+import { RecoverableError } from "./task_manager.ts";
 
 export type GID = [number, string];
 
@@ -71,7 +72,14 @@ export class Client {
             for (const v of headers) {
                 url.headers.set(v[0], v[1]);
             }
-            return fetch(url);
+            try {
+                return fetch(url);
+            } catch (e) {
+                if (e instanceof TypeError) {
+                    throw new RecoverableError(e.message, { cause: e.cause });
+                }
+                throw e;
+            }
         } else {
             const d = Object.assign({ method: method || "GET" }, options);
             if (d.headers) {
@@ -86,7 +94,14 @@ export class Client {
             if (!d.signal && this.signal) {
                 d.signal = this.signal;
             }
-            return fetch(url, d);
+            try {
+                return fetch(url, d);
+            } catch (e) {
+                if (e instanceof TypeError) {
+                    throw new RecoverableError(e.message, { cause: e.cause });
+                }
+                throw e;
+            }
         }
     }
     /**
