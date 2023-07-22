@@ -343,6 +343,9 @@ export async function download_task(
                                 signal: force_abort,
                                 preventClose: true,
                             });
+                            if (pr.error) {
+                                throw (pr.error);
+                            }
                         } finally {
                             try {
                                 f.close();

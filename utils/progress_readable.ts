@@ -6,29 +6,38 @@ type EventMap = {
 export class ProgressReadable extends EventTarget {
     readable: ReadableStream<Uint8Array>;
     readed: number;
+    error?: unknown;
     constructor(readable: ReadableStream<Uint8Array>) {
         super();
         this.readed = 0;
         const reader = readable.getReader();
         this.readable = new ReadableStream({
-            pull: async (c) => {
+            pull: (c) => {
                 if (c.byobRequest) {
                     throw Error("Unimplemented.");
                 } else {
-                    const v = await reader.read();
-                    if (v.done) {
-                        this.dispatchEvent("finished", this.readed);
+                    reader.read().then((v) => {
+                        if (v.done) {
+                            this.dispatchEvent("finished", this.readed);
+                            c.close();
+                            return;
+                        } else {
+                            this.readed += v.value.byteLength;
+                            this.dispatchEvent("progress", this.readed);
+                            c.enqueue(v.value);
+                        }
+                    }).catch((e) => {
                         c.close();
-                        return;
-                    } else {
-                        this.readed += v.value.byteLength;
-                        this.dispatchEvent("progress", this.readed);
-                        c.enqueue(v.value);
-                    }
+                        this.error = e;
+                    });
                 }
             },
             cancel: (reason) => {
-                readable.cancel(reason);
+                try {
+                    readable.cancel(reason);
+                } catch (_) {
+                    null;
+                }
             },
             type: "bytes",
         });
