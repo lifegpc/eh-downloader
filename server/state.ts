@@ -20,6 +20,14 @@ export function initState(l: StateUpdater<string>) {
             l("#/");
         }
     });
+    self.addEventListener("hashchange", (_) => {
+        const hash = document.location.hash;
+        if (!hash || hash == "#") {
+            l("#/");
+        } else {
+            l(hash);
+        }
+    });
 }
 
 export const set_state: StateUpdater<string> = (updater) => {
