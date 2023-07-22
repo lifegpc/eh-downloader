@@ -61,8 +61,15 @@ export default class NewTask extends Component<NewTaskProps, State> {
         const [overwrite_ezcfg, set_overwrite_ezcfg] = useState(false);
         const onPasteGid = (clipboard: string) => {
             const p = parseUrl(clipboard);
-            if (p && p.type !== UrlType.Single) {
+            if (p) {
                 return { text: p.gid.toString(), overwrite: true };
+            }
+            return;
+        };
+        const onPasteToken = (clipboard: string) => {
+            const p = parseUrl(clipboard);
+            if (p && p.type !== UrlType.Single) {
+                return { text: p.token, overwrite: true };
             }
             return;
         };
@@ -186,6 +193,7 @@ export default class NewTask extends Component<NewTaskProps, State> {
                         description={t("task.gallery_token")}
                         outlined={true}
                         set_value={set_token}
+                        onPaste={onPasteToken}
                     />
                     <BCheckbox
                         id="d-cfg"
