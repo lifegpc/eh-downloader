@@ -3,7 +3,7 @@ import { Client } from "../client.ts";
 import type { Config } from "../config.ts";
 import type { EhDb, EhFile, PMeta } from "../db.ts";
 import { Task, TaskDownloadProgess, TaskType } from "../task.ts";
-import { TaskManager } from "../task_manager.ts";
+import { RecoverableError, TaskManager } from "../task_manager.ts";
 import {
     add_suffix_to_path,
     asyncFilter,
@@ -319,7 +319,7 @@ export async function download_task(
         }
     }
     await m.join();
-    if (m.has_failed_task) throw Error("Some tasks failed.");
+    if (m.has_failed_task) throw new RecoverableError("Some tasks failed.");
     if (abort.aborted || force_abort.aborted) throw Error("aborted");
     if (remove_previous_gallery && gmeta.first_gid && gmeta.first_key) {
         let replaced_gallery = dcfg.replaced_gallery;

@@ -26,6 +26,7 @@ function map_taskstatus(s: TaskStatus) {
     if (s === TaskStatus.Wait) return TaskStatusFlag.Waiting;
     else if (s === TaskStatus.Running) return TaskStatusFlag.Running;
     else if (s === TaskStatus.Finished) return TaskStatusFlag.Finished;
+    else if (s === TaskStatus.Failed) return TaskStatusFlag.Failed;
     return TaskStatusFlag.None;
 }
 
@@ -169,6 +170,14 @@ export default class TaskManager extends Component<TaskManagerProps> {
                     const task = tasks.value.get(t.detail.id);
                     if (task) {
                         task.base = t.detail;
+                    }
+                } else if (t.type === "task_error") {
+                    const task = tasks.value.get(t.detail.task.id);
+                    if (task) {
+                        task.status = TaskStatus.Failed;
+                        task.error = t.detail.error;
+                        task.fataled = t.detail.fatal;
+                        sendTaskChangedEvent(task.base.id);
                     }
                 }
             };

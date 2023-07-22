@@ -124,6 +124,7 @@ export default class Container extends Component<ContainerProps> {
                     />
                     <GlobalCtx.Provider value={this.context}>
                         <StyleSheet href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+                        <StyleSheet href="bootstrap/dist/css/bootstrap.min.css" />
                         <StyleSheet href="preact-material-components/style.css" />
                         <StyleSheet href="common.css" />
                     </GlobalCtx.Provider>

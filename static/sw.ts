@@ -33,6 +33,7 @@ const CACHES = [
     "/preact-material-components/style.css",
     "/favicon.ico",
     "/logo.svg",
+    "/bootstrap/dist/css/bootstrap.min.css",
 ];
 
 function match_url(u: URL) {

@@ -10,6 +10,7 @@ import type {
     MdTextButton as _MdTextButton,
     MdTonalButton as _MdTonalButton,
 } from "./md3.ts";
+import type _bs5 from "./bs5.ts";
 
 export const MdOutlinedTextField = signal<
     typeof _MdOutlinedTextField | undefined
@@ -39,6 +40,8 @@ export const MdMenu = signal<typeof _MdMenu | undefined>(undefined);
 
 export const MdMenuItem = signal<typeof _MdMenuItem | undefined>(undefined);
 
+export const bs5 = signal<typeof _bs5 | undefined>(undefined);
+
 export async function load_dmodule() {
     const md3 = await import("./md3.ts");
     MdOutlinedTextField.value = md3.MdOutlinedTextField;
@@ -50,4 +53,6 @@ export async function load_dmodule() {
     MdTextButton.value = md3.MdTextButton;
     MdMenu.value = md3.MdMenu;
     MdMenuItem.value = md3.MdMenuItem;
+    const b = await import("./bs5.ts");
+    bs5.value = b.default;
 }

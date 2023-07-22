@@ -19,5 +19,9 @@
     "ezcfg_output": "输出文件的位置：",
     "ezcfg_jpn_title": "优先使用日语标题。",
     "ezcfg_export_ad": "导出标记为广告的页面。",
-    "ezcfg_max_length": "Zip文件中文件名的最大长度："
+    "ezcfg_max_length": "Zip文件中文件名的最大长度：",
+    "update_meilisearch_data": "与Meiliserach服务器同步数据",
+    "fix_gallery_page": "修复缺损的画廊数据",
+    "status": "任务状态：",
+    "error_msg": "错误消息："
 }

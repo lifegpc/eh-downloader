@@ -4,6 +4,7 @@ import { sure_dir } from "./utils.ts";
 const map = JSON.parse(await Deno.readTextFile("./import_map.json")).imports;
 const LIST: string[] = [
     "preact-material-components/style.css",
+    "bootstrap/dist/css/bootstrap.min.css",
 ];
 
 function get_url(i: string) {

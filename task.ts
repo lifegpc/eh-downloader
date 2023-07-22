@@ -52,10 +52,13 @@ export enum TaskStatus {
     Wait,
     Running,
     Finished,
+    Failed,
 }
 
 export type TaskDetail<T extends TaskType = TaskType> = {
     base: Task<T>;
     progress?: TaskProgressBasicType[T];
     status: TaskStatus;
+    error?: string;
+    fataled?: boolean;
 };

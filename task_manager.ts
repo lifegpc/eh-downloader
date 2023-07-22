@@ -27,13 +27,15 @@ import {
 export class AlreadyClosedError extends Error {
 }
 
+export class RecoverableError extends Error {}
+
 type EventMap = {
     current_cfg_updated: ConfigType;
     new_task: Task;
     task_started: Task;
     task_finished: Task;
     task_progress: TaskProgress;
-    task_error: { task: Task; error: string };
+    task_error: { task: Task; error: string; fatal: boolean };
     task_updated: Task;
 };
 
@@ -189,6 +191,7 @@ export class TaskManager extends EventTarget {
     async check_running_tasks() {
         this.#check_closed();
         const removed_task: number[] = [];
+        const fataled_task: number[] = [];
         for (const [id, task] of this.running_tasks) {
             const status = await promiseState(task.task);
             if (status.status == PromiseStatus.Fulfilled && status.value) {
@@ -198,16 +201,22 @@ export class TaskManager extends EventTarget {
             } else if (status.status == PromiseStatus.Rejected) {
                 if (status.reason && !this.aborted) {
                     console.log(status.reason);
+                    const fatal = !(status.reason instanceof RecoverableError);
                     this.dispatchEvent("task_error", {
                         task: task.base,
                         error: status.reason.toString(),
+                        fatal,
                     });
+                    if (fatal) fataled_task.push(id);
                 }
                 removed_task.push(id);
             }
         }
         for (const id of removed_task) {
             this.running_tasks.delete(id);
+        }
+        for (const id of fataled_task) {
+            await this.db.delete_task_by_id(id);
         }
     }
     close() {

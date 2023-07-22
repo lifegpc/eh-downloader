@@ -19,5 +19,9 @@
     "ezcfg_output": "The path to output file: ",
     "ezcfg_jpn_title": "Use japanese title first.",
     "ezcfg_export_ad": "Export pages which marked as ads.",
-    "ezcfg_max_length": "Maximum length of filenames in Zip files: "
+    "ezcfg_max_length": "Maximum length of filenames in Zip files: ",
+    "update_meilisearch_data": "Synchronize data with meilisearch server",
+    "fix_gallery_page": "Fix broken gallery data",
+    "status": "Task status: ",
+    "error_msg": "Error message: "
 }

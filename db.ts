@@ -848,6 +848,11 @@ export class EhDb {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
         });
     }
+    delete_task_by_id(id: number) {
+        return this.transaction(() => {
+            this.db.query("DELETE FROM task WHERE id = ?;", [id]);
+        });
+    }
     delete_token(token: string) {
         this.db.query("DELETE FROM token WHERE token = ?;", [token]);
     }
