@@ -2,7 +2,12 @@ import { assert } from "std/assert/mod.ts";
 import { Client } from "../client.ts";
 import type { Config } from "../config.ts";
 import type { EhDb, EhFile, PMeta } from "../db.ts";
-import { Task, TaskDownloadProgess, TaskType } from "../task.ts";
+import {
+    Task,
+    TaskDownloadProgess,
+    TaskDownloadSingleProgress,
+    TaskType,
+} from "../task.ts";
 import { RecoverableError, TaskManager } from "../task_manager.ts";
 import {
     add_suffix_to_path,
@@ -14,6 +19,7 @@ import {
 } from "../utils.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { exists } from "std/fs/exists.ts";
+import { ProgressReadable } from "../utils/progress_readable.ts";
 
 export type DownloadConfig = {
     max_download_img_count?: number;
@@ -26,6 +32,8 @@ export type DownloadConfig = {
 
 export const DEFAULT_DOWNLOAD_CONFIG: DownloadConfig = {};
 
+const PROGRESS_UPDATE_INTERVAL = 200;
+
 class DownloadManager {
     #abort: AbortSignal;
     #force_abort: AbortSignal;
@@ -34,6 +42,8 @@ class DownloadManager {
     #progress: TaskDownloadProgess;
     #task: Task;
     #manager: TaskManager;
+    #progress_changed: boolean;
+    #last_send_progress: number;
     constructor(
         max_download_img_count: number,
         abort: AbortSignal,
@@ -45,9 +55,16 @@ class DownloadManager {
         this.#running_tasks = [];
         this.#abort = abort;
         this.#force_abort = force_abort;
-        this.#progress = { downloaded_page: 0, failed_page: 0, total_page: 0 };
+        this.#progress = {
+            downloaded_page: 0,
+            failed_page: 0,
+            total_page: 0,
+            details: [],
+        };
         this.#task = task;
         this.#manager = manager;
+        this.#progress_changed = false;
+        this.#last_send_progress = -1;
     }
     async #check_tasks() {
         this.#running_tasks = await asyncFilter(
@@ -65,13 +82,35 @@ class DownloadManager {
                 return s.status === PromiseStatus.Pending;
             },
         );
+        if (this.#progress_changed) {
+            const now = (new Date()).getTime();
+            if (now >= this.#last_send_progress + PROGRESS_UPDATE_INTERVAL) {
+                this.#manager.dispatchTaskProgressEvent(
+                    TaskType.Download,
+                    this.#task.id,
+                    this.#progress,
+                );
+            }
+            this.#progress_changed = false;
+            this.#last_send_progress = now;
+        }
     }
     #sendEvent() {
-        return this.#manager.dispatchTaskProgressEvent(
+        this.#progress_changed = true;
+        const now = (new Date()).getTime();
+        if (now < this.#last_send_progress + PROGRESS_UPDATE_INTERVAL) return;
+        const re = this.#manager.dispatchTaskProgressEvent(
             TaskType.Download,
             this.#task.id,
             this.#progress,
         );
+        this.#last_send_progress = now;
+        this.#progress_changed = false;
+        return re;
+    }
+    add_new_details(d: TaskDownloadSingleProgress) {
+        this.#progress.details.push(d);
+        this.#sendEvent();
     }
     async add_new_task<T>(f: () => Promise<T>) {
         while (1) {
@@ -93,6 +132,26 @@ class DownloadManager {
             if (!this.#running_tasks.length) break;
             await sleep(10);
         }
+    }
+    remove_details(index: number) {
+        this.#progress.details = this.#progress.details.filter((v) =>
+            v.index !== index
+        );
+    }
+    set_details_downloaded(index: number, downloaded: number) {
+        const d = this.#progress.details.find((v) => v.index === index);
+        if (d) d.downloaded = downloaded;
+        this.#sendEvent();
+    }
+    set_details_started(index: number) {
+        const d = this.#progress.details.find((v) => v.index === index);
+        if (d) d.started = (new Date()).getTime();
+        this.#sendEvent();
+    }
+    set_details_total(index: number, total: number) {
+        const d = this.#progress.details.find((v) => v.index === index);
+        if (d) d.total = total;
+        this.#sendEvent();
     }
     set_total_page(page: number) {
         this.#progress.total_page = page;
@@ -231,6 +290,21 @@ export async function download_task(
             path = add_suffix_to_path(path, i.page_token);
             console.log("Changed path to", path);
         }
+        const f = download_original
+            ? i.get_original_file(path)
+            : i.get_file(path);
+        if (f === undefined) throw Error("Failed to get file.");
+        m.add_new_details({
+            downloaded: 0,
+            height: f.height,
+            index: i.index,
+            is_original: f.is_original,
+            name: i.name,
+            token: i.page_token,
+            total: 0,
+            width: f.width,
+            started: 0,
+        });
         function download_img() {
             return new Promise<void>((resolve, reject) => {
                 async function download() {
@@ -240,22 +314,45 @@ export async function download_task(
                     if (re === undefined) {
                         throw Error("Failed to fetch image.");
                     }
+                    m.set_details_started(i.index);
+                    const len = re.headers.get("Content-Length");
+                    if (len) {
+                        const tmp = parseInt(len);
+                        if (!isNaN(tmp)) {
+                            m.set_details_total(i.index, tmp);
+                        }
+                    }
                     if (re.body === null) {
                         throw Error("Response don't have a body.");
                     }
-                    const f = await Deno.open(path, {
-                        create: true,
-                        write: true,
-                        truncate: true,
+                    const pr = new ProgressReadable(re.body);
+                    pr.addEventListener("progress", (e) => {
+                        m.set_details_downloaded(i.index, e.detail);
+                    });
+                    pr.addEventListener("finished", () => {
+                        m.remove_details(i.index);
                     });
                     try {
-                        await re.body.pipeTo(f.writable, {
-                            signal: force_abort,
-                            preventClose: true,
+                        const f = await Deno.open(path, {
+                            create: true,
+                            write: true,
+                            truncate: true,
                         });
+                        try {
+                            await pr.readable.pipeTo(f.writable, {
+                                signal: force_abort,
+                                preventClose: true,
+                            });
+                        } finally {
+                            try {
+                                f.close();
+                            } catch (_) {
+                                null;
+                            }
+                        }
                     } finally {
                         try {
-                            f.close();
+                            pr.readable.cancel();
                         } catch (_) {
                             null;
                         }
@@ -278,10 +375,6 @@ export async function download_task(
             });
         }
         await download_img();
-        const f = download_original
-            ? i.get_original_file(path)
-            : i.get_file(path);
-        if (f === undefined) throw Error("Failed to get file.");
         db.add_file(f);
         return;
     }

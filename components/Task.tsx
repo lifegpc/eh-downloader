@@ -72,7 +72,7 @@ export default class Task extends Component<Props, State> {
             if (task.base.type === TaskType.Download) {
                 const d = task
                     .progress as TaskProgressBasicType[TaskType.Download];
-                progress_div = (
+                const b_progress_div = (
                     <Progress max={d.total_page} animated={true}>
                         <Progress.Bar
                             class="bg-success"
@@ -80,6 +80,27 @@ export default class Task extends Component<Props, State> {
                         />
                         <Progress.Bar class="bg-danger" value={d.failed_page} />
                     </Progress>
+                );
+                progress_div = (
+                    <div>
+                        {b_progress_div}
+                        {d.details.map((v) => {
+                            return (
+                                <div>
+                                    <div>{v.name}</div>
+                                    <Progress
+                                        max={v.total || v.downloaded}
+                                        animated={true}
+                                    >
+                                        <Progress.Bar
+                                            class="bg-success"
+                                            value={v.downloaded}
+                                        />
+                                    </Progress>
+                                </div>
+                            );
+                        })}
+                    </div>
                 );
             }
         }
