@@ -192,7 +192,6 @@ export default class BTextField<T extends keyof TextType>
                     onPaste={this.props.onPaste
                         ? ((e: ClipboardEvent) => {
                             if (!this.props.onPaste) return;
-                            console.log(e);
                             const clipboard =
                                 e.clipboardData?.getData("text") || "";
                             const v = this.props.onPaste(clipboard);
