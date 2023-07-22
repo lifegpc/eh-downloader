@@ -22,14 +22,6 @@ export type TaskManagerProps = {
     show: boolean;
 };
 
-function map_taskstatus(s: TaskStatus) {
-    if (s === TaskStatus.Wait) return TaskStatusFlag.Waiting;
-    else if (s === TaskStatus.Running) return TaskStatusFlag.Running;
-    else if (s === TaskStatus.Finished) return TaskStatusFlag.Finished;
-    else if (s === TaskStatus.Failed) return TaskStatusFlag.Failed;
-    return TaskStatusFlag.None;
-}
-
 const tasks = signal(new Map<number, TaskDetail>());
 const task_list = signal(new Array<number>());
 export const task_ws = signal<WebSocket | undefined>(undefined);
@@ -208,10 +200,7 @@ export default class TaskManager extends Component<TaskManagerProps> {
                     {task_list.value.map((k) => {
                         const t = tasks.value.get(k);
                         if (t) {
-                            if (!(flags & map_taskstatus(t.status))) {
-                                return <div data-id={k}></div>;
-                            }
-                            return <Task task={t} />;
+                            return <Task task={t} flags={flags} />;
                         } else {
                             return <div data-id={k}></div>;
                         }

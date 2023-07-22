@@ -5,9 +5,11 @@ import { TaskStatus, TaskType } from "../task.ts";
 import t from "../server/i18n.ts";
 import { tw } from "twind";
 import Progress from "./Progress.tsx";
+import { TaskStatusFlag } from "./TaskFilterBar.tsx";
 
 type Props = {
     task: TaskDetail;
+    flags: TaskStatusFlag;
 };
 
 type State = {
@@ -28,6 +30,14 @@ const Status: Record<TaskStatus, string> = {
     [TaskStatus.Failed]: "failed",
 };
 
+function map_taskstatus(s: TaskStatus) {
+    if (s === TaskStatus.Wait) return TaskStatusFlag.Waiting;
+    else if (s === TaskStatus.Running) return TaskStatusFlag.Running;
+    else if (s === TaskStatus.Finished) return TaskStatusFlag.Finished;
+    else if (s === TaskStatus.Failed) return TaskStatusFlag.Failed;
+    return TaskStatusFlag.None;
+}
+
 export default class Task extends Component<Props, State> {
     constructor(props: Props) {
         super(props);
@@ -44,6 +54,9 @@ export default class Task extends Component<Props, State> {
     }
     render() {
         const task = this.props.task;
+        if (!(this.props.flags & map_taskstatus(task.status))) {
+            return <div data-id={task.base.id}></div>;
+        }
         console.log(task);
         let error_div = null;
         if (task.status === TaskStatus.Failed) {
