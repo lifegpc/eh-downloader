@@ -90,9 +90,9 @@ class DownloadManager {
                     this.#task.id,
                     this.#progress,
                 );
+                this.#progress_changed = false;
+                this.#last_send_progress = now;
             }
-            this.#progress_changed = false;
-            this.#last_send_progress = now;
         }
     }
     #sendEvent() {

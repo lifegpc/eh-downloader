@@ -4,12 +4,14 @@ import {
     ContextType,
     createContext,
 } from "preact";
+import round from "lodash/round";
 
 type CtxProps = {
     min: number;
     max: number;
     striped: boolean;
     animated: boolean;
+    precision: number;
 };
 
 const PCtx = createContext<CtxProps | null>(null);
@@ -26,6 +28,7 @@ type BarProps = {
         max: number,
         min: number,
     ) => string;
+    precision?: number;
 };
 
 class ProgressBar extends Component<BarProps> {
@@ -39,6 +42,10 @@ class ProgressBar extends Component<BarProps> {
         const animated = this.props.animated === undefined
             ? this.context?.animated
             : this.props.animated;
+        const precision =
+            (this.props.precision === undefined
+                ? this.context?.precision
+                : this.props.precision) || 2;
         if (striped || animated) cls += " progress-bar-striped";
         if (animated) cls += " progress-bar-animated";
         if (this.props.class) cls += " " + this.props.class;
@@ -49,7 +56,7 @@ class ProgressBar extends Component<BarProps> {
         const style = `width: ${per}%;`;
         let label = this.props.label;
         if (this.props.set_label) {
-            label = this.props.set_label(per, v, max, min);
+            label = this.props.set_label(round(per, precision), v, max, min);
         }
         return (
             <div
@@ -76,6 +83,8 @@ type Props = {
     /**@default {false} */
     animated?: boolean;
     children: ComponentChildren;
+    /**@default {2} */
+    precision?: number;
 };
 
 export default class Progress extends Component<Props> {
@@ -89,6 +98,7 @@ export default class Progress extends Component<Props> {
                         max: this.props.max || 100,
                         striped: this.props.striped || false,
                         animated: this.props.animated || false,
+                        precision: this.props.precision || 2,
                     }}
                 >
                     {this.props.children}
