@@ -19,6 +19,13 @@ type BarProps = {
     striped?: boolean;
     animated?: boolean;
     class?: string;
+    label?: string;
+    set_label?: (
+        per: number,
+        value: number,
+        max: number,
+        min: number,
+    ) => string;
 };
 
 class ProgressBar extends Component<BarProps> {
@@ -38,7 +45,12 @@ class ProgressBar extends Component<BarProps> {
         const max = this.context?.max || 100;
         const min = this.context?.min || 0;
         const v = this.props.value;
-        const style = `width: ${(v - min) / (max - min) * 100}%;`;
+        const per = (v - min) / (max - min) * 100;
+        const style = `width: ${per}%;`;
+        let label = this.props.label;
+        if (this.props.set_label) {
+            label = this.props.set_label(per, v, max, min);
+        }
         return (
             <div
                 class={cls}
@@ -47,7 +59,9 @@ class ProgressBar extends Component<BarProps> {
                 aria-valuenow={v}
                 aria-valuemin={min}
                 aria-valuemax={max}
-            />
+            >
+                {label}
+            </div>
         );
     }
 }

@@ -6,6 +6,7 @@ import t from "../server/i18n.ts";
 import { tw } from "twind";
 import Progress from "./Progress.tsx";
 import { TaskStatusFlag } from "./TaskFilterBar.tsx";
+import { filesize } from "filesize";
 
 type Props = {
     task: TaskDetail;
@@ -76,8 +77,15 @@ export default class Task extends Component<Props, State> {
                         <Progress.Bar
                             class="bg-success"
                             value={d.downloaded_page}
+                            set_label={(per, v) =>
+                                `${v} (${per}%)`}
                         />
-                        <Progress.Bar class="bg-danger" value={d.failed_page} />
+                        <Progress.Bar
+                            class="bg-danger"
+                            value={d.failed_page}
+                            set_label={(per, v) =>
+                                `${v} (${per}%)`}
+                        />
                     </Progress>
                 );
                 progress_div = (
@@ -94,6 +102,13 @@ export default class Task extends Component<Props, State> {
                                         <Progress.Bar
                                             class="bg-success"
                                             value={v.downloaded}
+                                            set_label={(per, v) =>
+                                                `${
+                                                    filesize(v, {
+                                                        base: 2,
+                                                        round: 3,
+                                                    })
+                                                } (${per}%)`}
                                         />
                                     </Progress>
                                 </div>
