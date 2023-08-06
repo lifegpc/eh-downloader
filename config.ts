@@ -22,6 +22,7 @@ export type ConfigType = {
     thumbnail_method: ThumbnailMethod;
     thumbnail_dir: string;
     remove_previous_gallery: boolean;
+    img_verify_secret?: string;
 };
 
 export enum ThumbnailMethod {
@@ -132,6 +133,9 @@ export class Config {
     get remove_previous_gallery() {
         return this._return_bool("remove_previous_gallery") || false;
     }
+    get img_verify_secret() {
+        return this._return_string("img_verify_secret");
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -154,6 +158,7 @@ export class Config {
             thumbnail_method: this.thumbnail_method,
             thumbnail_dir: this.thumbnail_dir,
             remove_previous_gallery: this.remove_previous_gallery,
+            img_verify_secret: this.img_verify_secret,
         };
     }
 }

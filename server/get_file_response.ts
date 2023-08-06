@@ -12,6 +12,7 @@ export type GetFileResponseOptions = {
     if_unmodified_since?: string | null;
     mimetype?: string | null;
     range?: string | null;
+    cache_control?: string | null;
 };
 
 export async function get_file_response(
@@ -249,6 +250,9 @@ export async function get_file_response(
             };
             if (mimetype) headers["Content-Type"] = mimetype;
             if (i.mtime) headers["Last-Modified"] = i.mtime.toUTCString();
+            if (opts?.cache_control) {
+                headers["Cache-Control"] = opts.cache_control;
+            }
             return new Response(f.readable, { headers });
         }
     } catch (e) {
