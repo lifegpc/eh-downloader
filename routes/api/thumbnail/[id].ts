@@ -104,7 +104,7 @@ export const handler: Handlers = {
                 const b = new URLSearchParams();
                 b.append("verify", tverify);
                 return Response.redirect(
-                    `${get_host(req)}/api/file/${f.id}?${b}`,
+                    `${get_host(req)}/api/thumbnail/${f.id}?${b}`,
                 );
             }
             if (verify !== tverify) {
