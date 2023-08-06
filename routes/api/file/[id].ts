@@ -34,7 +34,7 @@ export const handler: Handlers = {
             const tverify = encode(
                 new Uint8Array(
                     await pbkdf2Hmac(
-                        `id`,
+                        `${id}`,
                         m.cfg.img_verify_secret,
                         1000,
                         64,

@@ -23,6 +23,7 @@ export type ConfigType = {
     thumbnail_dir: string;
     remove_previous_gallery: boolean;
     img_verify_secret?: string;
+    img_verify_bypass_auth: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -136,6 +137,9 @@ export class Config {
     get img_verify_secret() {
         return this._return_string("img_verify_secret");
     }
+    get img_verify_bypass_auth() {
+        return this._return_bool("img_verify_bypass_auth") || false;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -159,6 +163,7 @@ export class Config {
             thumbnail_dir: this.thumbnail_dir,
             remove_previous_gallery: this.remove_previous_gallery,
             img_verify_secret: this.img_verify_secret,
+            img_verify_bypass_auth: this.img_verify_bypass_auth,
         };
     }
 }
