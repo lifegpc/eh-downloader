@@ -3,10 +3,8 @@ import { get_task_manager } from "../../server.ts";
 import { parse_cookies } from "../../server/cookies.ts";
 import { return_error } from "../../server/utils.ts";
 import type { Token } from "../../db.ts";
-import pbkdf2Hmac from "pbkdf2-hmac";
-import { encode } from "std/encoding/base64.ts";
 
-async function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
+function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
     if (req.method === "OPTIONS") return true;
     const m = get_task_manager();
     if (m.db.get_user_count() === 0) return true;
@@ -18,43 +16,19 @@ async function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
         token = cookies.get("token");
         is_from_cookie = true;
     }
-    const check = async () => {
+    const check = () => {
         if (u.pathname === "/api/token" && req.method === "PUT") return true;
         if (u.pathname === "/api/status" && req.method === "GET") return true;
-        if (m.cfg.img_verify_bypass_auth) {
-            if (
-                u.pathname.startsWith("/api/file") ||
-                u.pathname.startsWith("/api/thumbnail")
-            ) {
-                if (ctx.params.id) {
-                    const verify = u.searchParams.get("verify");
-                    if (verify) {
-                        const tverify = encode(
-                            new Uint8Array(
-                                await pbkdf2Hmac(
-                                    `${ctx.params.id}`,
-                                    m.cfg.img_verify_secret,
-                                    1000,
-                                    64,
-                                    "SHA-512",
-                                ),
-                            ),
-                        );
-                        if (verify === tverify) return true;
-                    }
-                }
-            }
-        }
         return false;
     };
-    if (!token) return await check();
+    if (!token) return check();
     const t = m.db.get_token(token);
     const now = (new Date()).getTime();
-    if (!t || t.expired.getTime() < now) return await check();
+    if (!t || t.expired.getTime() < now) return check();
     const user = m.db.get_user(t.uid);
     if (!user) {
         m.db.delete_token(token);
-        return await check();
+        return check();
     }
     ctx.state.user = user;
     ctx.state.is_from_cookie = is_from_cookie;
@@ -63,7 +37,7 @@ async function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
 }
 
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
-    if (!(await handle_auth(req, ctx))) {
+    if (!(handle_auth(req, ctx))) {
         return return_error(401, "Unauthorized");
     }
     const res = await ctx.next();

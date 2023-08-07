@@ -50,8 +50,10 @@ function match_url(u: URL) {
 /**@ts-ignore */
 self.addEventListener("fetch", async (e: FetchEvent) => {
     const u = new URL(e.request.url);
-    if (u.origin === self.location.origin && u.pathname.startsWith("/api/")) {
-        return;
+    if (u.origin === self.location.origin) {
+        if (u.pathname.startsWith("/api/")) return;
+        if (u.pathname.startsWith("/file/")) return;
+        if (u.pathname.startsWith("/thumbnail/")) return;
     }
     if (!inited) await deleteOldCaches();
     const r = e.request;

@@ -1,11 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { exists } from "std/fs/exists.ts";
 import { get_task_manager } from "../../../server.ts";
-import {
-    get_string,
-    parse_bool,
-    parse_int,
-} from "../../../server/parse_form.ts";
+import { parse_bool, parse_int } from "../../../server/parse_form.ts";
 import { generate_filename, ThumbnailConfig } from "../../../thumbnail/base.ts";
 import { sure_dir } from "../../../utils.ts";
 import { ThumbnailMethod } from "../../../config.ts";
@@ -17,6 +13,7 @@ import {
 import { get_host } from "../../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encode } from "std/encoding/base64.ts";
+import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -80,38 +77,27 @@ export const handler: Handlers = {
         }
         const opts: GetFileResponseOptions = {};
         if (m.cfg.img_verify_secret) {
-            let verify = null;
-            try {
-                const form = await req.formData();
-                verify = await get_string(form.get("verify"));
-            } catch (_) {
-                null;
-                const u = new URL(req.url);
-                verify = u.searchParams.get("verify");
-            }
-            const tverify = encode(
-                new Uint8Array(
-                    await pbkdf2Hmac(
-                        `${id}`,
-                        m.cfg.img_verify_secret,
-                        1000,
-                        64,
-                        "SHA-512",
-                    ),
-                ),
-            );
+            const verify = u.searchParams.get("verify");
             if (verify === null) {
-                const b = new URLSearchParams();
+                const bs = new SortableURLSearchParams(u.search, ["verify"]);
+                const tverify = encode(
+                    new Uint8Array(
+                        await pbkdf2Hmac(
+                            `${id}${bs.toString2()}`,
+                            m.cfg.img_verify_secret,
+                            1000,
+                            64,
+                            "SHA-512",
+                        ),
+                    ),
+                );
+                const b = new URLSearchParams(bs.toString());
                 b.append("verify", tverify);
                 return Response.redirect(
-                    `${get_host(req)}/api/thumbnail/${f.id}?${b}`,
+                    `${get_host(req)}/thumbnail/${f.id}?${b}`,
                 );
             }
-            if (verify !== tverify) {
-                return new Response("Invalid verify.", { status: 400 });
-            }
         }
-        opts.cache_control = "public, max-age=31536000";
         opts.range = req.headers.get("range");
         opts.if_modified_since = req.headers.get("If-Modified-Since");
         opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");

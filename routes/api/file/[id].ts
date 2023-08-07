@@ -4,10 +4,11 @@ import {
     get_file_response,
     GetFileResponseOptions,
 } from "../../../server/get_file_response.ts";
-import { get_string } from "../../../server/parse_form.ts";
+import { parse_bool } from "../../../server/parse_form.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encode } from "std/encoding/base64.ts";
-import { get_host } from "../../../server/utils.ts";
+import { get_host, return_data } from "../../../server/utils.ts";
+import type { EhFileExtend } from "../../../server/files.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -16,21 +17,24 @@ export const handler: Handlers = {
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();
+        const u = new URL(req.url);
         const f = m.db.get_file(id);
+        const data = await parse_bool(u.searchParams.get("data"), false);
         if (!f) {
             return new Response("File not found.", { status: 404 });
         }
+        if (data) {
+            return return_data<EhFileExtend>({
+                id: f.id,
+                height: f.height,
+                width: f.width,
+                is_original: f.is_original,
+                token: f.token,
+            });
+        }
         const opts: GetFileResponseOptions = {};
         if (m.cfg.img_verify_secret) {
-            let verify = null;
-            try {
-                const form = await req.formData();
-                verify = await get_string(form.get("verify"));
-            } catch (_) {
-                null;
-                const u = new URL(req.url);
-                verify = u.searchParams.get("verify");
-            }
+            const verify = u.searchParams.get("verify");
             const tverify = encode(
                 new Uint8Array(
                     await pbkdf2Hmac(
@@ -46,14 +50,10 @@ export const handler: Handlers = {
                 const b = new URLSearchParams();
                 b.append("verify", tverify);
                 return Response.redirect(
-                    `${get_host(req)}/api/file/${f.id}?${b}`,
+                    `${get_host(req)}/file/${f.id}?${b}`,
                 );
             }
-            if (verify !== tverify) {
-                return new Response("Invalid verify.", { status: 400 });
-            }
         }
-        opts.cache_control = "public, max-age=31536000";
         opts.range = req.headers.get("range");
         opts.if_modified_since = req.headers.get("If-Modified-Since");
         opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");

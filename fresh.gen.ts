@@ -20,8 +20,12 @@ import * as $14 from "./routes/api/task.ts";
 import * as $15 from "./routes/api/thumbnail/[id].ts";
 import * as $16 from "./routes/api/token.ts";
 import * as $17 from "./routes/api/user.ts";
-import * as $18 from "./routes/index.tsx";
-import * as $19 from "./routes/manifest.json.ts";
+import * as $18 from "./routes/file/[id].ts";
+import * as $19 from "./routes/file/_middleware.ts";
+import * as $20 from "./routes/index.tsx";
+import * as $21 from "./routes/manifest.json.ts";
+import * as $22 from "./routes/thumbnail/[id].ts";
+import * as $23 from "./routes/thumbnail/_middleware.ts";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -46,8 +50,12 @@ const manifest = {
         "./routes/api/thumbnail/[id].ts": $15,
         "./routes/api/token.ts": $16,
         "./routes/api/user.ts": $17,
-        "./routes/index.tsx": $18,
-        "./routes/manifest.json.ts": $19,
+        "./routes/file/[id].ts": $18,
+        "./routes/file/_middleware.ts": $19,
+        "./routes/index.tsx": $20,
+        "./routes/manifest.json.ts": $21,
+        "./routes/thumbnail/[id].ts": $22,
+        "./routes/thumbnail/_middleware.ts": $23,
     },
     islands: {
         "./islands/Container.tsx": $$0,
