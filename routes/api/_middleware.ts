@@ -70,7 +70,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
                         "Set-Cookie",
                         `token=${t.token}; Expires=${t.expired.toUTCString()}${
                             t.http_only ? "; HttpOnly" : ""
-                        }${t.secure ? "; Secure" : ""}`,
+                        }${t.secure ? "; Secure" : ""}; Path=/api`,
                     );
                 } catch {
                     null;
