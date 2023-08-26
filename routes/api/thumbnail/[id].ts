@@ -50,17 +50,17 @@ export const handler: Handlers = {
             cfg.height = height;
         } else if (width !== null) {
             cfg.width = width;
-            cfg.height = Math.round(f.height / f.width * width);
+            cfg.height = Math.floor(f.height / f.width * width);
         } else if (height !== null) {
             cfg.height = height;
-            cfg.width = Math.round(f.width / f.height * height);
+            cfg.width = Math.floor(f.width / f.height * height);
         } else {
             if (f.width > f.height) {
                 cfg.width = max;
-                cfg.height = Math.round(f.height / f.width * max);
+                cfg.height = Math.floor(f.height / f.width * max);
             } else {
                 cfg.height = max;
-                cfg.width = Math.round(f.width / f.height * max);
+                cfg.width = Math.floor(f.width / f.height * max);
             }
         }
         if (!force) {
