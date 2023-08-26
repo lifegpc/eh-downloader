@@ -10,11 +10,17 @@
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
         "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net --unstable",
         "fetch": "deno run --allow-read=./ --allow-write=./ --allow-net fetch_static_files.ts",
-        "gen_meili_server_key": "deno run --allow-net scripts/gen_meili_server_key.ts"
+        "gen_meili_server_key": "deno run --allow-net scripts/gen_meili_server_key.ts",
+        "server-build": "deno run -A --unstable server-dev.ts build"
     },
     "fmt": {
         "indentWidth": 4,
-        "exclude": ["config.json", "static/sw.js", "static/sw.meta.json"]
+        "exclude": [
+            "config.json",
+            "static/sw.js",
+            "static/sw.meta.json",
+            "_fresh"
+        ]
     },
     "compilerOptions": {
         "jsx": "react-jsx",
@@ -24,6 +30,7 @@
     "lint": {
         "rules": {
             "tags": ["fresh", "recommended"]
-        }
+        },
+        "exclude": ["_fresh"]
     }
 }
