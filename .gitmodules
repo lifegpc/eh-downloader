@@ -1,0 +1,3 @@
+[submodule "extensions/utils"]
+	path = extensions/utils
+	url = https://github.com/lifegpc/c-utils

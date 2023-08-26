@@ -19,7 +19,8 @@
             "config.json",
             "static/sw.js",
             "static/sw.meta.json",
-            "_fresh"
+            "_fresh",
+            "extensions/build"
         ]
     },
     "compilerOptions": {

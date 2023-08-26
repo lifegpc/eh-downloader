@@ -2,7 +2,11 @@ import { Handlers } from "$fresh/server.ts";
 import { exists } from "std/fs/exists.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool, parse_int } from "../../../server/parse_form.ts";
-import { generate_filename, ThumbnailConfig } from "../../../thumbnail/base.ts";
+import {
+    generate_filename,
+    ThumbnailConfig,
+    ThumbnailGenMethod,
+} from "../../../thumbnail/base.ts";
 import { sure_dir } from "../../../utils.ts";
 import { ThumbnailMethod } from "../../../config.ts";
 import { fb_generate_thumbnail } from "../../../thumbnail/ffmpeg_binary.ts";
@@ -35,7 +39,12 @@ export const handler: Handlers = {
         const height = await parse_int(u.searchParams.get("height"), null);
         const quality = await parse_int(u.searchParams.get("quality"), 1);
         const force = await parse_bool(u.searchParams.get("force"), false);
-        const cfg: ThumbnailConfig = { width: 0, height: 0, quality };
+        const cfg: ThumbnailConfig = {
+            width: 0,
+            height: 0,
+            quality,
+            method: ThumbnailGenMethod.Unknown,
+        };
         if (width !== null && height !== null) {
             cfg.width = width;
             cfg.height = height;

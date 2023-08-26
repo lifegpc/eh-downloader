@@ -27,6 +27,7 @@
         "@material/web/": "https://unpkg.lifegpc.workers.dev/@material/web@1.0.0-pre.13/",
         "@lit-labs/react/": "https://esm.sh/@lit-labs/react@1.2.1/",
         "bootstrap/": "https://esm.sh/bootstrap@5.3.0/",
-        "filesize": "https://esm.sh/filesize@10.0.7"
+        "filesize": "https://esm.sh/filesize@10.0.7",
+        "pwn/": "https://deno.land/x/pwn@1.0.0/"
     }
 }
