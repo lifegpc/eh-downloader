@@ -103,6 +103,19 @@ export const handler: Handlers = {
                     }
                     return return_data({});
                 } else return return_error(3, "Invalid parameters.");
+            } else if (Array.isArray(b)) {
+                const m = get_task_manager();
+                for (const d of b) {
+                    if (typeof d.token === "string") {
+                        if (
+                            typeof d.is_nsfw === "boolean" &&
+                            typeof d.is_ad === "boolean"
+                        ) {
+                            m.db.add_filemeta(d);
+                        }
+                    }
+                }
+                return return_data({});
             }
             return return_error(5, "Unknown JSON format.");
         } else if (
