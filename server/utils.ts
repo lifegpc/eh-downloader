@@ -41,6 +41,17 @@ export function return_data<T = unknown>(
     return gen_response<T>({ ok: true, status: 0, data }, status, headers);
 }
 
+export function gen_data<T = unknown>(data: T): JSONResult<T> {
+    return { ok: true, status: 0, data };
+}
+
+export function gen_error<T = unknown>(
+    status: Exclude<number, 0>,
+    error: string,
+): JSONResult<T> {
+    return { ok: false, status, error };
+}
+
 export function return_json<T = unknown>(data: T, status = 200) {
     return new Response(JSON.stringify(data), {
         status,

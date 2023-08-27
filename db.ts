@@ -1007,6 +1007,20 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_tag(id: number) {
+        const s = this.db.queryEntries<Tag>(
+            "SELECT * FROM tag WHERE id = ?;",
+            [id],
+        );
+        return s.length ? s[0] : undefined;
+    }
+    get_tag_by_tag(tag: string) {
+        const s = this.db.queryEntries<Tag>(
+            "SELECT * FROM tag WHERE tag = ?;",
+            [tag],
+        );
+        return s.length ? s[0] : undefined;
+    }
     async get_task(id: number) {
         const s = await this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task WHERE id = ?;", [id])
