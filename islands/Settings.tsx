@@ -13,6 +13,7 @@ import t from "../server/i18n.ts";
 import SettingsSelect from "../components/SettingsSelect.tsx";
 import type { _MdDialog, DialogAction } from "../server/md3.ts";
 import { MdDialog, MdTextButton } from "../server/dmodule.ts";
+import StringRecordsBox from "../components/StringRecordsBox.tsx";
 
 export type SettingsProps = {
     show: boolean;
@@ -276,6 +277,21 @@ export default class Settings extends Component<SettingsProps> {
                                 type="text"
                                 outlined={true}
                             />
+                            <div>
+                                <label style={{ display: "block" }}>
+                                    {t("settings.meili_hosts")}
+                                </label>
+                                <StringRecordsBox
+                                    value={settings.meili_hosts || {}}
+                                    sign=":"
+                                    set_value={(_) => {
+                                        set_changed((v) => {
+                                            v.add("meili_hosts");
+                                            return v;
+                                        });
+                                    }}
+                                />
+                            </div>
                         </div>
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>

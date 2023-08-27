@@ -30,5 +30,6 @@
     "thumbnail_method1": "ffmpeg API",
     "thumbnail_dir": "The folder used to store thumbnails: ",
     "remove_previous_gallery": "Remove old galleries which replaced by new ones.",
-    "img_verify_secret": "The secret of image verify: "
+    "img_verify_secret": "The secret of image verify: ",
+    "meili_hosts": "Meilie search server host returned by API with specific host: "
 }

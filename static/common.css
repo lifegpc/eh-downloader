@@ -362,6 +362,21 @@ div.new_task div.content .text .mdc-text-field {
     margin-top: 6px;
 }
 
+div.string-record {
+    display: inline-flex;
+    line-height: 56px;
+}
+
+div.string-record > div.b-text-field.md3.text {
+    margin: 0 5px;
+}
+
+div.string-records-box {
+    display: inline-grid;
+    display: -ms-inline-grid;
+    display: -moz-inline-grid;
+}
+
 @media (max-width:1280px) {
     .settings {
         margin: 0;

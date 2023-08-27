@@ -30,5 +30,6 @@
     "thumbnail_method1": "FFMPEG API",
     "thumbnail_dir": "存放缩略图的文件夹：",
     "remove_previous_gallery": "移除被新画廊替代的旧画廊。",
-    "img_verify_secret": "用于验证图片verify的密钥："
+    "img_verify_secret": "用于验证图片verify的密钥：",
+    "meili_hosts": "为指定域名API将返回专门的Meilisearch服务器主机："
 }
