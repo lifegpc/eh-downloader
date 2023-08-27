@@ -29,5 +29,6 @@
     "thumbnail_method0": "ffmpeg binary",
     "thumbnail_method1": "ffmpeg API",
     "thumbnail_dir": "The folder used to store thumbnails: ",
-    "remove_previous_gallery": "Remove old galleries which replaced by new ones."
+    "remove_previous_gallery": "Remove old galleries which replaced by new ones.",
+    "img_verify_secret": "The secret of image verify: "
 }

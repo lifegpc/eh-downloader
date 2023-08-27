@@ -269,6 +269,13 @@ export default class Settings extends Component<SettingsProps> {
                                 )}
                                 outlined={true}
                             />
+                            <SettingsText
+                                name="img_verify_secret"
+                                value={settings.img_verify_secret || ""}
+                                description={t("settings.img_verify_secret")}
+                                type="text"
+                                outlined={true}
+                            />
                         </div>
                     </SettingsContext>
                     <Button onClick={loadData}>{t("common.reload")}</Button>

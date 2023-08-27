@@ -29,5 +29,6 @@
     "thumbnail_method0": "FFMPEG二进制",
     "thumbnail_method1": "FFMPEG API",
     "thumbnail_dir": "存放缩略图的文件夹：",
-    "remove_previous_gallery": "移除被新画廊替代的旧画廊。"
+    "remove_previous_gallery": "移除被新画廊替代的旧画廊。",
+    "img_verify_secret": "用于验证图片verify的密钥："
 }
