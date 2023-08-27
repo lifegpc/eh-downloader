@@ -1,6 +1,6 @@
 /// <reference lib="deno.unstable" />
 import { Struct } from "pwn/mod.ts";
-import { ThumbnailAlign, ThumbnailGenMethod } from "./base.ts";
+import { ThumbnailAlign, ThumbnailConfig, ThumbnailGenMethod } from "./base.ts";
 
 let libSuffix = "";
 let libPrefix = "lib";
@@ -77,4 +77,26 @@ export async function gen_thumbnail(
     const re = _Result.unpack(ore);
     if (re.e) return get_error(ore);
     return;
+}
+
+export async function fa_generate_thumbnail(
+    i: string,
+    o: string,
+    cfg: ThumbnailConfig,
+) {
+    let method = cfg.method;
+    if (method === ThumbnailGenMethod.Unknown) method = ThumbnailGenMethod.Fill;
+    const re = await gen_thumbnail(
+        i,
+        o,
+        cfg.width,
+        cfg.height,
+        method,
+        cfg.align,
+        cfg.quality,
+    );
+    if (re) {
+        console.error(re);
+    }
+    return re === undefined;
 }

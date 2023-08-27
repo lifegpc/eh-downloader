@@ -2,11 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import { exists } from "std/fs/exists.ts";
 import { get_task_manager } from "../../server.ts";
 import { parse_int } from "../../server/parse_form.ts";
-import {
-    generate_filename,
-    ThumbnailConfig,
-    ThumbnailGenMethod,
-} from "../../thumbnail/base.ts";
+import { generate_filename, ThumbnailConfig } from "../../thumbnail/base.ts";
 import { sure_dir } from "../../utils.ts";
 import {
     get_file_response,
@@ -50,34 +46,24 @@ export const handler: Handlers = {
         if (verify !== tverify) {
             return new Response("verify is invalid.", { status: 400 });
         }
-        const max = await parse_int(u.searchParams.get("max"), 1200);
         const width = await parse_int(u.searchParams.get("width"), null);
         const height = await parse_int(u.searchParams.get("height"), null);
-        const quality = await parse_int(u.searchParams.get("quality"), 1);
-        const cfg: ThumbnailConfig = {
-            width: 0,
-            height: 0,
-            quality,
-            method: ThumbnailGenMethod.Unknown,
-        };
-        if (width !== null && height !== null) {
-            cfg.width = width;
-            cfg.height = height;
-        } else if (width !== null) {
-            cfg.width = width;
-            cfg.height = Math.floor(f.height / f.width * width);
-        } else if (height !== null) {
-            cfg.height = height;
-            cfg.width = Math.floor(f.width / f.height * height);
-        } else {
-            if (f.width > f.height) {
-                cfg.width = max;
-                cfg.height = Math.floor(f.height / f.width * max);
-            } else {
-                cfg.height = max;
-                cfg.width = Math.floor(f.width / f.height * max);
-            }
+        const quality = await parse_int(u.searchParams.get("quality"), null);
+        const method = await parse_int(u.searchParams.get("method"), null);
+        const align = await parse_int(u.searchParams.get("align"), null);
+        if (
+            width === null || height === null || quality === null ||
+            method === null || align === null
+        ) {
+            return new Response("params is missing", { status: 400 });
         }
+        const cfg: ThumbnailConfig = {
+            width,
+            height,
+            quality,
+            method,
+            align,
+        };
         const output = generate_filename(b, f, cfg);
         if (!(await exists(output))) {
             return new Response("file not exists.", { status: 500 });

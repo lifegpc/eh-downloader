@@ -3,7 +3,10 @@ import { exists } from "std/fs/exists.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool, parse_int } from "../../../server/parse_form.ts";
 import {
+    gen_thumbnail_config_params,
     generate_filename,
+    parse_thumbnail_align,
+    parse_thumbnail_method,
     ThumbnailConfig,
     ThumbnailGenMethod,
 } from "../../../thumbnail/base.ts";
@@ -18,6 +21,9 @@ import { get_host } from "../../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encode } from "std/encoding/base64.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
+import type * as FFMPEG_API from "../../../thumbnail/ffmpeg_api.ts";
+
+let ffmpeg_api: typeof FFMPEG_API | undefined;
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -39,11 +45,14 @@ export const handler: Handlers = {
         const height = await parse_int(u.searchParams.get("height"), null);
         const quality = await parse_int(u.searchParams.get("quality"), 1);
         const force = await parse_bool(u.searchParams.get("force"), false);
+        const tmethod = parse_thumbnail_method(u.searchParams.get("method"));
+        const align = parse_thumbnail_align(u.searchParams.get("align"));
         const cfg: ThumbnailConfig = {
             width: 0,
             height: 0,
             quality,
-            method: ThumbnailGenMethod.Unknown,
+            method: tmethod,
+            align: align,
         };
         if (width !== null && height !== null) {
             cfg.width = width;
@@ -51,22 +60,29 @@ export const handler: Handlers = {
         } else if (width !== null) {
             cfg.width = width;
             cfg.height = Math.floor(f.height / f.width * width);
+            cfg.method = ThumbnailGenMethod.Unknown;
         } else if (height !== null) {
             cfg.height = height;
             cfg.width = Math.floor(f.width / f.height * height);
+            cfg.method = ThumbnailGenMethod.Unknown;
         } else {
             if (f.width > f.height) {
                 cfg.width = max;
                 cfg.height = Math.floor(f.height / f.width * max);
+                cfg.method = ThumbnailGenMethod.Unknown;
             } else {
                 cfg.height = max;
                 cfg.width = Math.floor(f.width / f.height * max);
+                cfg.method = ThumbnailGenMethod.Unknown;
             }
         }
         if (!force) {
             if (cfg.width > f.width || cfg.height > f.height) {
                 return Response.redirect(`${get_host(req)}/api/file/${f.id}`);
             }
+        }
+        if (method === ThumbnailMethod.FFMPEG_BINARY) {
+            cfg.method = ThumbnailGenMethod.Unknown;
         }
         const output = generate_filename(b, f, cfg);
         if (!(await exists(output))) {
@@ -82,13 +98,32 @@ export const handler: Handlers = {
                         status: 500,
                     });
                 }
+            } else if (method === ThumbnailMethod.FFMPEG_API) {
+                if (!ffmpeg_api) {
+                    ffmpeg_api = await import(
+                        "../../../thumbnail/ffmpeg_api.ts"
+                    );
+                }
+                const re = await ffmpeg_api.fa_generate_thumbnail(
+                    f.path,
+                    output,
+                    cfg,
+                );
+                if (!re) {
+                    return new Response("Failed to generate thumbnail.", {
+                        status: 500,
+                    });
+                }
             }
         }
         const opts: GetFileResponseOptions = {};
         if (m.cfg.img_verify_secret) {
             const verify = u.searchParams.get("verify");
             if (verify === null) {
-                const bs = new SortableURLSearchParams(u.search, ["verify"]);
+                const bs = new SortableURLSearchParams(
+                    gen_thumbnail_config_params(cfg),
+                    ["verify"],
+                );
                 const tverify = encode(
                     new Uint8Array(
                         await pbkdf2Hmac(

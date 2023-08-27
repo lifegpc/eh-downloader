@@ -1,4 +1,5 @@
 export type StatusData = {
+    ffmpeg_api_enabled: boolean;
     ffmpeg_binary_enabled: boolean;
     meilisearch_enabled: boolean;
     meilisearch?: {

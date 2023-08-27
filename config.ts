@@ -123,7 +123,7 @@ export class Config {
         return this._return_string("ffmpeg_path") || "ffmpeg";
     }
     get thumbnail_method() {
-        const n = this._return_number("thumbnail") || 0;
+        const n = this._return_number("thumbnail_method") || 0;
         if (n < 0 || n > 1) return ThumbnailMethod.FFMPEG_BINARY;
         return n as ThumbnailMethod;
     }

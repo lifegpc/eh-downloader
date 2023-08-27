@@ -3,6 +3,19 @@ import { get_task_manager } from "../../server.ts";
 import type { StatusData } from "../../server/status.ts";
 import { return_data } from "../../server/utils.ts";
 import { check_ffmpeg_binary } from "../../thumbnail/ffmpeg_binary.ts";
+import type * as FFMPEG_API from "../../thumbnail/ffmpeg_api.ts";
+
+let ffmpeg_api: typeof FFMPEG_API | undefined;
+
+async function check_ffmpeg_api() {
+    if (ffmpeg_api) return true;
+    try {
+        ffmpeg_api = await import("../../thumbnail/ffmpeg_api.ts");
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
 
 export const handler: Handlers = {
     async GET(_req, ctx) {
@@ -12,6 +25,7 @@ export const handler: Handlers = {
         const ffmpeg_binary_enabled = await check_ffmpeg_binary(
             m.cfg.ffmpeg_path,
         );
+        const ffmpeg_api_enabled = await check_ffmpeg_api();
         const meilisearch_enabled = m.meilisearch !== undefined;
         const meilisearch =
             is_authed && meilisearch_enabled && m.cfg.meili_host &&
@@ -24,6 +38,7 @@ export const handler: Handlers = {
                 : undefined;
         const no_user = m.db.get_user_count() === 0;
         return return_data<StatusData>({
+            ffmpeg_api_enabled,
             ffmpeg_binary_enabled,
             meilisearch_enabled,
             meilisearch,
