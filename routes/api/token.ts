@@ -5,23 +5,44 @@ import { return_data, return_error } from "../../server/utils.ts";
 import { get_task_manager } from "../../server.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import isEqual from "lodash/isEqual";
+import type { Token } from "../../db.ts";
 
 const USER_PASSWORD_ERROR = "Incorrect username or password.";
 
 export const handler: Handlers = {
-    async DELETE(req, _ctx) {
-        const data = await req.formData();
-        const t = await get_string(data.get("token"));
+    async DELETE(req, ctx) {
+        let t: string | undefined | null;
+        try {
+            const data = await req.formData();
+            t = await get_string(data.get("token"));
+        } catch (_) {
+            null;
+        }
+        let is_from_auth = false;
+        const ttoken = <Token | undefined> ctx.state.token;
+        const is_from_cookie = <boolean | undefined> ctx.state.is_from_cookie;
+        if (!t && ttoken) {
+            t = ttoken.token;
+            is_from_auth = true;
+        }
         if (!t) return return_error(1, "token not specified.");
         const m = get_task_manager();
         const token = m.db.get_token(t);
         if (!token) return return_error(404, "token not found.");
         m.db.delete_token(t);
-        return return_data(true);
+        const headers: HeadersInit = {};
+        if (is_from_auth && is_from_cookie) {
+            headers["Set-Cookie"] = `token=${token.token}; Max-Age=0${
+                token.http_only ? "; HttpOnly" : ""
+            }${token.secure ? "; Secure" : ""}; Path=/api`;
+        }
+        return return_data(true, 200, headers);
     },
-    GET(req, _ctx) {
+    GET(req, ctx) {
         const u = new URL(req.url);
-        const t = u.searchParams.get("token");
+        let t = u.searchParams.get("token");
+        const ttoken = <Token | undefined> ctx.state.token;
+        if (!t && ttoken) t = ttoken.token;
         if (!t) return return_error(1, "token not specififed.");
         const m = get_task_manager();
         const token = m.db.get_token(t);
