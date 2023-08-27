@@ -50,6 +50,154 @@ export const handler: Handlers = {
         if (token) return get_filemeta(token);
         return return_error(400, "token is needed.");
     },
+    async POST(req, _ctx) {
+        const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
+        if (ct === "application/json") {
+            if (!req.body) return_error(1, "Body not found.");
+            let b = null;
+            try {
+                b = await req.json();
+            } catch (_) {
+                return return_error(2, "Invaild JSON file.");
+            }
+            if (typeof b.token === "string") {
+                const m = get_task_manager();
+                const f = m.db.get_filemeta(b.token) ||
+                    { token: b.token, is_nsfw: false, is_ad: false };
+                if (typeof b.is_nsfw === "boolean") {
+                    f.is_nsfw = b.is_nsfw;
+                }
+                if (typeof b.is_ad === "boolean") {
+                    f.is_ad = b.is_ad;
+                }
+                m.db.add_filemeta(f);
+                return return_data({});
+            } else if (typeof b.gid === "number") {
+                const m = get_task_manager();
+                const excludes: Set<string> = Array.isArray(b.excludes) &&
+                        // @ts-ignore Any
+                        b.excludes.every((d) => typeof d === "string")
+                    ? new Set(b.excludes)
+                    : new Set();
+                const tokens = new Set(
+                    m.db.get_pmeta(b.gid).map((d) => d.token),
+                );
+                for (const token of tokens) {
+                    if (excludes.has(token)) continue;
+                    const f = m.db.get_filemeta(token) ||
+                        { token, is_nsfw: false, is_ad: false };
+                    if (typeof b.is_nsfw === "boolean") {
+                        f.is_nsfw = b.is_nsfw;
+                    }
+                    if (typeof b.is_ad === "boolean") {
+                        f.is_ad = b.is_ad;
+                    }
+                    m.db.add_filemeta(f);
+                }
+                return return_data({});
+            } else if (
+                Array.isArray(b.tokens) &&
+                // @ts-ignore Any
+                b.tokens.every((d) => typeof d === "string")
+            ) {
+                const m = get_task_manager();
+                for (const token of b.tokens) {
+                    const f = m.db.get_filemeta(token) ||
+                        { token, is_nsfw: false, is_ad: false };
+                    if (typeof b.is_nsfw === "boolean") {
+                        f.is_nsfw = b.is_nsfw;
+                    }
+                    if (typeof b.is_ad === "boolean") {
+                        f.is_ad = b.is_ad;
+                    }
+                    m.db.add_filemeta(f);
+                }
+                return return_data({});
+            } else if (Array.isArray(b)) {
+                const m = get_task_manager();
+                for (const d of b) {
+                    if (typeof d.token === "string") {
+                        const f = m.db.get_filemeta(d.token) ||
+                            { token: d.token, is_nsfw: false, is_ad: false };
+                        if (typeof d.is_nsfw === "boolean") {
+                            f.is_nsfw = d.is_nsfw;
+                        }
+                        if (typeof d.is_ad === "boolean") {
+                            f.is_ad = d.is_ad;
+                        }
+                        m.db.add_filemeta(f);
+                    }
+                }
+                return return_data({});
+            }
+            return return_error(5, "Unknown JSON format.");
+        } else if (
+            ct === "application/x-www-form-urlencoded" ||
+            ct === "multipart/form-data"
+        ) {
+            let d: FormData | null = null;
+            try {
+                d = await req.formData();
+            } catch (_) {
+                return return_error(3, "Invalid parameters.");
+            }
+            const token = await get_string(d.get("token"));
+            const is_nsfw = await parse_bool(d.get("is_nsfw"), null);
+            const is_ad = await parse_bool(d.get("is_ad"), null);
+            const gid = await parse_int(d.get("gid"), null);
+            const tokens = await get_string(d.get("tokens"));
+            if (token) {
+                const m = get_task_manager();
+                const f = m.db.get_filemeta(token) ||
+                    { token, is_nsfw: false, is_ad: false };
+                if (is_nsfw !== null) {
+                    f.is_nsfw = is_nsfw;
+                }
+                if (is_ad !== null) {
+                    f.is_ad = is_ad;
+                }
+                m.db.add_filemeta(f);
+                return return_data({});
+            } else if (gid !== null) {
+                const e = await get_string(d.get("excludes"));
+                const excludes = e ? new Set(e.split(",")) : new Set<string>();
+                const m = get_task_manager();
+                const tokens = new Set(
+                    m.db.get_pmeta(gid).map((d) => d.token),
+                );
+                for (const token of tokens) {
+                    if (excludes.has(token)) continue;
+                    const f = m.db.get_filemeta(token) ||
+                        { token, is_nsfw: false, is_ad: false };
+                    if (is_nsfw !== null) {
+                        f.is_nsfw = is_nsfw;
+                    }
+                    if (is_ad !== null) {
+                        f.is_ad = is_ad;
+                    }
+                    m.db.add_filemeta(f);
+                }
+                return return_data({});
+            } else if (tokens) {
+                const ts = new Set(tokens.split(","));
+                const m = get_task_manager();
+                for (const token of ts) {
+                    const f = m.db.get_filemeta(token) ||
+                        { token, is_nsfw: false, is_ad: false };
+                    if (is_nsfw !== null) {
+                        f.is_nsfw = is_nsfw;
+                    }
+                    if (is_ad !== null) {
+                        f.is_ad = is_ad;
+                    }
+                    m.db.add_filemeta(f);
+                }
+                return return_data({});
+            }
+            return return_error(4, "Unknown format.");
+        }
+        return return_error(4, "Unknown format.");
+    },
     async PUT(req, _ctx) {
         const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
         if (ct === "application/json") {
