@@ -5,12 +5,12 @@
 #include "libswscale/swscale.h"
 #include <string.h>
 
-PUBLIC_API void thumbnail_fferror(int e, char* buf, size_t bufsize) {
+void thumbnail_fferror(int e, char* buf, size_t bufsize) {
     if (!buf) return;
     av_make_error_string(buf, bufsize, e);
 }
 
-int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, AVCodecContext* occ, THUMBNAIL_METHOD method) {
+int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, AVCodecContext* occ, THUMBNAIL_METHOD method, ALIGN_METHOD align) {
     if (!err || !ifr || !ofr) return 1;
     int re = 0;
     struct SwsContext* sws = NULL;
@@ -20,17 +20,30 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
         re = 1;
         goto end;
     }
-    int theight = ifr->height * occ->width / ifr->width;
-    char simple_way = 0;
-    if (occ->height == theight || method == THUMBNAIL_FILL) {
-        simple_way = 1;
-    }
-    if (simple_way) {
+    if (method == THUMBNAIL_FILL) {
         fr->width = occ->width;
         fr->height = occ->height;
-        fr->format = occ->pix_fmt;
-        fr->sample_aspect_ratio = ifr->sample_aspect_ratio;
+    } else if (method == THUMBNAIL_COVER) {
+        int twidth = ifr->width * occ->height / ifr->height;
+        if (twidth > occ->width) {
+            fr->width = twidth;
+            fr->height = occ->height;
+        } else {
+            fr->width = occ->width;
+            fr->height = ifr->height * occ->width / ifr->width;
+        }
+    } else if (method == THUMBNAIL_CONTAIN) {
+        int twidth = ifr->width * occ->height / ifr->height;
+        if (twidth > occ->width) {
+            fr->width = occ->width;
+            fr->height = ifr->height * occ->width / ifr->width;
+        } else {
+            fr->width = twidth;
+            fr->height = occ->height;
+        }
     }
+    fr->format = occ->pix_fmt;
+    fr->sample_aspect_ratio = ifr->sample_aspect_ratio;
     if ((err->fferr = av_frame_get_buffer(fr, 0)) < 0) {
         err->e = THUMBNAIL_FFMPEG_ERROR;
         re = 1;
@@ -43,17 +56,94 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
         av_log(NULL, AV_LOG_ERROR, "Failed to make writeable for output frame: %s\n", av_err2str(err->fferr));
         goto end;
     }
-    if (simple_way) {
-        if (!(sws = sws_getContext(ifr->width, ifr->height, (enum AVPixelFormat)ifr->format, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
-            err->e = THUMBNAIL_UNABLE_SCALE;
+    if (!(sws = sws_getContext(ifr->width, ifr->height, (enum AVPixelFormat)ifr->format, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
+        err->e = THUMBNAIL_UNABLE_SCALE;
+        re = 1;
+        goto end;
+    }
+    if ((err->fferr = sws_scale(sws, (const uint8_t* const*)ifr->data, ifr->linesize, 0, ifr->height, fr->data, fr->linesize)) < 0) {
+        err->e = THUMBNAIL_UNABLE_SCALE;
+        re = 1;
+        goto end;
+    }
+    if (method != THUMBNAIL_FILL) {
+        if (!(fr2 = av_frame_alloc())) {
+            err->e = THUMBNAIL_OOM;
             re = 1;
             goto end;
         }
-        if ((err->fferr = sws_scale(sws, (const uint8_t* const*)ifr->data, ifr->linesize, 0, ifr->height, fr->data, fr->linesize)) < 0) {
-            err->e = THUMBNAIL_UNABLE_SCALE;
+        fr2->width = occ->width;
+        fr2->height = occ->height;
+        fr2->format = occ->pix_fmt;
+        fr2->sample_aspect_ratio = occ->sample_aspect_ratio;
+        if ((err->fferr = av_frame_get_buffer(fr2, 0)) < 0) {
+            err->e = THUMBNAIL_FFMPEG_ERROR;
+            av_log(NULL, AV_LOG_ERROR, "Failed to get buffer for output frame: %s\n", av_err2str(err->fferr));
             re = 1;
             goto end;
         }
+        if ((err->fferr = av_frame_make_writable(fr2)) < 0) {
+            err->e = THUMBNAIL_FFMPEG_ERROR;
+            av_log(NULL, AV_LOG_ERROR, "Failed to make writeable for output frame: %s\n", av_err2str(err->fferr));
+            re = 1;
+            goto end;
+        }
+        int width = 0, height = 0, x1 = 0, y1 = 0, i = 0, j = 0;
+        if (method == THUMBNAIL_COVER) {
+            width = occ->width;
+            height = occ->height;
+            if (fr->width == occ->width) {
+                if (align == ALIGN_CENTER) {
+                    y1 = (fr->height - occ->height) / 2;
+                } else if (align == ALIGN_BOTTOM) {
+                    y1 = fr->height - occ->height;
+                }
+            } else if (fr->height == occ->height) {
+                if (align == ALIGN_CENTER) {
+                    x1 = (fr->width - occ->width) / 2;
+                } else if (align == ALIGN_RIGHT) {
+                    x1 = fr->width - occ->width;
+                }
+            }
+            for (i = 0; i < height; i++) {
+                memcpy(fr2->data[0] + i * fr2->linesize[0], fr->data[0] + (i + y1) * fr->linesize[0] + x1, width);
+            }
+            for (j = 1; j < 3; j++) {
+                for (i = 0; i < height / 2; i++) {
+                    memcpy(fr2->data[j] + i * fr2->linesize[j], fr->data[j] + (i + y1 / 2) * fr->linesize[j] + x1 / 2, width / 2);
+                }
+            }
+        } else if (method == THUMBNAIL_CONTAIN) {
+            width = fr->width;
+            height = fr->height;
+            if (fr->width == occ->width) {
+                if (align == ALIGN_CENTER) {
+                    y1 = (occ->height - fr->height) / 2;
+                } else if (align == ALIGN_BOTTOM) {
+                    y1 = occ->height - fr->height;
+                }
+            } else {
+                if (align == ALIGN_CENTER) {
+                    x1 = (occ->width - fr->width) / 2;
+                } else if (align == ALIGN_RIGHT) {
+                    x1 = occ->width - fr->width;
+                }
+            }
+            memset(fr2->data[0], 255, fr2->height * fr2->linesize[0]);
+            memset(fr2->data[1], 128, fr2->height / 2 * fr2->linesize[1]);
+            memset(fr2->data[2], 128, fr2->height / 2 * fr2->linesize[2]);
+            for (i = 0; i < height; i++) {
+                memcpy(fr2->data[0] + (i + y1) * fr2->linesize[0] + x1, fr->data[0] + i * fr->linesize[0], width);
+            }
+            for (j = 1; j < 3; j++) {
+                for (i = 0; i < height / 2; i++) {
+                    memcpy(fr2->data[j] + (i + y1 / 2) * fr2->linesize[j] + x1 / 2, fr->data[j] + i * fr->linesize[j], width / 2);
+                }
+            }
+        }
+        if (fr) av_frame_free(&fr);
+        fr = fr2;
+        fr2 = NULL;
     }
 end:
     if (re == 1 && fr) av_frame_free(&fr);
@@ -113,7 +203,7 @@ end:
     return re;
 }
 
-THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int height, THUMBNAIL_METHOD method) {
+THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int height, THUMBNAIL_METHOD method, ALIGN_METHOD align, int quality) {
     THUMBNAIL_ERROR re = { THUMBNAIL_OK, 0 };
     AVFormatContext* ic = NULL, * oc = NULL;
     AVStream* is = NULL, * os = NULL;
@@ -123,6 +213,10 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
     AVFrame* ifr = NULL, * ofr = NULL;
     if (method < THUMBNAIL_COVER || method > THUMBNAIL_FILL) {
         re.e = THUMBNAIL_UNKNOWN_METHOD;
+        goto end;
+    }
+    if (align < ALIGN_LEFT || align > ALIGN_RIGHT) {
+        re.e = THUMBNAIL_UNKNOWN_ALIGN;
         goto end;
     }
     if (!src || !dest) {
@@ -194,6 +288,9 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
     occ->sample_aspect_ratio = icc->sample_aspect_ratio;
     occ->time_base = AV_TIME_BASE_Q;
     occ->color_range = AVCOL_RANGE_JPEG;
+    occ->global_quality = quality;
+    occ->qmax = quality;
+    occ->qmin = quality;
     if ((re.fferr = avcodec_open2(occ, output_codec, NULL)) < 0) {
         av_log(NULL, AV_LOG_ERROR, "Failed to open encoder: %s\n", av_err2str(re.fferr));
         re.e = THUMBNAIL_FFMPEG_ERROR;
@@ -258,7 +355,7 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
             re.e = THUMBNAIL_FFMPEG_ERROR;
             goto end;
         }
-        if (thumbnail_convert_frame(&re, ifr, &ofr, occ, method)) {
+        if (thumbnail_convert_frame(&re, ifr, &ofr, occ, method, align)) {
             av_packet_unref(&pkt);
             re.e = THUMBNAIL_FFMPEG_ERROR;
             goto end;
@@ -312,6 +409,10 @@ const char* thumbnail_berror(THUMBNAIL_ERROR_E e) {
         return "No available encoder.";
     case THUMBNAIL_UNABLE_SCALE:
         return "Unable to scale image.";
+    case THUMBNAIL_UNKNOWN_METHOD:
+        return "Unknown method.";
+    case THUMBNAIL_UNKNOWN_ALIGN:
+        return "Unknown align.";
     default:
         return "Unknown error.";
     }

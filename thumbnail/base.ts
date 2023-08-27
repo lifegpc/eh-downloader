@@ -9,6 +9,14 @@ export enum ThumbnailGenMethod {
     Fill,
 }
 
+export enum ThumbnailAlign {
+    Left,
+    Top = 0,
+    Center,
+    Right,
+    Bottom = 2,
+}
+
 export type ThumbnailConfig = {
     width: number;
     height: number;

@@ -1,6 +1,6 @@
 /// <reference lib="deno.unstable" />
 import { Struct } from "pwn/mod.ts";
-import { ThumbnailGenMethod } from "./base.ts";
+import { ThumbnailAlign, ThumbnailGenMethod } from "./base.ts";
 
 let libSuffix = "";
 let libPrefix = "lib";
@@ -27,7 +27,15 @@ const lib = Deno.dlopen(
     libPath,
     {
         "gen_thumbnail": {
-            "parameters": ["buffer", "buffer", "i32", "i32", "i32"],
+            "parameters": [
+                "buffer",
+                "buffer",
+                "i32",
+                "i32",
+                "i32",
+                "i32",
+                "i32",
+            ],
             "result": { struct: ["i32", "i32"] },
             "nonblocking": true,
         },
@@ -53,6 +61,8 @@ export async function gen_thumbnail(
     width: number,
     height: number,
     method: ThumbnailGenMethod,
+    align: ThumbnailAlign,
+    quality: number,
 ) {
     const t = new TextEncoder();
     const ore = await lib.symbols.gen_thumbnail(
@@ -61,6 +71,8 @@ export async function gen_thumbnail(
         width,
         height,
         method,
+        align,
+        quality,
     );
     const re = _Result.unpack(ore);
     if (re.e) return get_error(ore);

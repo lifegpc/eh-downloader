@@ -14,6 +14,7 @@ typedef enum THUMBNAIL_ERROR_E {
     THUMBNAIL_OOM,
     THUMBNAIL_NO_ENCODER,
     THUMBNAIL_UNABLE_SCALE,
+    THUMBNAIL_UNKNOWN_ALIGN,
 } THUMBNAIL_ERROR_E;
 
 typedef struct THUMBNAIL_ERROR {
@@ -27,5 +28,13 @@ typedef enum THUMBNAIL_METHOD {
     THUMBNAIL_FILL,
 } THUMBNAIL_METHOD;
 
-PUBLIC_API THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int height, THUMBNAIL_METHOD method);
+typedef enum ALIGN_METHOD {
+    ALIGN_LEFT,
+    ALIGN_TOP = 0,
+    ALIGN_CENTER,
+    ALIGN_RIGHT,
+    ALIGN_BOTTOM = 2,
+} ALIGN_METHOD;
+
+PUBLIC_API THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int height, THUMBNAIL_METHOD method, ALIGN_METHOD align, int quality);
 PUBLIC_API void thumbnail_error(THUMBNAIL_ERROR e, char* buf, size_t bufsize);
