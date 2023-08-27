@@ -48,7 +48,6 @@ export const handler: Handlers = {
         const token = m.db.get_token(t);
         if (!token) return return_error(404, "token not found.");
         const user = m.db.get_user(token.uid);
-        m.db.delete_token(t);
         if (!user) return return_error(404, "user not found.");
         return return_data({
             token,
