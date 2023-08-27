@@ -23,6 +23,7 @@ export type ConfigType = {
     thumbnail_dir: string;
     remove_previous_gallery: boolean;
     img_verify_secret?: string;
+    meili_hosts?: Record<string, string>;
 };
 
 export enum ThumbnailMethod {
@@ -136,6 +137,18 @@ export class Config {
     get img_verify_secret() {
         return this._return_string("img_verify_secret");
     }
+    get meili_hosts() {
+        if (typeof this._data.meili_hosts === "object") {
+            const hosts: Record<string, string> = {};
+            for (const i in this._data.meili_hosts) {
+                /**@ts-ignore Object*/
+                const v = this._data.meili_hosts[i];
+                if (typeof v === "string") hosts[i] = v;
+            }
+            return hosts;
+        }
+        return undefined;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -159,6 +172,7 @@ export class Config {
             thumbnail_dir: this.thumbnail_dir,
             remove_previous_gallery: this.remove_previous_gallery,
             img_verify_secret: this.img_verify_secret,
+            meili_hosts: this.meili_hosts,
         };
     }
 }
