@@ -50,6 +50,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
             headers.set("Access-Control-Allow-Origin", "*");
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
             headers.set("Access-Control-Allow-Headers", "Content-Type, Range");
+            headers.set("Access-Control-Allow-Credentials", "true");
         }
         return new Response(null, { status: 204, headers });
     } else {
