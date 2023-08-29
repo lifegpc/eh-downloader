@@ -7,20 +7,22 @@ import {
 import { parse_bool } from "../../../server/parse_form.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encode } from "std/encoding/base64.ts";
-import { get_host, return_data } from "../../../server/utils.ts";
+import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
+        const u = new URL(req.url);
+        const data = await parse_bool(u.searchParams.get("data"), false);
         const id = parseInt(ctx.params.id);
         if (isNaN(id)) {
+            if (data) return return_error(400, "Bad Request")
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();
-        const u = new URL(req.url);
         const f = m.db.get_file(id);
-        const data = await parse_bool(u.searchParams.get("data"), false);
         if (!f) {
+            if (data) return return_error(404, "File not found.")
             return new Response("File not found.", { status: 404 });
         }
         if (data) {
