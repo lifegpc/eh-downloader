@@ -16,13 +16,13 @@ export const handler: Handlers = {
         const data = await parse_bool(u.searchParams.get("data"), false);
         const id = parseInt(ctx.params.id);
         if (isNaN(id)) {
-            if (data) return return_error(400, "Bad Request")
+            if (data) return return_error(400, "Bad Request");
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();
         const f = m.db.get_file(id);
         if (!f) {
-            if (data) return return_error(404, "File not found.")
+            if (data) return return_error(404, "File not found.");
             return new Response("File not found.", { status: 404 });
         }
         if (data) {
