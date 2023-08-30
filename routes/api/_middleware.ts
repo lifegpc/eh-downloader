@@ -47,7 +47,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         if (allow) headers.set("Allow", allow);
         const origin = req.headers.get("origin");
         if (origin) {
-            headers.set("Access-Control-Allow-Origin", "*");
+            headers.set("Access-Control-Allow-Origin", origin);
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
             headers.set("Access-Control-Allow-Headers", "Content-Type, Range");
             headers.set("Access-Control-Allow-Credentials", "true");
@@ -58,7 +58,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const headers = new Headers(res.headers);
         const origin = req.headers.get("origin");
         if (origin) {
-            headers.set("Access-Control-Allow-Origin", "*");
+            headers.set("Access-Control-Allow-Origin", origin);
         }
         if (ctx.state.is_from_cookie && ctx.state.token) {
             const m = get_task_manager();
