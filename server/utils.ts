@@ -29,8 +29,10 @@ function gen_response<T>(
 export function return_error<T = unknown>(
     status: Exclude<number, 0>,
     error: string,
+    http_status = 200,
+    headers: HeadersInit = {},
 ) {
-    return gen_response<T>({ ok: false, status, error });
+    return gen_response<T>({ ok: false, status, error }, http_status, headers);
 }
 
 export function return_data<T = unknown>(

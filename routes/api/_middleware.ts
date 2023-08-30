@@ -39,7 +39,14 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     const m = get_task_manager();
     if (!(handle_auth(req, ctx))) {
-        return return_error(401, "Unauthorized");
+        const headers: HeadersInit = {};
+        const origin = req.headers.get("origin");
+        if (origin) {
+            const c = m.cfg.cors_credentials_hosts.includes(origin);
+            headers["Access-Control-Allow-Origin"] = c ? origin : "*";
+            if (c) headers["Access-Control-Allow-Credentials"] = "true";
+        }
+        return return_error(401, "Unauthorized", 401, headers);
     }
     const res = await ctx.next();
     if (req.method === "OPTIONS" && res.status === 405) {
