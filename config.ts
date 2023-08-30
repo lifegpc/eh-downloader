@@ -25,6 +25,7 @@ export type ConfigType = {
     img_verify_secret?: string;
     meili_hosts?: Record<string, string>;
     cors_credentials_hosts: Array<string>;
+    flutter_frontend?: string;
 };
 
 export enum ThumbnailMethod {
@@ -160,6 +161,9 @@ export class Config {
         }
         return [];
     }
+    get flutter_frontend() {
+        return this._return_string("flutter_frontend");
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -185,6 +189,7 @@ export class Config {
             img_verify_secret: this.img_verify_secret,
             meili_hosts: this.meili_hosts,
             cors_credentials_hosts: this.cors_credentials_hosts,
+            flutter_frontend: this.flutter_frontend,
         };
     }
 }
