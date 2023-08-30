@@ -6,6 +6,8 @@ import {
     get_file_response,
     GetFileResponseOptions,
 } from "../server/get_file_response.ts";
+import { exists } from "std/fs/exists.ts";
+import { get_task_manager } from "../server.ts";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
@@ -72,6 +74,24 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
             opts.mimetype = "application/json";
         }
         return get_file_response(file, opts);
+    }
+    if (url.pathname == "/flutter" || url.pathname.startsWith("/flutter/")) {
+        const m = get_task_manager();
+        if (!m.cfg.flutter_frontend) {
+            return new Response("Flutter frontend is not enabled", {
+                status: 404,
+            });
+        }
+        const u = new URL(req.url);
+        let p = join(m.cfg.flutter_frontend, u.pathname.slice(8));
+        if (!(await exists(p)) || p === m.cfg.flutter_frontend) {
+            p = join(m.cfg.flutter_frontend, "/index.html");
+        }
+        const opts: GetFileResponseOptions = {};
+        opts.range = req.headers.get("range");
+        opts.if_modified_since = req.headers.get("If-Modified-Since");
+        opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
+        return await get_file_response(p, opts);
     }
     const res = await ctx.next();
     return res;
