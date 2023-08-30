@@ -1,17 +1,20 @@
 import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { get_task_manager } from "../../server.ts";
 
 export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     const res = await ctx.next();
+    const m = get_task_manager();
     if (req.method === "OPTIONS" && res.status === 405) {
         const headers = new Headers();
         const allow = res.headers.get("Accept");
         if (allow) headers.set("Allow", allow);
         const origin = req.headers.get("origin");
         if (origin) {
-            headers.set("Access-Control-Allow-Origin", origin);
+            const c = m.cfg.cors_credentials_hosts.includes(origin);
+            headers.set("Access-Control-Allow-Origin", c ? origin : "*");
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
             headers.set("Access-Control-Allow-Headers", "Content-Type, Range");
-            headers.set("Access-Control-Allow-Credentials", "true");
+            if (c) headers.set("Access-Control-Allow-Credentials", "true");
         }
         return new Response(null, { status: 204, headers });
     } else {
@@ -19,8 +22,9 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const headers = new Headers(res.headers);
         const origin = req.headers.get("origin");
         if (origin) {
-            headers.set("Access-Control-Allow-Origin", origin);
-            headers.set("Access-Control-Allow-Credentials", "true");
+            const c = m.cfg.cors_credentials_hosts.includes(origin);
+            headers.set("Access-Control-Allow-Origin", c ? origin : "*");
+            if (c) headers.set("Access-Control-Allow-Credentials", "true");
         }
         return new Response(res.body, {
             status: res.status,

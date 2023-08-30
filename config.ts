@@ -24,6 +24,7 @@ export type ConfigType = {
     remove_previous_gallery: boolean;
     img_verify_secret?: string;
     meili_hosts?: Record<string, string>;
+    cors_credentials_hosts: Array<string>;
 };
 
 export enum ThumbnailMethod {
@@ -149,6 +150,16 @@ export class Config {
         }
         return undefined;
     }
+    get cors_credentials_hosts(): Array<string> {
+        if (Array.isArray(this._data.cors_credentials_hosts)) {
+            const hosts: Array<string> = [];
+            for (const i of this._data.cors_credentials_hosts) {
+                if (typeof i === "string") hosts.push(i);
+            }
+            return hosts;
+        }
+        return [];
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -173,6 +184,7 @@ export class Config {
             remove_previous_gallery: this.remove_previous_gallery,
             img_verify_secret: this.img_verify_secret,
             meili_hosts: this.meili_hosts,
+            cors_credentials_hosts: this.cors_credentials_hosts,
         };
     }
 }
