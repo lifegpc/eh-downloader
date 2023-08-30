@@ -20,6 +20,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const origin = req.headers.get("origin");
         if (origin) {
             headers.set("Access-Control-Allow-Origin", origin);
+            headers.set("Access-Control-Allow-Credentials", "true");
         }
         return new Response(res.body, {
             status: res.status,

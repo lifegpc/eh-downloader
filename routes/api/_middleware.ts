@@ -59,6 +59,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
         const origin = req.headers.get("origin");
         if (origin) {
             headers.set("Access-Control-Allow-Origin", origin);
+            headers.set("Access-Control-Allow-Credentials", "true");
         }
         if (ctx.state.is_from_cookie && ctx.state.token) {
             const m = get_task_manager();
