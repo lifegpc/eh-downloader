@@ -9,15 +9,18 @@ git clone "https://github.com/lifegpc/eh-downloader.git"
 cd eh-downloader
 # Fetch static files from node_modules. These files are used in frontend.
 deno task fetch
+# Optional. This will enable release mode for fresh.
+$env:DENO_DEPLOYMENT_ID="$(git rev-parse HEAD)"
+# Optional. Prebuild islands.
+deno task server-build
 ```
 
 ### Start Server
 
 ```powershell
+cd eh-downloader
 # Optional. This will enable release mode for fresh.
 $env:DENO_DEPLOYMENT_ID="$(git rev-parse HEAD)"
-# Optional. Prebuild islands.
-deno task server-build
 # Start server
 deno task server
 ```
