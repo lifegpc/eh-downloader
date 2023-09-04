@@ -1021,6 +1021,12 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_tag_rows() {
+        return this.db.queryEntries<Tag>(
+            "SELECT * FROM tag WHERE tag LIKE ?;",
+            ["rows:%"],
+        );
+    }
     async get_task(id: number) {
         const s = await this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task WHERE id = ?;", [id])

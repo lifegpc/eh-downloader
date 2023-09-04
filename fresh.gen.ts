@@ -17,16 +17,17 @@ import * as $11 from "./routes/api/gallery/[gid].ts";
 import * as $12 from "./routes/api/gallery/list.ts";
 import * as $13 from "./routes/api/status.ts";
 import * as $14 from "./routes/api/tag/[id].ts";
-import * as $15 from "./routes/api/task.ts";
-import * as $16 from "./routes/api/thumbnail/[id].ts";
-import * as $17 from "./routes/api/token.ts";
-import * as $18 from "./routes/api/user.ts";
-import * as $19 from "./routes/file/[id].ts";
-import * as $20 from "./routes/file/_middleware.ts";
-import * as $21 from "./routes/index.tsx";
-import * as $22 from "./routes/manifest.json.ts";
-import * as $23 from "./routes/thumbnail/[id].ts";
-import * as $24 from "./routes/thumbnail/_middleware.ts";
+import * as $15 from "./routes/api/tag/rows.ts";
+import * as $16 from "./routes/api/task.ts";
+import * as $17 from "./routes/api/thumbnail/[id].ts";
+import * as $18 from "./routes/api/token.ts";
+import * as $19 from "./routes/api/user.ts";
+import * as $20 from "./routes/file/[id].ts";
+import * as $21 from "./routes/file/_middleware.ts";
+import * as $22 from "./routes/index.tsx";
+import * as $23 from "./routes/manifest.json.ts";
+import * as $24 from "./routes/thumbnail/[id].ts";
+import * as $25 from "./routes/thumbnail/_middleware.ts";
 import * as $$0 from "./islands/Container.tsx";
 import * as $$1 from "./islands/Settings.tsx";
 import * as $$2 from "./islands/TaskManager.tsx";
@@ -48,16 +49,17 @@ const manifest = {
         "./routes/api/gallery/list.ts": $12,
         "./routes/api/status.ts": $13,
         "./routes/api/tag/[id].ts": $14,
-        "./routes/api/task.ts": $15,
-        "./routes/api/thumbnail/[id].ts": $16,
-        "./routes/api/token.ts": $17,
-        "./routes/api/user.ts": $18,
-        "./routes/file/[id].ts": $19,
-        "./routes/file/_middleware.ts": $20,
-        "./routes/index.tsx": $21,
-        "./routes/manifest.json.ts": $22,
-        "./routes/thumbnail/[id].ts": $23,
-        "./routes/thumbnail/_middleware.ts": $24,
+        "./routes/api/tag/rows.ts": $15,
+        "./routes/api/task.ts": $16,
+        "./routes/api/thumbnail/[id].ts": $17,
+        "./routes/api/token.ts": $18,
+        "./routes/api/user.ts": $19,
+        "./routes/file/[id].ts": $20,
+        "./routes/file/_middleware.ts": $21,
+        "./routes/index.tsx": $22,
+        "./routes/manifest.json.ts": $23,
+        "./routes/thumbnail/[id].ts": $24,
+        "./routes/thumbnail/_middleware.ts": $25,
     },
     islands: {
         "./islands/Container.tsx": $$0,
