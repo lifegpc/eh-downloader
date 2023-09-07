@@ -29,7 +29,7 @@ Deno.test({
         ]),
     );
     assertEquals(re.length, 19);
-    assertEquals(re.file_size, "58.20 MB");
+    assertEquals(re.file_size, "58.20 MiB");
     assertEquals(re.visible, true);
     console.log(re.favorited);
     assert(typeof re.favorited === "number");
