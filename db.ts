@@ -909,17 +909,30 @@ export class EhDb {
             [limit, offset],
         ).map((n) => n[0]);
     }
-    get_gmetas(offset = 0, limit = 20, fields = "*") {
+    get_gmetas(
+        offset = 0,
+        limit = 20,
+        fields = "*",
+        sort_by_gid: boolean | null = null,
+    ) {
+        const sort_sql = sort_by_gid !== null
+            ? ` ORDER BY gid ${sort_by_gid ? "ASC" : "DESC"}`
+            : "";
         return this.convert_gmeta(
             this.db.queryEntries<GMetaRaw>(
-                `SELECT ${fields} FROM gmeta LIMIT ? OFFSET ?;`,
+                `SELECT ${fields} FROM gmeta${sort_sql} LIMIT ? OFFSET ?;`,
                 [limit, offset],
             ),
         );
     }
-    get_gmetas_all(fields = "*") {
+    get_gmetas_all(fields = "*", sort_by_gid: boolean | null = null) {
+        const sort_sql = sort_by_gid !== null
+            ? ` ORDER BY gid ${sort_by_gid ? "ASC" : "DESC"}`
+            : "";
         return this.convert_gmeta(
-            this.db.queryEntries<GMetaRaw>(`SELECT ${fields} FROM gmeta;`),
+            this.db.queryEntries<GMetaRaw>(
+                `SELECT ${fields} FROM gmeta${sort_sql};`,
+            ),
         );
     }
     get_gmeta_by_gid(gid: number) {

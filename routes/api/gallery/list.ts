@@ -29,6 +29,10 @@ export const handler: Handlers = {
         const offset = await parse_int(u.searchParams.get("offset"), 0);
         const limit = await parse_int(u.searchParams.get("limit"), 20);
         const fields = u.searchParams.get("fields") || "*";
+        const sort_by_gid = await parse_bool(
+            u.searchParams.get("sort_by_gid"),
+            null,
+        );
         if (fields !== "*") {
             const fs = fields.split(",");
             const ok = fs.every((d) => {
@@ -38,9 +42,11 @@ export const handler: Handlers = {
             if (!ok) return return_error(1, "Some fields not allowed.");
         }
         if (all) {
-            return return_data(t.db.get_gmetas_all(fields));
+            return return_data(t.db.get_gmetas_all(fields, sort_by_gid));
         } else {
-            return return_data(t.db.get_gmetas(offset, limit, fields));
+            return return_data(
+                t.db.get_gmetas(offset, limit, fields, sort_by_gid),
+            );
         }
     },
 };
