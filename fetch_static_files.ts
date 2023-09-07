@@ -8,6 +8,12 @@ const LIST: string[] = [
 ];
 
 function get_url(i: string) {
+    if (i.startsWith("preact-material-components/")) {
+        return i.replace(
+            "preact-material-components/",
+            "https://esm.sh/preact-material-components@1.6.1/",
+        );
+    }
     for (const v of Object.getOwnPropertyNames(map)) {
         if (v.endsWith("/") && i.startsWith(v)) {
             return i.replace(v, map[v]);
