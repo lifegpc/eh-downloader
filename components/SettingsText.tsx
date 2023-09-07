@@ -1,7 +1,7 @@
 import { Component, ComponentChildren, ContextType } from "preact";
 import { SettingsCtx } from "./SettingsContext.tsx";
 import type { ConfigType } from "../config.ts";
-import TextField from "preact-material-components/TextField";
+import TextField from "preact-material-components/TextField.js";
 import { Ref, StateUpdater, useRef } from "preact/hooks";
 
 interface TextType {

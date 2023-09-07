@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import Icon from "preact-material-components/Icon";
+import Icon from "preact-material-components/Icon.js";
 import type { TaskDetail, TaskProgressBasicType } from "../task.ts";
 import { TaskStatus, TaskType } from "../task.ts";
 import t from "../server/i18n.ts";

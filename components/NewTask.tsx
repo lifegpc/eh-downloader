@@ -1,7 +1,7 @@
 import { Component, ContextType } from "preact";
 import { GlobalCtx } from "./GlobalContext.tsx";
-import Fab from "preact-material-components/Fab";
-import Icon from "preact-material-components/Icon";
+import Fab from "preact-material-components/Fab.js";
+import Icon from "preact-material-components/Icon.js";
 import { set_state } from "../server/state.ts";
 import t from "../server/i18n.ts";
 import BSelect from "./BSelect.tsx";
@@ -16,9 +16,9 @@ import {
 } from "../server/cfg.ts";
 import BCheckbox from "./BCheckbox.tsx";
 import BContext from "./BContext.tsx";
-import Button from "preact-material-components/Button";
+import Button from "preact-material-components/Button.js";
 import { sendTaskMessage } from "../islands/TaskManager.tsx";
-import Snackbar from "preact-material-components/Snackbar";
+import Snackbar from "preact-material-components/Snackbar.js";
 import type { GalleryResult } from "../server/gallery.ts";
 import { tw } from "twind";
 import type { ExportZipConfig } from "../tasks/export_zip.ts";

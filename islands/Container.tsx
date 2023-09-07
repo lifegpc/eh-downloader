@@ -1,9 +1,9 @@
 import { Head } from "$fresh/runtime.ts";
 import { Component, ContextType } from "preact";
 import { StateUpdater, useEffect, useState } from "preact/hooks";
-import Icon from "preact-material-components/Icon";
-import List from "preact-material-components/List";
-import TopAppBar from "preact-material-components/TopAppBar";
+import Icon from "preact-material-components/Icon.js";
+import List from "preact-material-components/List.js";
+import TopAppBar from "preact-material-components/TopAppBar.js";
 import StyleSheet from "../components/StyleSheet.tsx";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import Settings from "./Settings.tsx";

@@ -1,7 +1,7 @@
 import { Component, ContextType } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import Button from "preact-material-components/Button";
-import Snackbar from "preact-material-components/Snackbar";
+import Button from "preact-material-components/Button.js";
+import Snackbar from "preact-material-components/Snackbar.js";
 import { tw } from "twind";
 import { GlobalCtx } from "../components/GlobalContext.tsx";
 import type { ConfigType } from "../config.ts";

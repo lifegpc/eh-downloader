@@ -1,5 +1,5 @@
 import { Component, ContextType } from "preact";
-import Checkbox from "preact-material-components/Checkbox";
+import Checkbox from "preact-material-components/Checkbox.js";
 import { BCtx } from "./BContext.tsx";
 
 type Props = {

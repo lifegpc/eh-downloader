@@ -11,8 +11,8 @@ import type {
 } from "../server/task.ts";
 import { get_ws_host } from "../server/utils.ts";
 import Task from "../components/Task.tsx";
-import Fab from "preact-material-components/Fab";
-import Icon from "preact-material-components/Icon";
+import Fab from "preact-material-components/Fab.js";
+import Icon from "preact-material-components/Icon.js";
 import { set_state } from "../server/state.ts";
 import t from "../server/i18n.ts";
 import { TaskFilterBar, TaskStatusFlag } from "../components/TaskFilterBar.tsx";

@@ -1,8 +1,8 @@
 import { Component, ComponentChildren, ContextType } from "preact";
-import TextField from "preact-material-components/TextField";
+import TextField from "preact-material-components/TextField.js";
 import { Ref, useRef, useState } from "preact/hooks";
 import { BCtx } from "./BContext.tsx";
-import List from "preact-material-components/List";
+import List from "preact-material-components/List.js";
 
 interface TextType {
     text: string;

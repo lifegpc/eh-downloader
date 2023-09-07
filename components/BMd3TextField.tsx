@@ -3,7 +3,7 @@ import { BCtx } from "./BContext.tsx";
 import { useState } from "preact/hooks";
 import type { _MdOutlinedTextField as _TextField } from "../server/md3.ts";
 import { MdOutlinedTextField } from "../server/dmodule.ts";
-import List from "preact-material-components/List";
+import List from "preact-material-components/List.js";
 
 interface TextType {
     text: string;

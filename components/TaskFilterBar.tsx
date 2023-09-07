@@ -1,7 +1,7 @@
 // @ts-nocheck Chips
 import { Component } from "preact";
 import { Ref, useRef } from "preact/hooks";
-import Chips from "preact-material-components/Chips";
+import Chips from "preact-material-components/Chips.js";
 import t from "../server/i18n.ts";
 
 export enum TaskStatusFlag {

@@ -1,7 +1,7 @@
 import { Component, ContextType } from "preact";
 import { SettingsCtx } from "./SettingsContext.tsx";
 import type { ConfigType } from "../config.ts";
-import Checkbox from "preact-material-components/Checkbox";
+import Checkbox from "preact-material-components/Checkbox.js";
 
 export type SettingsCheckboxProps = {
     checked: boolean;
