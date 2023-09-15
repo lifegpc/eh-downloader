@@ -256,6 +256,13 @@ const TOKEN_TABLE = `CREATE TABLE token (
     secure BOOLEAN
 );`;
 
+function escape_fields(fields: string, namespace: string) {
+    const fs = fields.split(",");
+    return fs.map((f) => {
+        return `${namespace}.${f.trim()}`;
+    }).join(",");
+}
+
 export class EhDb {
     db;
     #flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
@@ -914,24 +921,80 @@ export class EhDb {
         limit = 20,
         fields = "*",
         sort_by_gid: boolean | null = null,
+        uploader: string | null = null,
+        tag: string | null,
     ) {
         const sort_sql = sort_by_gid !== null
-            ? ` ORDER BY gid ${sort_by_gid ? "ASC" : "DESC"}`
+            ? ` ORDER BY gmeta.gid ${sort_by_gid ? "ASC" : "DESC"}`
             : "";
+        "";
+        const join_sqls = [];
+        const where_sqls = [];
+        const args = [];
+        let escape = false;
+        if (tag) {
+            const tag_id = this.#tags.get(tag);
+            if (tag_id !== undefined) {
+                join_sqls.push("INNER JOIN gtag ON gmeta.gid = gtag.gid");
+                where_sqls.push("gtag.id = ?");
+                args.push(tag_id);
+                escape = true;
+            }
+        }
+        if (uploader) {
+            where_sqls.push("uploader = ?");
+            args.push(uploader);
+        }
+        const where_sql = where_sqls.length
+            ? ` WHERE ${where_sqls.join(" AND ")}`
+            : "";
+        const join_sql = join_sqls.length ? ` ${join_sqls.join(" ")}` : "";
+        args.push(limit, offset);
         return this.convert_gmeta(
             this.db.queryEntries<GMetaRaw>(
-                `SELECT ${fields} FROM gmeta${sort_sql} LIMIT ? OFFSET ?;`,
-                [limit, offset],
+                `SELECT ${
+                    escape ? escape_fields(fields, "gmeta") : fields
+                } FROM gmeta${join_sql}${where_sql}${sort_sql} LIMIT ? OFFSET ?;`,
+                args,
             ),
         );
     }
-    get_gmetas_all(fields = "*", sort_by_gid: boolean | null = null) {
+    get_gmetas_all(
+        fields = "*",
+        sort_by_gid: boolean | null = null,
+        uploader: string | null = null,
+        tag: string | null = null,
+    ) {
         const sort_sql = sort_by_gid !== null
-            ? ` ORDER BY gid ${sort_by_gid ? "ASC" : "DESC"}`
+            ? ` ORDER BY gmeta.gid ${sort_by_gid ? "ASC" : "DESC"}`
             : "";
+        const join_sqls = [];
+        const where_sqls = [];
+        const args = [];
+        let escape = false;
+        if (tag) {
+            const tag_id = this.#tags.get(tag);
+            if (tag_id !== undefined) {
+                join_sqls.push("INNER JOIN gtag ON gmeta.gid = gtag.gid");
+                where_sqls.push("gtag.id = ?");
+                args.push(tag_id);
+                escape = true;
+            }
+        }
+        if (uploader) {
+            where_sqls.push("uploader = ?");
+            args.push(uploader);
+        }
+        const where_sql = where_sqls.length
+            ? ` WHERE ${where_sqls.join(" AND ")}`
+            : "";
+        const join_sql = join_sqls.length ? ` ${join_sqls.join(" ")}` : "";
         return this.convert_gmeta(
             this.db.queryEntries<GMetaRaw>(
-                `SELECT ${fields} FROM gmeta${sort_sql};`,
+                `SELECT ${
+                    escape ? escape_fields(fields, "gmeta") : fields
+                } FROM gmeta${join_sql}${where_sql}${sort_sql};`,
+                args,
             ),
         );
     }

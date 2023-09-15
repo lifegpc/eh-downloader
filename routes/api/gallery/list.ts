@@ -33,6 +33,8 @@ export const handler: Handlers = {
             u.searchParams.get("sort_by_gid"),
             null,
         );
+        const uploader = u.searchParams.get("uploader");
+        const tag = u.searchParams.get("tag");
         if (fields !== "*") {
             const fs = fields.split(",");
             const ok = fs.every((d) => {
@@ -42,10 +44,19 @@ export const handler: Handlers = {
             if (!ok) return return_error(1, "Some fields not allowed.");
         }
         if (all) {
-            return return_data(t.db.get_gmetas_all(fields, sort_by_gid));
+            return return_data(
+                t.db.get_gmetas_all(fields, sort_by_gid, uploader, tag),
+            );
         } else {
             return return_data(
-                t.db.get_gmetas(offset, limit, fields, sort_by_gid),
+                t.db.get_gmetas(
+                    offset,
+                    limit,
+                    fields,
+                    sort_by_gid,
+                    uploader,
+                    tag,
+                ),
             );
         }
     },
