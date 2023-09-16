@@ -128,9 +128,9 @@ export function get_export_zip_response(
     return new Response(readable, {
         headers: {
             "content-type": "application/zip",
-            "Content-Disposition": `attachment; filename="${
+            "Content-Disposition": `attachment; filename*=UTF-8''${
                 encodeURIComponent(title)
-            }.zip"`,
+            }.zip`,
         },
     });
 }
