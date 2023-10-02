@@ -6,6 +6,7 @@ export async function update_meili_search_data(
     manager: TaskManager,
 ) {
     if (!manager.meilisearch) throw Error("MeiliServer not found.");
+    await manager.meilisearch.removeAllGallery();
     const progress: TaskUpdateMeiliSearchDataProgress = {
         total_gallery: 0,
         updated_gallery: 0,
