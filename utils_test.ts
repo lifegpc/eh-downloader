@@ -102,15 +102,21 @@ Deno.test("calFileMd5_test", async () => {
 });
 
 Deno.test("asyncEvery_test", async () => {
-    const e = [new Promise<number>((res) => setTimeout(() => res(100), 100))];
+    // @ts-ignore: FUCKED UP
+    const list = [];
+    // @ts-ignore: FUCKED UP
+    function timeout(fun, time) {
+        list.push(setTimeout(fun, time));
+    }
+    const e = [new Promise<number>((res) => timeout(() => res(100), 100))];
     const e2 = [
-        new Promise<number>((res) => setTimeout(() => res(100), 100)),
-        new Promise<number>((res) => setTimeout(() => res(200), 100)),
+        new Promise<number>((res) => timeout(() => res(100), 100)),
+        new Promise<number>((res) => timeout(() => res(200), 100)),
     ];
     const e3 = [
-        new Promise<number>((res) => setTimeout(() => res(100), 100)),
-        new Promise<number>((res) => setTimeout(() => res(200), 100)),
-        new Promise<number>((res) => setTimeout(() => res(150), 100)),
+        new Promise<number>((res) => timeout(() => res(100), 100)),
+        new Promise<number>((res) => timeout(() => res(200), 100)),
+        new Promise<number>((res) => timeout(() => res(150), 100)),
     ];
     const t = { test: 2 };
     assertEquals(
@@ -137,6 +143,10 @@ Deno.test("asyncEvery_test", async () => {
         }, t),
         false,
     );
+    // @ts-ignore: FUCKED UP
+    for (const i of list) {
+        clearTimeout(i);
+    }
 });
 
 Deno.test("map_test", () => {
