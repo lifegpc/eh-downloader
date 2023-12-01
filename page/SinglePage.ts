@@ -63,11 +63,14 @@ export class SinglePage {
     }
     get i7_data() {
         if (this.#i7_data === undefined) {
-            const ele = this.doc.querySelector("#i7 a");
+            const ele = this.doc.querySelector("#i6 div:last-child a");
             if (!ele) throw Error("Element not found.");
             /**@ts-ignore */
             const e = ele as HTMLElement;
             const i7_data = e.innerText;
+            if (!i7_data.startsWith("Download original")) {
+                throw Error("Unknown i7_data.");
+            }
             this.#i7_data = i7_data;
             return i7_data;
         } else return this.#i7_data;
@@ -121,7 +124,7 @@ export class SinglePage {
         if (this.is_original) return this.xres;
         if (this.#oxres === undefined) {
             const ox = this.i7_data.match(/(\d+) x \d+/)?.at(1);
-            if (!ox) throw Error("Failed to parse width.");
+            if (!ox) throw Error(`Failed to parse width: ${this.i7_data}`);
             const oxres = parseInt(ox);
             this.#oxres = oxres;
             return oxres;
@@ -138,8 +141,9 @@ export class SinglePage {
         } else return this.#oyres;
     }
     get original_url() {
-        const a = this.doc.querySelector("#i7 a");
+        const a = this.doc.querySelector("#i6 div:last-child a");
         if (a == null) return undefined;
+        if (!a.innerText.startsWith("Download original")) return undefined;
         return a.getAttribute("href") || undefined;
     }
     get pageCount() {
