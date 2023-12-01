@@ -22,7 +22,7 @@ function gen_response<T>(
         status = (d.status >= 400 && d.status < 600) ? d.status : 400;
     }
     const h = new Headers(headers);
-    h.set("Content-Type", "application/json");
+    h.set("Content-Type", "application/json; charset=UTF-8");
     return new Response(JSON.stringify(d), { status, headers: h });
 }
 
@@ -57,7 +57,7 @@ export function gen_error<T = unknown>(
 export function return_json<T = unknown>(data: T, status = 200) {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json; chatset=UTF-8" },
     });
 }
 

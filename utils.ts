@@ -264,3 +264,9 @@ export function map<T, S, V>(
     }
     return re;
 }
+
+export class TimeoutError extends Error {
+    constructor() {
+        super("Timeout");
+    }
+}

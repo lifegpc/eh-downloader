@@ -8,15 +8,23 @@ import { RecoverableError } from "./task_manager.ts";
 export type GID = [number, string];
 
 export class Client {
-    cookies;
-    host;
-    ua;
+    cfg;
+    get cookies() {
+        return this.cfg.cookies;
+    }
+    get host() {
+        return this.cfg.ex ? "exhentai.org" : "e-hentai.org";
+    }
+    get ua() {
+        return this.cfg.ua ||
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
+    }
+    get timeout() {
+        return this.cfg.fetch_timeout;
+    }
     signal;
     constructor(cfg: Config, signal?: AbortSignal) {
-        this.cookies = cfg.cookies;
-        this.ua = cfg.ua ||
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
-        this.host = cfg.ex ? "exhentai.org" : "e-hentai.org";
+        this.cfg = cfg;
         this.signal = signal;
     }
     get(
@@ -94,6 +102,15 @@ export class Client {
             if (!d.signal && this.signal) {
                 d.signal = this.signal;
             }
+            const osignal = d.signal;
+            const abortController = new AbortController();
+            const timeout = setTimeout(() => {
+                abortController.abort();
+            }, this.timeout);
+            osignal?.addEventListener("abort", () => {
+                abortController.abort(osignal?.reason);
+            });
+            d.signal = abortController.signal;
             try {
                 return fetch(url, d);
             } catch (e) {
@@ -101,6 +118,8 @@ export class Client {
                     throw new RecoverableError(e.message, { cause: e.cause });
                 }
                 throw e;
+            } finally {
+                clearTimeout(timeout);
             }
         }
     }

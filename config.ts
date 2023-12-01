@@ -26,6 +26,8 @@ export type ConfigType = {
     meili_hosts?: Record<string, string>;
     cors_credentials_hosts: Array<string>;
     flutter_frontend?: string;
+    fetch_timeout: number;
+    download_timeout: number;
 };
 
 export enum ThumbnailMethod {
@@ -164,6 +166,12 @@ export class Config {
     get flutter_frontend() {
         return this._return_string("flutter_frontend");
     }
+    get fetch_timeout() {
+        return this._return_number("fetch_timeout") || 10000;
+    }
+    get download_timeout() {
+        return this._return_number("download_timeout") || 10000;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -190,6 +198,8 @@ export class Config {
             meili_hosts: this.meili_hosts,
             cors_credentials_hosts: this.cors_credentials_hosts,
             flutter_frontend: this.flutter_frontend,
+            fetch_timeout: this.fetch_timeout,
+            download_timeout: this.download_timeout,
         };
     }
 }

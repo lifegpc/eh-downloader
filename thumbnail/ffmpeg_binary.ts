@@ -18,6 +18,7 @@ export async function fb_generate_thumbnail(
     cfg: ThumbnailConfig,
 ) {
     const args = [
+        "-n",
         "-i",
         i,
         "-vf",

@@ -16,6 +16,7 @@ import {
     PromiseStatus,
     sleep,
     sure_dir,
+    TimeoutError,
 } from "../utils.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { exists } from "std/fs/exists.ts";
@@ -109,7 +110,14 @@ class DownloadManager {
         return re;
     }
     add_new_details(d: TaskDownloadSingleProgress) {
-        this.#progress.details.push(d);
+        const index = this.#progress.details.findIndex((v) =>
+            v.index === d.index
+        );
+        if (index !== -1) {
+            this.#progress.details[index] = d;
+        } else {
+            this.#progress.details.push(d);
+        }
         this.#sendEvent();
     }
     async add_new_task<T>(f: () => Promise<T>) {
@@ -165,6 +173,7 @@ interface Image {
     is_original: boolean | undefined;
     name: string;
     page_token: string;
+    redirected_url: string | undefined;
     sampled_name: string;
     get_file(path: string): EhFile | undefined;
     get_original_file(path: string): EhFile | undefined;
@@ -260,126 +269,189 @@ export async function download_task(
                 return;
             }
         }
+        let load_times = 0;
         function load() {
             return new Promise<void>((resolve, reject) => {
                 const errors: unknown[] = [];
-                function try_load(a: number) {
-                    if (a >= max_retry_count) reject(errors);
+                function try_load() {
+                    if (load_times >= max_retry_count) reject(errors);
                     i.load().then(resolve).catch((e) => {
                         if (force_abort.aborted) {
                             throw Error("aborted.");
                         }
                         errors.push(e);
-                        try_load(a + 1);
+                        load_times += 1;
+                        try_load();
                     });
                 }
-                try_load(0);
+                try_load();
             });
         }
-        await load();
-        assert(i.data);
-        const pmeta = i.to_pmeta();
-        if (pmeta) db.add_pmeta(pmeta);
-        const download_original = download_original_img &&
-            !i.is_original;
-        const is_sampled = !download_original_img && !i.is_original;
-        let path = resolve(
-            join(base_path, is_sampled ? i.sampled_name : i.name),
-        );
-        if (names[i.name] > 1) {
-            path = add_suffix_to_path(path, i.page_token);
-            console.log("Changed path to", path);
-        }
-        const f = download_original
-            ? i.get_original_file(path)
-            : i.get_file(path);
-        if (f === undefined) throw Error("Failed to get file.");
-        m.add_new_details({
-            downloaded: 0,
-            height: f.height,
-            index: i.index,
-            is_original: f.is_original,
-            name: i.name,
-            token: i.page_token,
-            total: 0,
-            width: f.width,
-            started: 0,
-        });
-        function download_img() {
-            return new Promise<void>((resolve, reject) => {
-                async function download() {
-                    const re = await (download_original
-                        ? i.load_original_image()
-                        : i.load_image());
-                    if (re === undefined) {
-                        throw Error("Failed to fetch image.");
-                    }
-                    m.set_details_started(i.index);
-                    const len = re.headers.get("Content-Length");
-                    if (len) {
-                        const tmp = parseInt(len);
-                        if (!isNaN(tmp)) {
-                            m.set_details_total(i.index, tmp);
+        async function deal_with_img() {
+            assert(i.data);
+            const pmeta = i.to_pmeta();
+            if (pmeta) db.add_pmeta(pmeta);
+            const download_original = download_original_img &&
+                !i.is_original;
+            const is_sampled = !download_original_img && !i.is_original;
+            let path = resolve(
+                join(base_path, is_sampled ? i.sampled_name : i.name),
+            );
+            if (names[i.name] > 1) {
+                path = add_suffix_to_path(path, i.page_token);
+                console.log("Changed path to", path);
+            }
+            const f = download_original
+                ? i.get_original_file(path)
+                : i.get_file(path);
+            if (f === undefined) throw Error("Failed to get file.");
+            m.add_new_details({
+                downloaded: 0,
+                height: f.height,
+                index: i.index,
+                is_original: f.is_original,
+                name: i.name,
+                token: i.page_token,
+                total: 0,
+                width: f.width,
+                started: 0,
+            });
+            function download_img() {
+                return new Promise<void>((resolve, reject) => {
+                    async function download() {
+                        const re = await (download_original
+                            ? i.load_original_image()
+                            : i.load_image());
+                        if (re === undefined) {
+                            throw Error("Failed to fetch image.");
                         }
-                    }
-                    if (re.body === null) {
-                        throw Error("Response don't have a body.");
-                    }
-                    const pr = new ProgressReadable(re.body);
-                    pr.addEventListener("progress", (e) => {
-                        m.set_details_downloaded(i.index, e.detail);
-                    });
-                    pr.addEventListener("finished", () => {
-                        m.remove_details(i.index);
-                    });
-                    try {
-                        const f = await Deno.open(path, {
-                            create: true,
-                            write: true,
-                            truncate: true,
+                        m.set_details_started(i.index);
+                        const len = re.headers.get("Content-Length");
+                        if (len) {
+                            const tmp = parseInt(len);
+                            if (!isNaN(tmp)) {
+                                m.set_details_total(i.index, tmp);
+                            }
+                        }
+                        if (re.body === null) {
+                            throw Error("Response don't have a body.");
+                        }
+                        const pr = new ProgressReadable(
+                            re.body,
+                            cfg.download_timeout,
+                            force_abort,
+                        );
+                        pr.addEventListener("progress", (e) => {
+                            m.set_details_downloaded(i.index, e.detail);
+                        });
+                        pr.addEventListener("finished", () => {
+                            m.remove_details(i.index);
                         });
                         try {
-                            await pr.readable.pipeTo(f.writable, {
-                                signal: force_abort,
-                                preventClose: true,
+                            const f = await Deno.open(path, {
+                                create: true,
+                                write: true,
+                                truncate: true,
                             });
-                            if (pr.error) {
-                                throw (pr.error);
+                            try {
+                                await pr.readable.pipeTo(f.writable, {
+                                    signal: pr.signal,
+                                    preventClose: true,
+                                });
+                                if (pr.error) {
+                                    throw (pr.error);
+                                }
+                            } finally {
+                                try {
+                                    f.close();
+                                } catch (_) {
+                                    null;
+                                }
                             }
+                        } catch (e) {
+                            if (pr.is_timeout) {
+                                throw new TimeoutError();
+                            }
+                            throw e;
                         } finally {
                             try {
-                                f.close();
+                                pr.readable.cancel();
                             } catch (_) {
                                 null;
                             }
                         }
-                    } finally {
-                        try {
-                            pr.readable.cancel();
-                        } catch (_) {
-                            null;
-                        }
                     }
+                    const errors: unknown[] = [];
+                    function try_download(a: number) {
+                        if (a >= max_retry_count) {
+                            m.remove_details(i.index);
+                            reject(errors);
+                        }
+                        download().then(resolve).catch((e) => {
+                            if (force_abort.aborted) {
+                                throw Error("aborted.");
+                            }
+                            if (e instanceof DOMException) {
+                                if (e.name == "AbortError") {
+                                    reject(new TimeoutError());
+                                    return;
+                                }
+                            }
+                            if (e instanceof TimeoutError) {
+                                reject(e);
+                                return;
+                            }
+                            errors.push(e);
+                            try_download(a + 1);
+                        });
+                    }
+                    try_download(0);
+                });
+            }
+            await download_img();
+            db.add_file(f);
+        }
+        let retry = 0;
+        function try_deal_with_img() {
+            return new Promise((resolve, reject) => {
+                function try_() {
+                    load().then(() => {
+                        deal_with_img().then(resolve).catch((e) => {
+                            console.log("Failed to download, retry: ", e);
+                            retry += 1;
+                            if (retry >= max_retry_count) {
+                                reject(e);
+                                return;
+                            }
+                            const download_original = download_original_img &&
+                                !i.is_original;
+                            if (download_original) {
+                                i.redirected_url = undefined;
+                                try2_();
+                            } else try_();
+                        });
+                    }).catch(reject);
                 }
-                const errors: unknown[] = [];
-                function try_download(a: number) {
-                    if (a >= max_retry_count) {
-                        m.remove_details(i.index);
-                        reject(errors);
-                    }
-                    download().then(resolve).catch((e) => {
-                        if (force_abort.aborted) {
-                            throw Error("aborted.");
+                function try2_() {
+                    deal_with_img().then(resolve).catch((e) => {
+                        console.log("Failed to download, retry: ", e);
+                        retry += 1;
+                        if (retry >= max_retry_count) {
+                            reject(e);
+                            return;
                         }
-                        errors.push(e);
-                        try_download(a + 1);
+                        const download_original = download_original_img &&
+                            !i.is_original;
+                        if (download_original) {
+                            i.redirected_url = undefined;
+                            try2_();
+                        } else try_();
                     });
                 }
-                try_download(0);
+                try_();
             });
         }
-        await download_img();
-        db.add_file(f);
+        await try_deal_with_img();
         return;
     }
     if (mpv_enabled || g.mpv_enabled) {

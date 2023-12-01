@@ -7,10 +7,31 @@ export class ProgressReadable extends EventTarget {
     readable: ReadableStream<Uint8Array>;
     readed: number;
     error?: unknown;
-    constructor(readable: ReadableStream<Uint8Array>) {
+    timeout: number;
+    get signal() {
+        return this.#controller.signal;
+    }
+    get is_timeout() {
+        return this.#is_timeout;
+    }
+    #controller: AbortController;
+    #is_timeout: boolean;
+    #timeout?: number;
+    constructor(
+        readable: ReadableStream<Uint8Array>,
+        timeout: number,
+        originalSignal?: AbortSignal,
+    ) {
         super();
         this.readed = 0;
+        this.timeout = timeout;
+        this.#is_timeout = false;
         const reader = readable.getReader();
+        this.#controller = new AbortController();
+        originalSignal?.addEventListener("abort", () => {
+            this.#controller.abort();
+            this.#clearTimeout();
+        });
         this.readable = new ReadableStream({
             pull: (c) => {
                 if (c.byobRequest) {
@@ -20,27 +41,51 @@ export class ProgressReadable extends EventTarget {
                         if (v.done) {
                             this.dispatchEvent("finished", this.readed);
                             c.close();
+                            this.#clearTimeout();
                             return;
                         } else {
                             this.readed += v.value.byteLength;
                             this.dispatchEvent("progress", this.readed);
                             c.enqueue(v.value);
+                            if (v.value.byteLength != 0) {
+                                this.#clearTimeout();
+                                this.#setTimeout();
+                            }
                         }
                     }).catch((e) => {
-                        c.close();
+                        try {
+                            c.close();
+                        } catch (_) {
+                            null;
+                        }
                         this.error = e;
+                        this.#clearTimeout();
                     });
                 }
             },
             cancel: (reason) => {
                 try {
-                    readable.cancel(reason);
+                    if (!readable.locked) readable.cancel(reason);
+                    this.#clearTimeout();
                 } catch (_) {
                     null;
                 }
             },
             type: "bytes",
         });
+        this.#setTimeout();
+    }
+    #clearTimeout() {
+        if (this.#timeout) {
+            clearTimeout(this.#timeout);
+        }
+    }
+    #setTimeout() {
+        this.#timeout = setTimeout(() => {
+            this.#is_timeout = true;
+            this.#controller.abort();
+            console.log("aborted");
+        }, this.timeout);
     }
     // @ts-ignore Checked type
     addEventListener<T extends keyof EventMap>(
