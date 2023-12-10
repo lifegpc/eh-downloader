@@ -234,6 +234,7 @@ const FILE_TABLE = `CREATE TABLE file (
     height INT,
     is_original BOOLEAN
 );`;
+const FILE_INDEX = `CREATE INDEX file_token ON file (token);`;
 const FILEMETA_TABLE = `CREATE TABLE filemeta (
     token TEXT,
     is_nsfw BOOLEAN,
@@ -272,7 +273,7 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
-    readonly version = parse_ver("1.0.0-9");
+    readonly version = parse_ver("1.0.0-10");
     constructor(base_path: string) {
         const db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
@@ -407,6 +408,9 @@ export class EhDb {
                 this.db.execute("ALTER TABLE token ADD secure BOOLEAN;");
                 this.db.execute("UPDATE token SET http_only = 1, secure = 0;");
             }
+            if (compare_ver(v, parse_ver("1.0.0-10")) === -1) {
+                this.db.execute(FILE_INDEX);
+            }
             this.#write_version();
             if (need_optimize) this.optimize();
         }
@@ -438,6 +442,7 @@ export class EhDb {
         }
         if (!this.#exist_table.has("file")) {
             this.db.execute(FILE_TABLE);
+            this.db.execute(FILE_INDEX);
         }
         if (!this.#exist_table.has("filemeta")) {
             this.db.execute(FILEMETA_TABLE);
