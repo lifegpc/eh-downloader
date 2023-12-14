@@ -1062,12 +1062,24 @@ export class EhDb {
     get_random_file(
         is_nsfw: boolean | null = null,
         is_ad: boolean | null = null,
+        gids: Set<number> | null = null,
     ) {
         const args = [];
         let join_sql = "";
+        const with_sql = [];
         const where_sql = [];
+        if (gids) {
+            const gids_sql = [];
+            for (const gid of gids) {
+                gids_sql.push("(?)");
+                args.push(gid);
+            }
+            with_sql.push(`WITH gids AS (VALUES ${gids_sql.join(",")})`);
+            join_sql += " INNER JOIN pmeta ON file.token = pmeta.token";
+            where_sql.push("pmeta.gid IN gids");
+        }
         if (is_nsfw !== null || is_ad !== null) {
-            join_sql = " LEFT JOIN filemeta ON file.token = filemeta.token";
+            join_sql += " LEFT JOIN filemeta ON file.token = filemeta.token";
             if (is_nsfw !== null) {
                 where_sql.push("IFNULL(filemeta.is_nsfw, 0) = ?");
                 args.push(is_nsfw);
@@ -1080,9 +1092,10 @@ export class EhDb {
         const wsql = where_sql.length
             ? ` WHERE ${where_sql.join(" AND ")}`
             : "";
+        const wisql = with_sql.length ? `${with_sql.join(" ")} ` : "";
         const s = this.convert_file(
             this.db.queryEntries<EhFileRaw>(
-                `SELECT file.* FROM file${join_sql}${wsql} ORDER BY RANDOM() LIMIT 1;`,
+                `${wisql}SELECT file.* FROM file${join_sql}${wsql} ORDER BY RANDOM() LIMIT 1;`,
                 args,
             ),
         );
