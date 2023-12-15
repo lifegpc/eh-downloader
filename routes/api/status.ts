@@ -26,6 +26,9 @@ export const handler: Handlers = {
             m.cfg.ffmpeg_path,
         );
         const ffmpeg_api_enabled = await check_ffmpeg_api();
+        const ffprobe_binary_enabled = await check_ffmpeg_binary(
+            m.cfg.ffprobe_path,
+        );
         const meilisearch_enabled = m.meilisearch !== undefined;
         let meilisearch;
         if (
@@ -50,6 +53,7 @@ export const handler: Handlers = {
         return return_data<StatusData>({
             ffmpeg_api_enabled,
             ffmpeg_binary_enabled,
+            ffprobe_binary_enabled,
             meilisearch_enabled,
             meilisearch,
             no_user,

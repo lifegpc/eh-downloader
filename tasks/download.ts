@@ -11,6 +11,7 @@ import {
 import { RecoverableError, TaskManager } from "../task_manager.ts";
 import {
     add_suffix_to_path,
+    asyncEvery,
     asyncFilter,
     promiseState,
     PromiseStatus,
@@ -235,11 +236,13 @@ export async function download_task(
     async function download_task(names: Record<string, number>, i: Image) {
         const ofiles = db.get_files(i.page_token);
         if (ofiles.length) {
-            const t = ofiles[0];
-            if (
-                (t.is_original || !download_original_img) &&
-                (await exists(t.path))
-            ) {
+            const need = await asyncEvery(
+                ofiles,
+                async (t) =>
+                    (!t.is_original && download_original_img) ||
+                    (!await exists(t.path)),
+            );
+            if (!need) {
                 const p = db.get_pmeta_by_index(task.gid, i.index);
                 if (!p) {
                     const op = db.get_pmeta_by_token(

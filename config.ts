@@ -28,6 +28,7 @@ export type ConfigType = {
     flutter_frontend?: string;
     fetch_timeout: number;
     download_timeout: number;
+    ffprobe_path: string;
 };
 
 export enum ThumbnailMethod {
@@ -172,6 +173,9 @@ export class Config {
     get download_timeout() {
         return this._return_number("download_timeout") || 10000;
     }
+    get ffprobe_path() {
+        return this._return_string("ffprobe_path") || "ffprobe";
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -200,6 +204,7 @@ export class Config {
             flutter_frontend: this.flutter_frontend,
             fetch_timeout: this.fetch_timeout,
             download_timeout: this.download_timeout,
+            ffprobe_path: this.ffprobe_path,
         };
     }
 }
