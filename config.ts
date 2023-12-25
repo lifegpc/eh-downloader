@@ -171,7 +171,7 @@ export class Config {
         return this._return_number("fetch_timeout") || 10000;
     }
     get download_timeout() {
-        return this._return_number("download_timeout") || 10000;
+        return this._return_number("download_timeout") || 2000;
     }
     get ffprobe_path() {
         return this._return_string("ffprobe_path") || "ffprobe";
