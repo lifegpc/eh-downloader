@@ -396,11 +396,13 @@ export async function download_task(
                             }
                             if (e instanceof DOMException) {
                                 if (e.name == "AbortError") {
+                                    m.remove_details(i.index);
                                     reject(new TimeoutError());
                                     return;
                                 }
                             }
                             if (e instanceof TimeoutError) {
+                                m.remove_details(i.index);
                                 reject(e);
                                 return;
                             }
