@@ -86,6 +86,7 @@ export const handler: Handlers = {
             const cfg = await load_settings(path);
             let updated = false;
             Object.getOwnPropertyNames(d).forEach((k) => {
+                if (d[k] === null) return;
                 if (UNSAFE_TYPE2.indexOf(k) === -1) {
                     cfg._data[k] = d[k];
                     m.cfg._data[k] = d[k];
