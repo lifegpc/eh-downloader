@@ -280,7 +280,10 @@ export async function download_task(
                     if (load_times >= max_retry_count) reject(errors);
                     i.load().then(resolve).catch((e) => {
                         if (force_abort.aborted) {
-                            throw Error("aborted.");
+                            console.log("Aborted when loading image:", i);
+                            errors.push(e);
+                            reject(errors);
+                            return;
                         }
                         errors.push(e);
                         load_times += 1;
@@ -392,7 +395,13 @@ export async function download_task(
                         }
                         download().then(resolve).catch((e) => {
                             if (force_abort.aborted) {
-                                throw Error("aborted.");
+                                console.log(
+                                    "Aborted when downloading image:",
+                                    i,
+                                );
+                                errors.push(e);
+                                reject(errors);
+                                return;
                             }
                             if (e instanceof DOMException) {
                                 if (e.name == "AbortError") {
@@ -422,6 +431,10 @@ export async function download_task(
                 function try_() {
                     load().then(() => {
                         deal_with_img().then(resolve).catch((e) => {
+                            if (force_abort.aborted) {
+                                reject(e);
+                                return;
+                            }
                             console.log("Failed to download, retry: ", e);
                             retry += 1;
                             if (retry >= max_retry_count) {

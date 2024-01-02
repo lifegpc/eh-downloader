@@ -52,7 +52,7 @@ export class Client {
             return t ? t : undefined;
         } else return undefined;
     }
-    request(
+    async request(
         url: string | Request | URL,
         method: string | undefined = undefined,
         options: RequestInit | undefined = undefined,
@@ -81,7 +81,7 @@ export class Client {
                 url.headers.set(v[0], v[1]);
             }
             try {
-                return fetch(url);
+                return await fetch(url);
             } catch (e) {
                 if (e instanceof TypeError) {
                     throw new RecoverableError(e.message, { cause: e.cause });
@@ -112,7 +112,7 @@ export class Client {
             });
             d.signal = abortController.signal;
             try {
-                return fetch(url, d);
+                return await fetch(url, d);
             } catch (e) {
                 if (e instanceof TypeError) {
                     throw new RecoverableError(e.message, { cause: e.cause });

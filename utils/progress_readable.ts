@@ -46,10 +46,11 @@ export class ProgressReadable extends EventTarget {
                             this.#clearInterval();
                             return;
                         } else {
-                            this.readed += v.value.byteLength;
+                            const len = v.value.byteLength;
+                            this.readed += len;
                             this.dispatchEvent("progress", this.readed);
                             c.enqueue(v.value);
-                            if (v.value.byteLength != 0) {
+                            if (len != 0) {
                                 this.#last_readed = Date.now();
                             }
                         }
@@ -83,7 +84,7 @@ export class ProgressReadable extends EventTarget {
         }
     }
     #setInterval() {
-        this.#timeout = setTimeout(() => {
+        this.#timeout = setInterval(() => {
             const now = Date.now();
             if (now - this.#last_readed > this.timeout) {
                 this.#is_timeout = true;
