@@ -22,6 +22,11 @@ COPY ./deno.json ./
 COPY ./import_map.json ./
 COPY ./LICENSE ./
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 777 ./thumbnails && mkdir -p ./downloads && chmod 777 ./downloads
 ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
 
