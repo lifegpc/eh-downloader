@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     file \
+    perl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,6 +37,27 @@ RUN cd ~ && \
     --disable-devices --disable-filters --enable-filter=scale && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf FFmpeg-n6.1.1 ffmpeg.tar.gz
+
+RUN cd ~ && \
+    curl -L "https://github.com/curl/curl/releases/download/curl-8_5_0/curl-8.5.0.tar.gz" -o curl-8.5.0.tar.gz && \
+    tar -xzvf curl-8.5.0.tar.gz && \
+    cd curl-8.5.0 && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCURL_DISABLE_ALTSVC=ON -DCURL_DISABLE_SRP=ON \
+    -DCURL_DISABLE_COOKIES=ON -DCURL_DISABLE_BASIC_AUTH=ON -DCURL_DISABLE_BEARER_AUTH=ON \
+    -DCURL_DISABLE_DIGEST_AUTH=ON -DCURL_DISABLE_KERBEROS_AUTH=ON -DCURL_DISABLE_NEGOTIATE_AUTH=ON \
+    -DCURL_DISABLE_AWS=ON -DCURL_DISABLE_DICT=ON -DCURL_DISABLE_DOH=ON -DCURL_DISABLE_FILE=ON \
+    -DCURL_DISABLE_FORM_API=ON -DCURL_DISABLE_FTP=ON -DCURL_DISABLE_GETOPTIONS=ON \
+    -DCURL_DISABLE_GOPHER=ON -DCURL_DISABLE_HEADERS_API=ON -DCURL_DISABLE_HSTS=ON \
+    -DCURL_DISABLE_HTTP_AUTH=ON -DCURL_DISABLE_IMAP=ON -DCURL_DISABLE_LDAP=ON \
+    -DCURL_DISABLE_LDAPS=ON -DCURL_DISABLE_LIBCURL_OPTION=ON -DCURL_DISABLE_MQTT=ON \
+    -DCURL_DISABLE_NETRC=ON -DCURL_DISABLE_NTLM=ON -DCURL_DISABLE_POP3=ON \
+    -DCURL_DISABLE_PROXY=ON -DCURL_DISABLE_RTSP=ON -DCURL_DISABLE_SMB=ON \
+    -DCURL_DISABLE_SMTP=ON -DCURL_DISABLE_TELNET=ON -DCURL_DISABLE_TFTP=ON \
+    -DUSE_MANUAL=OFF -DCURL_ENABLE_SSL=OFF -DUSE_LIBIDN2=ON -DCURL_USE_LIBPSL=OFF \
+    -DCURL_USE_LIBSSH2=OFF -DCMAKE_INSTALL_PREFIX=/clib ../ && \
+    make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
+    cd ~ && rm -rf curl-8.5.0 curl-8.5.0.tar.gz
 
 FROM denoland/deno:latest as prod
 
@@ -64,7 +86,6 @@ COPY ./import_map.json ./
 COPY ./LICENSE ./
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
     zlib1g \
     && rm -rf /var/lib/apt/lists/*
 
