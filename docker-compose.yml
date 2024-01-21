@@ -1,0 +1,15 @@
+version: '3'
+services:
+  eh_downloader:
+    # This image includes flutter frontend.
+    # If you don't need it, use lifegpc/eh_downloader_base:master instead.
+    image: lifegpc/eh_downloader:master
+    container_name: eh_downloader
+    user: 1000:1000
+    volumes:
+      - ./data:/app/data
+      - ./downloads:/app/downloads
+      - ./thumbnails:/app/thumbnails
+    ports:
+      - 0.0.0.0:8000:8000
+    restart: unless-stopped
