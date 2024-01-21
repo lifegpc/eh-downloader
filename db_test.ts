@@ -8,6 +8,7 @@ Deno.test("DbTest", async () => {
     await sure_dir("./test/db");
     await remove_if_exists("./test/db/data.db");
     const db = new EhDb("./test/db");
+    await db.init();
     console.log(
         await db.add_task({
             gid: 1,

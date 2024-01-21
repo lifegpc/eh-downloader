@@ -1,4 +1,4 @@
-import { DB } from "sqlite/mod.ts";
+import { Db } from "./utils/db_interface.ts";
 import {
     compare as compare_ver,
     format as format_ver,
@@ -8,7 +8,7 @@ import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
-import { sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
+import { parse_bool, sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 import { generate as randomstring } from "randomstring";
 
@@ -265,7 +265,8 @@ function escape_fields(fields: string, namespace: string) {
 }
 
 export class EhDb {
-    db;
+    // @ts-ignore Ignore
+    db: Db;
     #flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
     #file: Deno.FsFile | undefined;
     #dblock: Deno.FsFile | undefined;
@@ -273,16 +274,29 @@ export class EhDb {
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
     #_tags: Map<string, number> | undefined;
+    #base_path: string;
+    #db_path: string;
+    #use_ffi = false;
     readonly version = parse_ver("1.0.0-10");
     constructor(base_path: string) {
-        const db_path = join(base_path, "data.db");
+        this.#base_path = base_path;
+        this.#db_path = join(base_path, "data.db");
         sure_dir_sync(base_path);
-        this.db = new DB(db_path);
+    }
+    async init() {
+        this.#use_ffi = parse_bool(Deno.env.get("DB_USE_FFI") ?? "false");
+        if (this.#use_ffi) {
+            const DB = (await import("./utils/db_ffi.ts")).DbFfi;
+            this.db = new DB(this.#db_path);
+        } else {
+            const DB = (await import("./utils/db_wasm.ts")).DbWasm;
+            this.db = new DB(this.#db_path);
+        }
         this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
         if (!this.#check_database()) this.#create_table();
-        if (this.#flock_enabled) {
-            this.#lock_file = join(base_path, "db.lock");
-            this.#dblock_file = join(base_path, "eh.locked");
+        if (!this.#use_ffi && this.#flock_enabled) {
+            this.#lock_file = join(this.#base_path, "db.lock");
+            this.#dblock_file = join(this.#base_path, "eh.locked");
             this.#file = Deno.openSync(this.#lock_file, {
                 create: true,
                 write: true,
@@ -292,7 +306,7 @@ export class EhDb {
                 write: true,
             });
             this.dblock();
-        } else {
+        } else if (!this.#use_ffi) {
             console.log(
                 "%cFile locking is disabled. Use --unstable to enable file locking.",
                 "color: yellow;",

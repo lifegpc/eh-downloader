@@ -274,6 +274,8 @@ export class TimeoutError extends Error {
 let _isDocker: boolean | undefined = undefined;
 
 export function isDocker() {
-    if (_isDocker === undefined) _isDocker = parse_bool(Deno.env.get("DOCKER") ?? "false");
+    if (_isDocker === undefined) {
+        _isDocker = parse_bool(Deno.env.get("DOCKER") ?? "false");
+    }
     return _isDocker;
 }

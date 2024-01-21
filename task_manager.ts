@@ -79,6 +79,9 @@ export class TaskManager extends EventTarget {
             );
         }
     }
+    async init() {
+        await this.db.init();
+    }
     async #add_task(task: Task) {
         const r = await this.db.add_task(task);
         this.dispatchEvent("new_task", r);

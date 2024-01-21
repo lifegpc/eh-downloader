@@ -30,6 +30,7 @@ export async function startServer(path: string) {
     cfg_path = path;
     const cfg = await load_settings(path);
     task_manager = new TaskManager(cfg);
+    await task_manager.init();
     task_manager.run(true).catch((e) => {
         if (!(e instanceof AlreadyClosedError)) throw e;
     });

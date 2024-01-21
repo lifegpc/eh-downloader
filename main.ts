@@ -78,6 +78,7 @@ if (!check_file_permissions(settings.base)) {
 }
 async function download() {
     const manager = new TaskManager(settings);
+    await manager.init();
     try {
         const urls: ParsedUrl[] = [];
         for (const i of args._.slice(1)) {
@@ -99,20 +100,23 @@ async function download() {
 }
 async function run() {
     const manager = new TaskManager(settings);
+    await manager.init();
     try {
         await manager.run();
     } finally {
         if (!manager.aborted) manager.close();
     }
 }
-function optimize() {
+async function optimize() {
     const db = new EhDb(settings.db_path || settings.base);
+    await db.init();
     if (args.better_optimize) db.better_optimize();
     db.optimize();
     db.close();
 }
 async function update_tag_translation() {
     const db = new EhDb(settings.db_path || settings.base);
+    await db.init();
     const signal = get_abort_signal();
     try {
         const f = await load_eht_file(
@@ -129,6 +133,7 @@ async function update_tag_translation() {
 }
 async function export_zip() {
     const manager = new TaskManager(settings);
+    await manager.init();
     try {
         for (const gid of args._.slice(1)) {
             if (typeof gid === "number") {
@@ -142,6 +147,7 @@ async function export_zip() {
 }
 async function update_meili_search_data() {
     const manager = new TaskManager(settings);
+    await manager.init();
     try {
         await manager.add_update_meili_search_data_task();
         await manager.run();
@@ -151,6 +157,7 @@ async function update_meili_search_data() {
 }
 async function fix_gallery_page() {
     const manager = new TaskManager(settings);
+    await manager.init();
     try {
         await manager.add_fix_gallery_page_task();
         await manager.run();
@@ -165,7 +172,7 @@ async function main() {
     } else if (cmd == CMD.Run) {
         await run();
     } else if (cmd == CMD.Optimize) {
-        optimize();
+        await optimize();
     } else if (cmd == CMD.UpdateTagTranslation) {
         await update_tag_translation();
     } else if (cmd == CMD.ExportZip) {
