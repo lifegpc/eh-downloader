@@ -292,7 +292,6 @@ export class EhDb {
             const DB = (await import("./utils/db_wasm.ts")).DbWasm;
             this.db = new DB(this.#db_path);
         }
-        this.db.execute("PRAGMA main.locking_mode=EXCLUSIVE;");
         if (!this.#check_database()) this.#create_table();
         if (!this.#use_ffi && this.#flock_enabled) {
             this.#lock_file = join(this.#base_path, "db.lock");
