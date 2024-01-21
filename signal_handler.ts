@@ -24,7 +24,11 @@ export function add_exit_handler(m: TaskManager) {
     };
     Deno.addSignalListener("SIGINT", handler);
     if (Deno.build.os !== "windows") {
-        Deno.addSignalListener("SIGTERM", handler);
+        Deno.addSignalListener("SIGTERM", () => {
+            m.force_abort();
+            ExitTarget.dispatchEvent(new Event("close"));
+            m.close();
+        });
     }
 }
 
