@@ -26,8 +26,7 @@ RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 
 ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
 
 EXPOSE 8000
-ENTRYPOINT deno
-CMD ["task", "server"]
+ENTRYPOINT deno task server
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
     CMD curl -Lk -fsS http://localhost:8000/api/health_check || exit 1
