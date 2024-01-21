@@ -24,7 +24,6 @@ COPY ./LICENSE ./
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 777 ./thumbnails && mkdir -p ./downloads && chmod 777 ./downloads
