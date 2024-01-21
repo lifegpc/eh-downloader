@@ -19,6 +19,7 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
     const check = () => {
         if (u.pathname === "/api/token" && req.method === "PUT") return true;
         if (u.pathname === "/api/status" && req.method === "GET") return true;
+        if (u.pathname === "/api/health_check" && req.method === "GET") return true;
         return false;
     };
     if (!token) return check();

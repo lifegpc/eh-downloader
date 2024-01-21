@@ -77,15 +77,23 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
     }
     if (url.pathname == "/flutter" || url.pathname.startsWith("/flutter/")) {
         const m = get_task_manager();
+        let flutter_base = import.meta.resolve("../static/flutter").slice(7);
+        if (Deno.build.os === "windows") {
+            flutter_base = flutter_base.slice(1);
+        }
         if (!m.cfg.flutter_frontend) {
-            return new Response("Flutter frontend is not enabled", {
-                status: 404,
-            });
+            if (!await exists(flutter_base)) {
+                return new Response("Flutter frontend is not enabled", {
+                    status: 404,
+                });
+            }
+        } else {
+            flutter_base = m.cfg.flutter_frontend;
         }
         const u = new URL(req.url);
-        let p = join(m.cfg.flutter_frontend, u.pathname.slice(8));
-        if (!(await exists(p)) || p === m.cfg.flutter_frontend) {
-            p = join(m.cfg.flutter_frontend, "/index.html");
+        let p = join(flutter_base, u.pathname.slice(8));
+        if (!(await exists(p)) || p === flutter_base) {
+            p = join(flutter_base, "/index.html");
         }
         const opts: GetFileResponseOptions = {};
         opts.range = req.headers.get("range");

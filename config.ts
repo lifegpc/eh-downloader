@@ -114,7 +114,7 @@ export class Config {
         return this._return_bool("export_zip_jpn_title") || false;
     }
     get hostname() {
-        return this._return_string("hostname") || "localhost";
+        return this._return_string("hostname") || "0.0.0.0";
     }
     get meili_host() {
         return this._return_string("meili_host");

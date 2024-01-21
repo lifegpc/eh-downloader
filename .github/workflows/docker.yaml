@@ -1,0 +1,44 @@
+name: Docker image deploy
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - docker-compose.yml
+      - README.md
+  workflow_dispatch:
+
+concurrency:
+  group: docker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: lifegpc
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract metadata for docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: lifegpc/eh_downloader_base
+      - name: Switch docker drive
+        run: docker buildx create --use
+      - name: Build and push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            DENO_DEPLOYMENT_ID=${{ github.sha }}
