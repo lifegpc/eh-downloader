@@ -93,7 +93,7 @@ ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
 ENV DOCKER=true
 
 EXPOSE 8000
-ENTRYPOINT deno task server
+ENTRYPOINT /tini -- deno task server
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
     CMD curl -Lk -fsS http://localhost:8000/api/health_check || exit 1
