@@ -8,4 +8,5 @@ export type StatusData = {
         key: string;
     };
     no_user: boolean;
+    is_docker: boolean;
 };

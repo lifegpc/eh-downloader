@@ -4,6 +4,7 @@ import type { StatusData } from "../../server/status.ts";
 import { get_host, return_data } from "../../server/utils.ts";
 import { check_ffmpeg_binary } from "../../thumbnail/ffmpeg_binary.ts";
 import type * as FFMPEG_API from "../../thumbnail/ffmpeg_api.ts";
+import { isDocker } from "../../utils.ts";
 
 let ffmpeg_api: typeof FFMPEG_API | undefined;
 
@@ -50,6 +51,7 @@ export const handler: Handlers = {
             };
         }
         const no_user = m.db.get_user_count() === 0;
+        const is_docker = isDocker();
         return return_data<StatusData>({
             ffmpeg_api_enabled,
             ffmpeg_binary_enabled,
@@ -57,6 +59,7 @@ export const handler: Handlers = {
             meilisearch_enabled,
             meilisearch,
             no_user,
+            is_docker,
         });
     },
 };

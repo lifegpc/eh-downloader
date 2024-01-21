@@ -112,6 +112,9 @@ export class Config {
         return this._return_bool("download_original_img") || false;
     }
     get port() {
+        if (isDocker()) {
+            return 8000;
+        }
         return this._return_number("port") || 8000;
     }
     get export_zip_jpn_title() {
@@ -119,7 +122,7 @@ export class Config {
     }
     get hostname() {
         if (isDocker()) {
-            return this._return_string("hostname") || "0.0.0.0";
+            return "0.0.0.0";
         }
         return this._return_string("hostname") || "127.0.0.1";
     }
