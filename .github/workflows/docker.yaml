@@ -40,5 +40,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=docker-cache
+          cache-to: type=gha,mode=max,scope=docker-cache
           build-args: |
             DENO_DEPLOYMENT_ID=${{ github.sha }}

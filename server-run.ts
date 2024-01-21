@@ -1,3 +1,6 @@
 import { startServer } from "./server.ts";
+import { isDocker } from "./utils.ts";
 
-await startServer("./config.json");
+const configPath = isDocker() ? "./data/config.json" : "./config.json";
+
+await startServer(configPath);
