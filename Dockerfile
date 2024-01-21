@@ -88,10 +88,10 @@ COPY ./LICENSE ./
 ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
 
-RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 777 ./thumbnails && mkdir -p ./downloads && chmod 777 ./downloads && mkdir -p ./data && chmod 777 ./data
 ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
 ENV DOCKER=true
 ENV DB_USE_FFI=true
+RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 777 ./thumbnails && mkdir -p ./downloads && chmod 777 ./downloads && mkdir -p ./data && chmod 777 ./data
 
 EXPOSE 8000
 ENTRYPOINT ["/tini", "--", "deno", "task", "server"]
