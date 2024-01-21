@@ -22,9 +22,8 @@ COPY ./deno.json ./
 COPY ./import_map.json ./
 COPY ./LICENSE ./
 
-RUN deno task fetch
+RUN deno task fetch && deno task server-build && mkdir -p ./thumbnails && chmod 777 ./thumbnails && mkdir -p ./downloads && chmod 777 ./downloads
 ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
-RUN deno task server-build
 
 EXPOSE 8000
 ENTRYPOINT deno
