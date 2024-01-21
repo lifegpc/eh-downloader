@@ -1,5 +1,4 @@
 import { TaskManager } from "./task_manager.ts";
-import { isDocker } from "./utils.ts";
 
 export const ExitTarget = new EventTarget();
 
@@ -13,10 +12,6 @@ export function add_exit_handler(m: TaskManager) {
         m.close();
     };
     const handler = async () => {
-        if (isDocker()) {
-            force_kill();
-            return;
-        }
         if (ignore_signal) return;
         if (first_aborted) {
             m.abort();
