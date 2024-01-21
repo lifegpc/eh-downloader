@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd ~ && \
     curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n6.1.1.tar.gz" -o ffmpeg.tar.gz && \
     tar -xzvf ffmpeg.tar.gz && \
-    cd Ffmpeg-n6.1.1 && \
+    cd FFmpeg-n6.1.1 && \
     ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
     --enable-gpl --enable-version3 --disable-doc --disable-ffplay \
     --disable-network --disable-autodetect --enable-zlib \
@@ -35,7 +35,7 @@ RUN cd ~ && \
     --disable-protocols --enable-protocol=async,concat,concatf,data,fd,file,md5,pipe,subfile \
     --disable-devices --disable-filters --enable-filter=scale && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
-    cd ~ && rm -rf Ffmpeg-n6.1.1 ffmpeg.tar.gz
+    cd ~ && rm -rf FFmpeg-n6.1.1 ffmpeg.tar.gz
 
 FROM denoland/deno:latest as prod
 
