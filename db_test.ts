@@ -1,10 +1,10 @@
 import { assertEquals } from "std/assert/mod.ts";
 import { EhDb, EhFile, GMeta, PMeta } from "./db.ts";
 import { TaskType } from "./task.ts";
-import { remove_if_exists } from "./test_base.ts";
+import { DB_PERMISSION, remove_if_exists } from "./test_base.ts";
 import { sure_dir } from "./utils.ts";
 
-Deno.test("DbTest", async () => {
+Deno.test({ name: "DbTest", permissions: DB_PERMISSION }, async () => {
     await sure_dir("./test/db");
     await remove_if_exists("./test/db/data.db");
     const db = new EhDb("./test/db");

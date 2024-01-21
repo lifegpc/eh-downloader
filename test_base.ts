@@ -10,6 +10,12 @@ export const API_PERMISSION: Deno.PermissionOptions = {
     ],
 };
 
+export const DB_PERMISSION: Deno.PermissionOptions = {
+    env: ["DB_USE_FFI"],
+    read: ["./test"],
+    write: ["./test"],
+};
+
 export async function remove_if_exists(f: string) {
     if (await exists(f)) await Deno.remove(f, { "recursive": true });
 }
