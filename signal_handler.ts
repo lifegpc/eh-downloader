@@ -1,11 +1,22 @@
 import { TaskManager } from "./task_manager.ts";
+import { isDocker } from "./utils.ts";
 
 export const ExitTarget = new EventTarget();
 
 export function add_exit_handler(m: TaskManager) {
     let first_aborted = true;
     let ignore_signal = false;
+    const force_kill = () => {
+        m.abort();
+        m.force_abort();
+        ExitTarget.dispatchEvent(new Event("close"));
+        m.close();
+    };
     const handler = async () => {
+        if (isDocker()) {
+            force_kill();
+            return;
+        }
         if (ignore_signal) return;
         if (first_aborted) {
             m.abort();
@@ -24,12 +35,7 @@ export function add_exit_handler(m: TaskManager) {
     };
     Deno.addSignalListener("SIGINT", handler);
     if (Deno.build.os !== "windows") {
-        Deno.addSignalListener("SIGTERM", () => {
-            m.abort();
-            m.force_abort();
-            ExitTarget.dispatchEvent(new Event("close"));
-            m.close();
-        });
+        Deno.addSignalListener("SIGTERM", force_kill);
     }
 }
 
