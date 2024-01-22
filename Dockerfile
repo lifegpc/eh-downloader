@@ -71,6 +71,7 @@ COPY ./components ./components
 COPY ./islands ./islands
 COPY ./page ./page
 COPY ./routes ./routes
+COPY ./scripts ./scripts
 COPY ./server ./server
 COPY ./static/*.css ./static/
 COPY ./static/*.ts ./static/
