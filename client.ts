@@ -1,6 +1,7 @@
 import type { Config } from "./config.ts";
 import { load_gallery_metadata } from "./page/GalleryMetadata.ts";
 import { load_gallery_page } from "./page/GalleryPage.ts";
+import { load_home_overview_page } from "./page/HomeOverviewPage.ts";
 import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
 import { RecoverableError } from "./task_manager.ts";
@@ -199,5 +200,25 @@ export class Client {
             );
         }
         return load_mpv_page(await re.text(), this);
+    }
+    /**
+     * Fetch home page overview
+     * @returns null if not logged in
+     */
+    async fetchHomeOverviewPage() {
+        const url = `https://${this.host}/home.php`;
+        const re = await this.get(url);
+        if (re.redirected) {
+            const u = new URL(re.url);
+            if (u.pathname.startsWith("/login")) {
+                return null;
+            }
+        }
+        if (re.status != 200) {
+            throw new Error(
+                `Fetch ${url} failed, status ${re.status} ${re.statusText}`,
+            );
+        }
+        return load_home_overview_page(await re.text());
     }
 }
