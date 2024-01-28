@@ -10,6 +10,7 @@ export type GID = [number, string];
 
 export class Client {
     cfg;
+    #last_429_time: number | undefined = undefined;
     get cookies() {
         return this.cfg.cookies;
     }
@@ -60,29 +61,27 @@ export class Client {
     ) {
         const headers = new Headers();
         headers.set("User-Agent", this.ua);
-        if (this.cookies) {
-            if (typeof url === "string") {
-                const u = new URL(url);
-                if (this.is_eh(u.hostname)) {
-                    headers.set("Cookie", this.cookies);
-                }
-            } else if (url instanceof Request) {
-                const u = new URL(url.url);
-                if (this.is_eh(u.hostname)) {
-                    headers.set("Cookie", this.cookies);
-                }
-            } else if (url instanceof URL) {
-                if (this.is_eh(url.hostname)) {
-                    headers.set("Cookie", this.cookies);
-                }
+        const hostname = typeof url === "string"
+            ? new URL(url).hostname
+            : url instanceof Request
+            ? new URL(url.url).hostname
+            : url.hostname;
+        if (this.is_eh(hostname)) {
+            if (this.cookies) {
+                headers.set("Cookie", this.cookies);
             }
+            await this.waitFor429();
         }
         if (url instanceof Request) {
             for (const v of headers) {
                 url.headers.set(v[0], v[1]);
             }
             try {
-                return await fetch(url);
+                const re = await fetch(url);
+                if (this.is_eh(hostname) && re.status == 429) {
+                    this.#last_429_time = Date.now();
+                }
+                return re;
             } catch (e) {
                 if (e instanceof TypeError) {
                     throw new RecoverableError(e.message, { cause: e.cause });
@@ -113,7 +112,11 @@ export class Client {
             });
             d.signal = abortController.signal;
             try {
-                return await fetch(url, d);
+                const re = await fetch(url, d);
+                if (this.is_eh(hostname) && re.status == 429) {
+                    this.#last_429_time = Date.now();
+                }
+                return re;
             } catch (e) {
                 if (e instanceof TypeError) {
                     throw new RecoverableError(e.message, { cause: e.cause });
@@ -122,6 +125,16 @@ export class Client {
             } finally {
                 clearTimeout(timeout);
             }
+        }
+    }
+    async waitFor429() {
+        if (this.#last_429_time === undefined) return;
+        const now = Date.now();
+        const delta = now - this.#last_429_time;
+        if (delta < 10000) {
+            await new Promise((resolve) => {
+                setTimeout(resolve, 10000 - delta);
+            });
         }
     }
     /**
