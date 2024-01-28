@@ -221,7 +221,7 @@ export class Client {
      * @returns null if not logged in
      */
     async fetchHomeOverviewPage() {
-        const url = `https://${this.host}/home.php`;
+        const url = `https://e-hentai.org/home.php`;
         const re = await this.get(url);
         if (re.redirected) {
             const u = new URL(re.url);
