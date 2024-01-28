@@ -265,7 +265,9 @@ export function map<T, S, V>(
     return re;
 }
 
-export class TimeoutError extends Error {
+export class RecoverableError extends Error {}
+
+export class TimeoutError extends RecoverableError {
     constructor() {
         super("Timeout");
     }

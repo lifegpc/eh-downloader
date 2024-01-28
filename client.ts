@@ -4,7 +4,7 @@ import { load_gallery_page } from "./page/GalleryPage.ts";
 import { load_home_overview_page } from "./page/HomeOverviewPage.ts";
 import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
-import { RecoverableError } from "./task_manager.ts";
+import { RecoverableError, TimeoutError } from "./utils.ts";
 
 export type GID = [number, string];
 
@@ -118,8 +118,10 @@ export class Client {
                 }
                 return re;
             } catch (e) {
-                if (e instanceof TypeError) {
-                    throw new RecoverableError(e.message, { cause: e.cause });
+                if (e instanceof DOMException) {
+                    if (e.name == "AbortError") {
+                        throw new TimeoutError();
+                    }
                 }
                 throw e;
             } finally {

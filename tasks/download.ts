@@ -8,7 +8,8 @@ import {
     TaskDownloadSingleProgress,
     TaskType,
 } from "../task.ts";
-import { RecoverableError, TaskManager } from "../task_manager.ts";
+import { TaskManager } from "../task_manager.ts";
+import { RecoverableError } from "../utils.ts";
 import {
     add_suffix_to_path,
     asyncEvery,

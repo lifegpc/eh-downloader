@@ -21,13 +21,12 @@ import {
     DiscriminatedUnion,
     promiseState,
     PromiseStatus,
+    RecoverableError,
     sleep,
 } from "./utils.ts";
 
 export class AlreadyClosedError extends Error {
 }
-
-export class RecoverableError extends Error {}
 
 type EventMap = {
     current_cfg_updated: ConfigType;
