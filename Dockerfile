@@ -63,7 +63,7 @@ RUN cd ~ && \
     curl -L "https://www.sqlite.org/snapshot/sqlite-snapshot-202401231504.tar.gz" -o sqlite-snapshot-202401231504.tar.gz && \
     tar -xzvf sqlite-snapshot-202401231504.tar.gz && \
     cd sqlite-snapshot-202401231504 && \
-    ./configure --prefix=/clib --enable-shared --disable-static && \
+    ./configure --prefix=/clib --enable-shared --disable-static --disable-static-shell && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf sqlite-snapshot-202401231504 sqlite-snapshot-202401231504.tar.gz
 
