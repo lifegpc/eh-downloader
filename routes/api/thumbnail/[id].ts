@@ -19,7 +19,7 @@ import {
 } from "../../../server/get_file_response.ts";
 import { get_host } from "../../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "std/encoding/base64.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import type * as FFMPEG_API from "../../../thumbnail/ffmpeg_api.ts";
 

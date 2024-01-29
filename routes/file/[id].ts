@@ -5,7 +5,7 @@ import {
     GetFileResponseOptions,
 } from "../../server/get_file_response.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "std/encoding/base64.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {

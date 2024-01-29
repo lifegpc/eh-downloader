@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { decode } from "std/encoding/base64.ts";
+import { decodeBase64 as decode } from "std/encoding/base64.ts";
 import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import { get_task_manager } from "../../server.ts";

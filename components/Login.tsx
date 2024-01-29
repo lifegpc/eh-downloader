@@ -6,7 +6,7 @@ import { useState } from "preact/hooks";
 import { MdTonalButton } from "../server/dmodule.ts";
 import { set_state } from "../server/state.ts";
 import pbkdf2Hmac from "pbkdf2-hmac/?target=es2022";
-import { encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "std/encoding/base64.ts";
 
 type Props = {
     show: boolean;
