@@ -90,13 +90,14 @@ ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
 
 RUN deno task fetch && deno task server-build && deno task prebuild && \
-    deno task cache && rm -rf ~/.cache && \
+    deno task cache && deno task download_ffi && rm -rf ~/.cache && \
     mkdir -p ./thumbnails && chmod 777 ./thumbnails && \
     mkdir -p ./downloads && chmod 777 ./downloads && \
     mkdir -p ./data && chmod 777 ./data && chmod 777 /deno-dir
 ENV DENO_DEPLOYMENT_ID=${DENO_DEPLOYMENT_ID}
 ENV DOCKER=true
 ENV DB_USE_FFI=true
+ENV DENO_SQLITE_PATH=/app/lib/libsqlite3.so
 
 EXPOSE 8000
 ENTRYPOINT ["/tini", "--", "deno", "task", "server"]
