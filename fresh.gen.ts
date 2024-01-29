@@ -2,81 +2,83 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $0 from "./routes/_middleware.ts";
-import * as $1 from "./routes/api/_middleware.ts";
-import * as $2 from "./routes/api/config.ts";
-import * as $3 from "./routes/api/deploy_id.ts";
-import * as $4 from "./routes/api/eh/image_limit.ts";
-import * as $5 from "./routes/api/exit.ts";
-import * as $6 from "./routes/api/export/gallery/zip/[gid].ts";
-import * as $7 from "./routes/api/file/[id].ts";
-import * as $8 from "./routes/api/file/random.ts";
-import * as $9 from "./routes/api/file/upload.ts";
-import * as $10 from "./routes/api/filemeta.ts";
-import * as $11 from "./routes/api/filemeta/[token].ts";
-import * as $12 from "./routes/api/files/[token].ts";
-import * as $13 from "./routes/api/gallery/[gid].ts";
-import * as $14 from "./routes/api/gallery/list.ts";
-import * as $15 from "./routes/api/health_check.ts";
-import * as $16 from "./routes/api/status.ts";
-import * as $17 from "./routes/api/tag/[id].ts";
-import * as $18 from "./routes/api/tag/rows.ts";
-import * as $19 from "./routes/api/task.ts";
-import * as $20 from "./routes/api/thumbnail/[id].ts";
-import * as $21 from "./routes/api/token.ts";
-import * as $22 from "./routes/api/user.ts";
-import * as $23 from "./routes/file/[id].ts";
-import * as $24 from "./routes/file/_middleware.ts";
-import * as $25 from "./routes/index.tsx";
-import * as $26 from "./routes/manifest.json.ts";
-import * as $27 from "./routes/thumbnail/[id].ts";
-import * as $28 from "./routes/thumbnail/_middleware.ts";
-import * as $29 from "./routes/upload.tsx";
-import * as $$0 from "./islands/Container.tsx";
-import * as $$1 from "./islands/Settings.tsx";
-import * as $$2 from "./islands/TaskManager.tsx";
-import * as $$3 from "./islands/Upload.tsx";
+import * as $_middleware from "./routes/_middleware.ts";
+import * as $api_middleware from "./routes/api/_middleware.ts";
+import * as $api_config from "./routes/api/config.ts";
+import * as $api_deploy_id from "./routes/api/deploy_id.ts";
+import * as $api_eh_image_limit from "./routes/api/eh/image_limit.ts";
+import * as $api_exit from "./routes/api/exit.ts";
+import * as $api_export_gallery_zip_gid_ from "./routes/api/export/gallery/zip/[gid].ts";
+import * as $api_file_id_ from "./routes/api/file/[id].ts";
+import * as $api_file_random from "./routes/api/file/random.ts";
+import * as $api_file_upload from "./routes/api/file/upload.ts";
+import * as $api_filemeta from "./routes/api/filemeta.ts";
+import * as $api_filemeta_token_ from "./routes/api/filemeta/[token].ts";
+import * as $api_files_token_ from "./routes/api/files/[token].ts";
+import * as $api_gallery_gid_ from "./routes/api/gallery/[gid].ts";
+import * as $api_gallery_list from "./routes/api/gallery/list.ts";
+import * as $api_health_check from "./routes/api/health_check.ts";
+import * as $api_status from "./routes/api/status.ts";
+import * as $api_tag_id_ from "./routes/api/tag/[id].ts";
+import * as $api_tag_rows from "./routes/api/tag/rows.ts";
+import * as $api_task from "./routes/api/task.ts";
+import * as $api_thumbnail_id_ from "./routes/api/thumbnail/[id].ts";
+import * as $api_token from "./routes/api/token.ts";
+import * as $api_user from "./routes/api/user.ts";
+import * as $file_id_ from "./routes/file/[id].ts";
+import * as $file_middleware from "./routes/file/_middleware.ts";
+import * as $index from "./routes/index.tsx";
+import * as $manifest_json from "./routes/manifest.json.ts";
+import * as $thumbnail_id_ from "./routes/thumbnail/[id].ts";
+import * as $thumbnail_middleware from "./routes/thumbnail/_middleware.ts";
+import * as $upload from "./routes/upload.tsx";
+import * as $Container from "./islands/Container.tsx";
+import * as $Settings from "./islands/Settings.tsx";
+import * as $TaskManager from "./islands/TaskManager.tsx";
+import * as $Upload from "./islands/Upload.tsx";
+import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
     routes: {
-        "./routes/_middleware.ts": $0,
-        "./routes/api/_middleware.ts": $1,
-        "./routes/api/config.ts": $2,
-        "./routes/api/deploy_id.ts": $3,
-        "./routes/api/eh/image_limit.ts": $4,
-        "./routes/api/exit.ts": $5,
-        "./routes/api/export/gallery/zip/[gid].ts": $6,
-        "./routes/api/file/[id].ts": $7,
-        "./routes/api/file/random.ts": $8,
-        "./routes/api/file/upload.ts": $9,
-        "./routes/api/filemeta.ts": $10,
-        "./routes/api/filemeta/[token].ts": $11,
-        "./routes/api/files/[token].ts": $12,
-        "./routes/api/gallery/[gid].ts": $13,
-        "./routes/api/gallery/list.ts": $14,
-        "./routes/api/health_check.ts": $15,
-        "./routes/api/status.ts": $16,
-        "./routes/api/tag/[id].ts": $17,
-        "./routes/api/tag/rows.ts": $18,
-        "./routes/api/task.ts": $19,
-        "./routes/api/thumbnail/[id].ts": $20,
-        "./routes/api/token.ts": $21,
-        "./routes/api/user.ts": $22,
-        "./routes/file/[id].ts": $23,
-        "./routes/file/_middleware.ts": $24,
-        "./routes/index.tsx": $25,
-        "./routes/manifest.json.ts": $26,
-        "./routes/thumbnail/[id].ts": $27,
-        "./routes/thumbnail/_middleware.ts": $28,
-        "./routes/upload.tsx": $29,
+        "./routes/_middleware.ts": $_middleware,
+        "./routes/api/_middleware.ts": $api_middleware,
+        "./routes/api/config.ts": $api_config,
+        "./routes/api/deploy_id.ts": $api_deploy_id,
+        "./routes/api/eh/image_limit.ts": $api_eh_image_limit,
+        "./routes/api/exit.ts": $api_exit,
+        "./routes/api/export/gallery/zip/[gid].ts":
+            $api_export_gallery_zip_gid_,
+        "./routes/api/file/[id].ts": $api_file_id_,
+        "./routes/api/file/random.ts": $api_file_random,
+        "./routes/api/file/upload.ts": $api_file_upload,
+        "./routes/api/filemeta.ts": $api_filemeta,
+        "./routes/api/filemeta/[token].ts": $api_filemeta_token_,
+        "./routes/api/files/[token].ts": $api_files_token_,
+        "./routes/api/gallery/[gid].ts": $api_gallery_gid_,
+        "./routes/api/gallery/list.ts": $api_gallery_list,
+        "./routes/api/health_check.ts": $api_health_check,
+        "./routes/api/status.ts": $api_status,
+        "./routes/api/tag/[id].ts": $api_tag_id_,
+        "./routes/api/tag/rows.ts": $api_tag_rows,
+        "./routes/api/task.ts": $api_task,
+        "./routes/api/thumbnail/[id].ts": $api_thumbnail_id_,
+        "./routes/api/token.ts": $api_token,
+        "./routes/api/user.ts": $api_user,
+        "./routes/file/[id].ts": $file_id_,
+        "./routes/file/_middleware.ts": $file_middleware,
+        "./routes/index.tsx": $index,
+        "./routes/manifest.json.ts": $manifest_json,
+        "./routes/thumbnail/[id].ts": $thumbnail_id_,
+        "./routes/thumbnail/_middleware.ts": $thumbnail_middleware,
+        "./routes/upload.tsx": $upload,
     },
     islands: {
-        "./islands/Container.tsx": $$0,
-        "./islands/Settings.tsx": $$1,
-        "./islands/TaskManager.tsx": $$2,
-        "./islands/Upload.tsx": $$3,
+        "./islands/Container.tsx": $Container,
+        "./islands/Settings.tsx": $Settings,
+        "./islands/TaskManager.tsx": $TaskManager,
+        "./islands/Upload.tsx": $Upload,
     },
     baseUrl: import.meta.url,
-};
+} satisfies Manifest;
 
 export default manifest;
