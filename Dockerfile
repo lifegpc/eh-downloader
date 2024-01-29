@@ -59,6 +59,14 @@ RUN cd ~ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf curl-8.5.0 curl-8.5.0.tar.gz
 
+RUN cd ~ && \
+    curl -L "https://www.sqlite.org/snapshot/sqlite-snapshot-202401231504.tar.gz" -o sqlite-snapshot-202401231504.tar.gz && \
+    tar -xzvf sqlite-snapshot-202401231504.tar.gz && \
+    cd sqlite-snapshot-202401231504 && \
+    ./configure --prefix=/clib --enable-shared --disable-static && \
+    make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
+    cd ~ && rm -rf sqlite-snapshot-202401231504 sqlite-snapshot-202401231504.tar.gz
+
 FROM denoland/deno:latest as prod
 
 ARG DENO_DEPLOYMENT_ID
@@ -90,7 +98,7 @@ ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
 
 RUN deno task fetch && deno task server-build && deno task prebuild && \
-    deno task cache && deno task download_ffi && rm -rf ~/.cache && \
+    deno task cache && rm -rf ~/.cache && \
     mkdir -p ./thumbnails && chmod 777 ./thumbnails && \
     mkdir -p ./downloads && chmod 777 ./downloads && \
     mkdir -p ./data && chmod 777 ./data && chmod 777 /deno-dir
