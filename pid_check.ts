@@ -1,3 +1,5 @@
+import { exists } from "std/fs/exists.ts";
+
 export async function check_running(pid: number) {
     if (Deno.build.os == "windows") {
         const cmd = new Deno.Command("tasklist.exe", {
@@ -9,5 +11,7 @@ export async function check_running(pid: number) {
         if (o.code !== 0) return;
         const s = (new TextDecoder()).decode(o.stdout);
         return s.indexOf(`${pid}`) !== -1;
+    } else if (Deno.build.os == "linux") {
+        return await exists(`/proc/${pid}`);
     }
 }
