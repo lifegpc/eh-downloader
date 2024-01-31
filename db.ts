@@ -154,6 +154,7 @@ export type Token = {
     expired: Date;
     http_only: boolean;
     secure: boolean;
+    last_used: Date;
 };
 type TokenRaw = {
     id: number;
@@ -162,6 +163,7 @@ type TokenRaw = {
     expired: string;
     http_only: number;
     secure: number;
+    last_used: string;
 };
 const ALL_TABLES = [
     "version",
@@ -254,7 +256,8 @@ const TOKEN_TABLE = `CREATE TABLE token (
     token TEXT,
     expired TEXT,
     http_only BOOLEAN,
-    secure BOOLEAN
+    secure BOOLEAN,
+    last_used TEXT
 );`;
 
 function escape_fields(fields: string, namespace: string) {
@@ -277,7 +280,7 @@ export class EhDb {
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
-    readonly version = parse_ver("1.0.0-10");
+    readonly version = parse_ver("1.0.0-11");
     constructor(base_path: string) {
         this.#base_path = base_path;
         this.#db_path = join(base_path, "data.db");
@@ -311,6 +314,7 @@ export class EhDb {
                 "color: yellow;",
             );
         }
+        this.remove_expired_token();
     }
     #add_tag(s: string) {
         return this.transaction(() => {
@@ -423,6 +427,12 @@ export class EhDb {
             }
             if (compare_ver(v, parse_ver("1.0.0-10")) === -1) {
                 this.db.execute(FILE_INDEX);
+            }
+            if (compare_ver(v, parse_ver("1.0.0-11")) === -1) {
+                this.db.execute("ALTER TABLE token ADD last_used TEXT;");
+                this.db.execute(
+                    "UPDATE token SET last_used = '1970-01-01T00:00:00.000Z';",
+                );
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -636,8 +646,15 @@ export class EhDb {
             token = randomstring();
         }
         this.db.query(
-            "INSERT INTO token (uid, token, expired, http_only, secure) VALUES (?, ?, ?, ?, ?);",
-            [uid, token, new Date(added + 2592000000), http_only, secure],
+            "INSERT INTO token (uid, token, expired, http_only, secure, last_used) VALUES (?, ?, ?, ?, ?, ?);",
+            [
+                uid,
+                token,
+                new Date(added + 2592000000),
+                http_only,
+                secure,
+                new Date(added),
+            ],
         );
         const t = this.get_token(token);
         if (!t) throw Error("Failed to add token.");
@@ -824,9 +841,11 @@ export class EhDb {
             const h = m.http_only !== 0;
             const s = m.secure !== 0;
             const t = <Token> <unknown> m;
+            const l = new Date(m.last_used);
             t.expired = e;
             t.http_only = h;
             t.secure = s;
+            t.last_used = l;
             return t;
         });
     }
@@ -1192,6 +1211,9 @@ export class EhDb {
     optimize() {
         this.db.execute("VACUUM;");
     }
+    remove_expired_token() {
+        this.db.query("DELETE FROM token WHERE expired < ?;", [new Date()]);
+    }
     rollback() {
         this.db.execute("ROLLBACK TRANSACTION;");
     }
@@ -1266,5 +1288,11 @@ export class EhDb {
         const t = this.get_token(token);
         if (!t) throw Error("Failed to update token.");
         return t;
+    }
+    update_token_last_used(token: string) {
+        this.db.query(
+            "UPDATE token SET last_used = ? WHERE token = ?;",
+            [new Date(), token],
+        );
     }
 }

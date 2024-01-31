@@ -36,6 +36,7 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
     ctx.state.user = user;
     ctx.state.is_from_cookie = is_from_cookie;
     ctx.state.token = t;
+    m.db.update_token_last_used(token);
     return true;
 }
 

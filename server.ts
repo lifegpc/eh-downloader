@@ -35,6 +35,9 @@ export async function startServer(path: string) {
         if (!(e instanceof AlreadyClosedError)) throw e;
     });
     await load_translation(task_manager.aborts);
+    setInterval(() => {
+        task_manager?.db.remove_expired_token();
+    }, 86_400_000)
     return start(manifest, {
         signal: task_manager.aborts,
         plugins: [twindPlugin(twindConfig)],
