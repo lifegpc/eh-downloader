@@ -29,6 +29,7 @@
         "bootstrap/": "https://esm.sh/bootstrap@5.3.0/",
         "filesize": "https://esm.sh/filesize@10.1.0",
         "pwn/": "https://deno.land/x/pwn@1.0.0/",
-        "sqlite3/": "https://deno.land/x/sqlite3@0.10.0/"
+        "sqlite3/": "https://deno.land/x/sqlite3@0.10.0/",
+        "async/": "https://deno.land/x/async@v2.1.0/"
     }
 }

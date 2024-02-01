@@ -6,8 +6,37 @@ import { get_task_manager } from "../../server.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import isEqual from "lodash/isEqual";
 import type { Token } from "../../db.ts";
+import { Mutex } from "async/mutex.ts";
 
 const USER_PASSWORD_ERROR = "Incorrect username or password.";
+
+class TimestampCache {
+    caches: Map<string, Set<number>> = new Map();
+    ttl = 120000;
+    add(key: string, t: number) {
+        const v = this.caches.get(key);
+        if (!v) {
+            this.caches.set(key, new Set([t]));
+        } else {
+            v.add(t);
+        }
+    }
+    clear_expired(key: string, now: number) {
+        const v = this.caches.get(key);
+        if (!v) return;
+        for (const t of v) {
+            if (t + this.ttl < now) v.delete(t);
+        }
+    }
+    is_in_cache(key: string, t: number) {
+        const v = this.caches.get(key);
+        if (!v) return false;
+        return v.has(t);
+    }
+}
+
+const timestamp_cache = new TimestampCache();
+const cache_mutex = new Mutex();
 
 export const handler: Handlers = {
     async DELETE(req, ctx) {
@@ -73,7 +102,7 @@ export const handler: Handlers = {
         }
         const t = await parse_int(data.get("t"), null);
         if (t === null) return return_error(1, "t not specified.");
-        const now = (new Date()).getTime();
+        const now = Date.now();
         if (t > now + 60000 || t < now - 60000) {
             return return_error(3, "Time is not corrected.");
         }
@@ -92,6 +121,16 @@ export const handler: Handlers = {
         );
         if (!isEqual(pa, password)) {
             return return_error(4, USER_PASSWORD_ERROR);
+        }
+        await cache_mutex.acquire();
+        try {
+            timestamp_cache.clear_expired(username, now);
+            if (timestamp_cache.is_in_cache(username, t)) {
+                return return_error(5, "This request has been used.");
+            }
+            timestamp_cache.add(username, t);
+        } finally {
+            cache_mutex.release();
         }
         const token = m.db.add_token(
             u.id,
