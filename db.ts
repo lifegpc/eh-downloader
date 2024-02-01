@@ -155,6 +155,10 @@ export type Token = {
     http_only: boolean;
     secure: boolean;
     last_used: Date;
+    client: string | null;
+    device: string | null;
+    client_version: string | null;
+    client_platform: string | null;
 };
 type TokenRaw = {
     id: number;
@@ -164,6 +168,10 @@ type TokenRaw = {
     http_only: number;
     secure: number;
     last_used: string;
+    client: string | null;
+    device: string | null;
+    client_version: string | null;
+    client_platform: string | null;
 };
 const ALL_TABLES = [
     "version",
@@ -257,7 +265,11 @@ const TOKEN_TABLE = `CREATE TABLE token (
     expired TEXT,
     http_only BOOLEAN,
     secure BOOLEAN,
-    last_used TEXT
+    last_used TEXT,
+    client TEXT,
+    device TEXT,
+    client_version TEXT,
+    client_platform TEXT
 );`;
 
 function escape_fields(fields: string, namespace: string) {
@@ -280,7 +292,7 @@ export class EhDb {
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
-    readonly version = parse_ver("1.0.0-11");
+    readonly version = parse_ver("1.0.0-12");
     constructor(base_path: string) {
         this.#base_path = base_path;
         this.#db_path = join(base_path, "data.db");
@@ -433,6 +445,12 @@ export class EhDb {
                 this.db.execute(
                     "UPDATE token SET last_used = '1970-01-01T00:00:00.000Z';",
                 );
+            }
+            if (compare_ver(v, parse_ver("1.0.0-12")) === -1) {
+                this.db.execute("ALTER TABLE token ADD client TEXT;");
+                this.db.execute("ALTER TABLE token ADD device TEXT;");
+                this.db.execute("ALTER TABLE token ADD client_version TEXT;");
+                this.db.execute("ALTER TABLE token ADD client_platform TEXT;");
             }
             this.#write_version();
             if (need_optimize) this.optimize();
@@ -640,13 +658,17 @@ export class EhDb {
         added: number,
         http_only: boolean,
         secure: boolean,
+        client: string | null,
+        device: string | null,
+        client_version: string | null,
+        client_platform: string | null,
     ): Token {
         let token = randomstring();
         while (this.get_token(token)) {
             token = randomstring();
         }
         this.db.query(
-            "INSERT INTO token (uid, token, expired, http_only, secure, last_used) VALUES (?, ?, ?, ?, ?, ?);",
+            "INSERT INTO token (uid, token, expired, http_only, secure, last_used, client, device, client_version, client_platform) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
             [
                 uid,
                 token,
@@ -654,6 +676,10 @@ export class EhDb {
                 http_only,
                 secure,
                 new Date(added),
+                client,
+                device,
+                client_version,
+                client_platform,
             ],
         );
         const t = this.get_token(token);
@@ -1285,6 +1311,45 @@ export class EhDb {
             "UPDATE token SET expired = ? WHERE token = ?;",
             [new Date(added + 2592000000), token],
         );
+        const t = this.get_token(token);
+        if (!t) throw Error("Failed to update token.");
+        return t;
+    }
+    update_token_info(
+        token: string,
+        client: string | null,
+        device: string | null,
+        client_version: string | null,
+        client_platform: string | null,
+    ): Token {
+        if (
+            client !== null || device !== null || client_version !== null ||
+            client_platform !== null
+        ) {
+            const args = [];
+            const sets = [];
+            if (client !== null) {
+                sets.push("client = ?");
+                args.push(client);
+            }
+            if (device !== null) {
+                sets.push("device = ?");
+                args.push(device);
+            }
+            if (client_version !== null) {
+                sets.push("client_version = ?");
+                args.push(client_version);
+            }
+            if (client_platform !== null) {
+                sets.push("client_platform = ?");
+                args.push(client_platform);
+            }
+            args.push(token);
+            this.db.query(
+                `UPDATE token SET ${sets.join(", ")} WHERE token = ?;`,
+                args,
+            );
+        }
         const t = this.get_token(token);
         if (!t) throw Error("Failed to update token.");
         return t;

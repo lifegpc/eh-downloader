@@ -7,6 +7,7 @@ import { MdTonalButton } from "../server/dmodule.ts";
 import { set_state } from "../server/state.ts";
 import pbkdf2Hmac from "pbkdf2-hmac/?target=es2022";
 import { encodeBase64 as encode } from "std/encoding/base64.ts";
+import { UserAgent } from "std/http/user_agent.ts";
 
 type Props = {
     show: boolean;
@@ -45,6 +46,17 @@ export default class Login extends Component<Props> {
             b.append("set_cookie", "1");
             if (document.location.protocol === "https:") {
                 b.append("secure", "1");
+            }
+            b.append("client", "fresh");
+            b.append("client_version", "0.0.1");
+            b.append("client_platform", "web");
+            const ua = new UserAgent(navigator.userAgent);
+            let name = ua.browser.name;
+            if (name && ua.browser.version) {
+                name += " " + ua.browser.version;
+            }
+            if (name) {
+                b.append("device", name);
             }
             const re2 = await fetch("/api/token", { method: "PUT", body: b });
             const token = await re2.json();

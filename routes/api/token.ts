@@ -80,6 +80,10 @@ export const handler: Handlers = {
         const set_cookie = await parse_bool(data.get("set_cookie"), false);
         const http_only = await parse_bool(data.get("http_only"), true);
         const secure = await parse_bool(data.get("secure"), false);
+        const client = await get_string(data.get("client"));
+        const client_version = await get_string(data.get("client_version"));
+        const client_platform = await get_string(data.get("client_platform"));
+        const device = await get_string(data.get("device"));
         const m = get_task_manager();
         const u = m.db.get_user_by_name(username);
         if (!u) return return_error(4, USER_PASSWORD_ERROR);
@@ -89,7 +93,16 @@ export const handler: Handlers = {
         if (!isEqual(pa, password)) {
             return return_error(4, USER_PASSWORD_ERROR);
         }
-        const token = m.db.add_token(u.id, now, http_only, secure);
+        const token = m.db.add_token(
+            u.id,
+            now,
+            http_only,
+            secure,
+            client,
+            device,
+            client_version,
+            client_platform,
+        );
         const headers: HeadersInit = {};
         if (set_cookie) {
             headers["Set-Cookie"] =
@@ -98,5 +111,34 @@ export const handler: Handlers = {
                 }${secure ? "; Secure" : ""}; Path=/api`;
         }
         return return_data(token, 201, headers);
+    },
+    async PATCH(req, ctx) {
+        try {
+            const data = await req.formData();
+            let t = await get_string(data.get("token"));
+            const ttoken = <Token | undefined> ctx.state.token;
+            if (!t && ttoken) t = ttoken.token;
+            if (!t) return return_error(1, "token not specififed.");
+            const client = await get_string(data.get("client"));
+            const client_version = await get_string(data.get("client_version"));
+            const client_platform = await get_string(
+                data.get("client_platform"),
+            );
+            const device = await get_string(data.get("device"));
+            const m = get_task_manager();
+            const token = m.db.get_token(t);
+            if (!token) return return_error(404, "token not found.");
+            return return_data(
+                m.db.update_token_info(
+                    t,
+                    client,
+                    device,
+                    client_version,
+                    client_platform,
+                ),
+            );
+        } catch (e) {
+            return return_error(500, e.message);
+        }
     },
 };
