@@ -302,7 +302,7 @@ export class EhDb {
         this.#use_ffi = parse_bool(Deno.env.get("DB_USE_FFI") ?? "false");
         if (this.#use_ffi) {
             const DB = (await import("./utils/db_ffi.ts")).DbFfi;
-            this.db = new DB(this.#db_path);
+            this.db = new DB(this.#db_path, { int64: true });
         } else {
             const DB = (await import("./utils/db_wasm.ts")).DbWasm;
             this.db = new DB(this.#db_path);
