@@ -30,6 +30,7 @@ export type ConfigType = {
     fetch_timeout: number;
     download_timeout: number;
     ffprobe_path: string;
+    redirect_to_flutter: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -186,6 +187,9 @@ export class Config {
     get ffprobe_path() {
         return this._return_string("ffprobe_path") || "ffprobe";
     }
+    get redirect_to_flutter() {
+        return this._return_bool("redirect_to_flutter") ?? true;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -215,6 +219,7 @@ export class Config {
             fetch_timeout: this.fetch_timeout,
             download_timeout: this.download_timeout,
             ffprobe_path: this.ffprobe_path,
+            redirect_to_flutter: this.redirect_to_flutter,
         };
     }
 }
