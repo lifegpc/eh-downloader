@@ -346,6 +346,7 @@ export async function download_task(
                         const pr = new ProgressReadable(
                             re.body,
                             cfg.download_timeout,
+                            cfg.download_timeout_check_interval,
                             force_abort,
                         );
                         pr.addEventListener("progress", (e) => {

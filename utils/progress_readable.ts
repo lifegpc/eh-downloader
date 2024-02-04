@@ -8,6 +8,7 @@ export class ProgressReadable extends EventTarget {
     readed: number;
     error?: unknown;
     timeout: number;
+    interval: number;
     get signal() {
         return this.#controller.signal;
     }
@@ -21,11 +22,13 @@ export class ProgressReadable extends EventTarget {
     constructor(
         readable: ReadableStream<Uint8Array>,
         timeout: number,
+        interval: number,
         originalSignal?: AbortSignal,
     ) {
         super();
         this.readed = 0;
         this.timeout = timeout;
+        this.interval = interval;
         this.#is_timeout = false;
         this.#last_readed = Date.now();
         const reader = readable.getReader();
@@ -91,7 +94,7 @@ export class ProgressReadable extends EventTarget {
                 this.#controller.abort();
                 this.#clearInterval();
             }
-        }, 1);
+        }, this.interval);
     }
     // @ts-ignore Checked type
     addEventListener<T extends keyof EventMap>(
