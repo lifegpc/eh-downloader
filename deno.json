@@ -5,7 +5,7 @@
         "cache": "deno cache main.ts server-dev.ts",
         "server-dev": "deno run -A \"--watch=static/*.css,static/*.ts,static/*/,routes/,translation/\" server-dev.ts",
         "server": "deno run -A server-run.ts",
-        "test": "deno test --allow-read=./ --allow-net --allow-write=./ --allow-run=tasklist.exe --allow-env",
+        "test": "deno test --allow-read --allow-net --allow-write --allow-ffi --allow-run=tasklist.exe --allow-env",
         "run": "deno run --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID,DOCKER,DB_USE_FFI --allow-ffi --allow-net",
         "compile": "deno compile --allow-read=./ --allow-write=./ --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net",
         "compile_full": "deno compile --allow-read --allow-write --allow-run=tasklist.exe --allow-env=DENO_DEPLOYMENT_ID --allow-net",
