@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { User } from "../../../db.ts";
+import { User, UserPermission } from "../../../db.ts";
 import { get_task_manager } from "../../../server.ts";
 import { EHImageLimit } from "../../../server/eh.ts";
 import { return_data, return_error } from "../../../server/utils.ts";
@@ -7,7 +7,10 @@ import { return_data, return_error } from "../../../server/utils.ts";
 export const handler: Handlers = {
     async GET(_req, ctx) {
         const user = <User | undefined> ctx.state.user;
-        if (user && !user.is_admin) {
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ManageTasks)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const m = get_task_manager();

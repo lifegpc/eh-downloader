@@ -22,11 +22,19 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "std/encoding/base64.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import type * as FFMPEG_API from "../../../thumbnail/ffmpeg_api.ts";
+import { User, UserPermission } from "../../../db.ts";
 
 let ffmpeg_api: typeof FFMPEG_API | undefined;
 
 export const handler: Handlers = {
     async GET(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ReadGallery)
+        ) {
+            return new Response("Permission denied", { status: 403 });
+        }
         const id = parseInt(ctx.params.id);
         if (isNaN(id)) {
             return new Response("Bad Request", { status: 400 });

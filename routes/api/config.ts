@@ -8,6 +8,7 @@ import {
 import { parse_bool } from "../../server/parse_form.ts";
 import { return_json } from "../../server/utils.ts";
 import { ExitTarget } from "../../signal_handler.ts";
+import type { User } from "../../db.ts";
 
 const UNSAFE_TYPE: (keyof ConfigType)[] = [
     "base",
@@ -21,7 +22,11 @@ const UNSAFE_TYPE: (keyof ConfigType)[] = [
 const UNSAFE_TYPE2 = UNSAFE_TYPE as string[];
 
 export const handler: Handlers = {
-    async GET(req, _ctx) {
+    async GET(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (user && !user.is_admin) {
+            return new Response("Permission denied", { status: 403 });
+        }
         const u = new URL(req.url);
         const current = await parse_bool(u.searchParams.get("current"), false);
         if (current) {
@@ -76,7 +81,11 @@ export const handler: Handlers = {
         const cfg = await load_settings(path);
         return return_json(cfg.to_json());
     },
-    async POST(req, _ctx) {
+    async POST(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (user && !user.is_admin) {
+            return new Response("Permission denied", { status: 403 });
+        }
         const content_type = req.headers.get("Content-Type");
         if (content_type === "application/json") {
             const d = await req.json();

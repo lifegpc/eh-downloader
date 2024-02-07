@@ -2,9 +2,14 @@ import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
 import type { GalleryData } from "../../../server/gallery.ts";
 import { return_data, return_error } from "../../../server/utils.ts";
+import { User, UserPermission } from "../../../db.ts";
 
 export const handler: Handlers = {
     GET(_req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin && !(u.permissions & UserPermission.ReadGallery)) {
+            return return_error(403, "Permission denied.");
+        }
         const gid = parseInt(ctx.params.gid);
         if (isNaN(gid)) {
             return return_error(400, "Failed to parse gid.");

@@ -5,7 +5,7 @@ import { return_data, return_error } from "../../server/utils.ts";
 import { get_task_manager } from "../../server.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import isEqual from "lodash/isEqual";
-import type { Token } from "../../db.ts";
+import type { Token, User } from "../../db.ts";
 import { Mutex } from "async/mutex.ts";
 
 const USER_PASSWORD_ERROR = "Incorrect username or password.";
@@ -58,6 +58,10 @@ export const handler: Handlers = {
         const m = get_task_manager();
         const token = m.db.get_token(t);
         if (!token) return return_error(404, "token not found.");
+        const user = <User | undefined> ctx.state.user;
+        if (user && !user.is_admin && token.uid !== user.id) {
+            return return_error(403, "Permission denied.");
+        }
         m.db.delete_token(t);
         const headers: HeadersInit = {};
         if (is_from_auth && is_from_cookie) {

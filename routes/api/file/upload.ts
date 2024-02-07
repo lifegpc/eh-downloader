@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import type { EhFile } from "../../../db.ts";
+import type { EhFile, User } from "../../../db.ts";
 import { get_task_manager } from "../../../server.ts";
 import { return_data, return_error } from "../../../server/utils.ts";
 import { get_string, parse_bool } from "../../../server/parse_form.ts";
@@ -7,9 +7,17 @@ import { fb_get_size } from "../../../thumbnail/ffmpeg_binary.ts";
 import { sure_dir } from "../../../utils.ts";
 import mime from "mime";
 import { extname, join, resolve } from "std/path/mod.ts";
+import { UserPermission } from "../../../db.ts";
 
 export const handler: Handlers = {
-    async POST(req, _ctx) {
+    async POST(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.EditGallery)
+        ) {
+            return return_error(403, "Permission denied.");
+        }
         const m = get_task_manager();
         try {
             const form = await req.formData();

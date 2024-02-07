@@ -9,9 +9,17 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "std/encoding/base64.ts";
 import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
+import { User, UserPermission } from "../../../db.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ReadGallery)
+        ) {
+            return return_error(403, "Permission denied.");
+        }
         const u = new URL(req.url);
         const data = await parse_bool(u.searchParams.get("data"), false);
         const id = parseInt(ctx.params.id);

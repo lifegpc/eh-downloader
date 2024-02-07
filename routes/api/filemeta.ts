@@ -3,6 +3,7 @@ import type { EhFileMeta } from "../../db.ts";
 import { get_task_manager } from "../../server.ts";
 import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";
+import { User, UserPermission } from "../../db.ts";
 
 export function get_filemeta(token: string) {
     const m = get_task_manager();
@@ -44,13 +45,24 @@ export function put_gallery_filemeta(
 }
 
 export const handler: Handlers = {
-    GET(req, _ctx) {
+    GET(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ReadGallery)
+        ) {
+            return return_error(403, "Permission denied.");
+        }
         const u = new URL(req.url);
         const token = u.searchParams.get("token");
         if (token) return get_filemeta(token);
         return return_error(400, "token is needed.");
     },
-    async POST(req, _ctx) {
+    async POST(req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin && !(u.permissions & UserPermission.EditGallery)) {
+            return return_error(403, "Permission denied.");
+        }
         const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
         if (ct === "application/json") {
             if (!req.body) return_error(1, "Body not found.");
@@ -198,7 +210,11 @@ export const handler: Handlers = {
         }
         return return_error(4, "Unknown format.");
     },
-    async PUT(req, _ctx) {
+    async PUT(req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin && !(u.permissions & UserPermission.EditGallery)) {
+            return return_error(403, "Permission denied.");
+        }
         const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
         if (ct === "application/json") {
             if (!req.body) return_error(1, "Body not found.");

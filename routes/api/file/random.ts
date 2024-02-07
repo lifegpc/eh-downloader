@@ -2,9 +2,17 @@ import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool } from "../../../server/parse_form.ts";
 import { get_host } from "../../../server/utils.ts";
+import { User, UserPermission } from "../../../db.ts";
 
 export const handler: Handlers = {
-    async GET(req, _ctx) {
+    async GET(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ReadGallery)
+        ) {
+            return new Response("Permission denied", { status: 403 });
+        }
         const m = get_task_manager();
         const u = new URL(req.url);
         const is_nsfw = await parse_bool(u.searchParams.get("is_nsfw"), null);

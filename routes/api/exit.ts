@@ -3,9 +3,14 @@ import { parse_bool } from "../../server/parse_form.ts";
 import { get_task_manager } from "../../server.ts";
 import { ExitTarget } from "../../signal_handler.ts";
 import { AlreadyClosedError } from "../../task_manager.ts";
+import type { User } from "../../db.ts";
 
 export const handler: Handlers = {
-    async POST(req, _ctx) {
+    async POST(req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin) {
+            return new Response("Permission denied.", { status: 403 });
+        }
         let force = false;
         try {
             const form = await req.formData();

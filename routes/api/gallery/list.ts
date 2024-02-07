@@ -2,6 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool, parse_int } from "../../../server/parse_form.ts";
 import { return_data, return_error } from "../../../server/utils.ts";
+import { User, UserPermission } from "../../../db.ts";
 
 const ALLOW_FIELDS = [
     "gid",
@@ -23,6 +24,13 @@ const ALLOW_FIELDS = [
 
 export const handler: Handlers = {
     async GET(req, _ctx) {
+        const user = <User | undefined> _ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(user.permissions & UserPermission.ReadGallery)
+        ) {
+            return return_error(403, "Permission denied.");
+        }
         const u = new URL(req.url);
         const t = get_task_manager();
         const all = await parse_bool(u.searchParams.get("all"), false);
