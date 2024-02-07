@@ -6,9 +6,18 @@ import type {
     TaskServerSocketData,
 } from "../../server/task.ts";
 import { ExitTarget } from "../../signal_handler.ts";
+import { get_string, parse_int } from "../../server/parse_form.ts";
+import { return_data, return_error } from "../../server/utils.ts";
+import type { DownloadConfig } from "../../tasks/download.ts";
+import type { ExportZipConfig } from "../../tasks/export_zip.ts";
+import { User, UserPermission } from "../../db.ts";
 
-export const handler: Handlers<Task[]> = {
-    GET(req, _ctx) {
+export const handler: Handlers = {
+    GET(req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin && !(u.permissions & UserPermission.ManageTasks)) {
+            return return_error(403, "Permission denied.");
+        }
         const t = get_task_manager();
         const { socket, response } = Deno.upgradeWebSocket(req);
         const handle = (
@@ -76,5 +85,72 @@ export const handler: Handlers<Task[]> = {
             ExitTarget.addEventListener("close", close_handle);
         };
         return response;
+    },
+    async PUT(req, ctx) {
+        const u = <User | undefined> ctx.state.user;
+        if (u && !u.is_admin && !(u.permissions & UserPermission.ManageTasks)) {
+            return return_error(403, "Permission denied.");
+        }
+        const t = get_task_manager();
+        let form: FormData | null = null;
+        try {
+            form = await req.formData();
+        } catch (_) {
+            return return_error(400, "Bad Request");
+        }
+        const typ = await get_string(form.get("type"));
+        if (!typ) {
+            return return_error(1, "type is required");
+        }
+        if (typ == "download") {
+            const gid = await parse_int(form.get("gid"), null);
+            const token = await get_string(form.get("token"));
+            if (gid === null) {
+                return return_error(2, "gid is required");
+            }
+            if (!token) {
+                return return_error(3, "token is required");
+            }
+            const cfg = await get_string(form.get("cfg"));
+            let dcfg: DownloadConfig | undefined = undefined;
+            if (cfg) {
+                try {
+                    dcfg = JSON.parse(cfg);
+                } catch (_) {
+                    return return_error(4, "cfg is invalid");
+                }
+            }
+            try {
+                const task = t.add_download_task(gid, token, dcfg, true);
+                if (task === null) {
+                    return return_error(6, "task is already in the list");
+                }
+                return return_data(task, 201);
+            } catch (e) {
+                return return_error(500, e.message);
+            }
+        } else if (typ == "export_zip") {
+            const gid = await parse_int(form.get("gid"), null);
+            if (gid === null) {
+                return return_error(2, "gid is required");
+            }
+            const cfg = await get_string(form.get("cfg"));
+            let dcfg: ExportZipConfig | undefined = undefined;
+            if (cfg) {
+                try {
+                    dcfg = JSON.parse(cfg);
+                } catch (_) {
+                    return return_error(4, "cfg is invalid");
+                }
+            }
+            try {
+                const task = t.add_export_zip_task(gid, dcfg);
+                return return_data(task, 201);
+            } catch (e) {
+                return return_error(500, e.message);
+            }
+        } else {
+            return return_error(5, "unknown type");
+        }
     },
 };

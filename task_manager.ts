@@ -106,12 +106,17 @@ export class TaskManager extends EventTarget {
     get aborts() {
         return this.#abort.signal;
     }
-    async add_download_task(gid: number, token: string, cfg?: DownloadConfig) {
+    async add_download_task(
+        gid: number,
+        token: string,
+        cfg?: DownloadConfig,
+        mark_already = false,
+    ) {
         this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
         if (otask !== undefined) {
             console.log("The task is already in list.");
-            return otask;
+            return mark_already ? null : otask;
         }
         const task: Task = {
             gid,

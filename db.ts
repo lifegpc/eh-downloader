@@ -7,6 +7,7 @@ import {
 import { unescape } from "std/html/mod.ts";
 import { join, resolve } from "std/path/mod.ts";
 import { SqliteError } from "sqlite/mod.ts";
+import { SqliteError as Sqlite3Error } from "sqlite3/mod.ts";
 import { Status } from "sqlite/src/constants.ts";
 import { parse_bool, sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
@@ -131,7 +132,9 @@ export enum UserPermission {
     None = 0,
     ReadGallery = 1 << 0,
     EditGallery = 1 << 1,
-    All = ~(~0 << 2),
+    DeleteGallery = 1 << 2,
+    ManageTasks = 1 << 3,
+    All = ~(~0 << 4),
 }
 export type User = {
     id: number;
@@ -720,6 +723,10 @@ export class EhDb {
         } catch (e) {
             if (e instanceof SqliteError) {
                 if (e.code == Status.SqliteBusy) return false;
+            }
+            if (e instanceof Sqlite3Error) {
+                // SQLITE_BUSY
+                if (e.code == 5) return false;
             }
             throw e;
         }
