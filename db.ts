@@ -12,6 +12,7 @@ import { Status } from "sqlite/src/constants.ts";
 import { parse_bool, sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 import { generate as randomstring } from "randomstring";
+import type { GalleryMetadataSingle } from "./page/GalleryMetadata.ts";
 
 type SqliteMaster = {
     type: string;
@@ -187,6 +188,7 @@ const ALL_TABLES = [
     "filemeta",
     "user",
     "token",
+    "ehmeta",
 ];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
@@ -273,6 +275,12 @@ const TOKEN_TABLE = `CREATE TABLE token (
     device TEXT,
     client_version TEXT,
     client_platform TEXT
+);`;
+const EHMETA_TABLE = `CREATE TABLE ehmeta (
+    gid INT,
+    data TEXT,
+    cached_time TEXT,
+    PRIMARY KEY (gid)
 );`;
 
 function escape_fields(fields: string, namespace: string) {
@@ -497,6 +505,9 @@ export class EhDb {
         if (!this.#exist_table.has("token")) {
             this.db.execute(TOKEN_TABLE);
         }
+        if (!this.#exist_table.has("ehmeta")) {
+            this.db.execute(EHMETA_TABLE);
+        }
         this.#updateExistsTable();
     }
     #read_version() {
@@ -537,6 +548,12 @@ export class EhDb {
                 format_ver(this.version),
             ]);
         });
+    }
+    add_ehmeta(data: GalleryMetadataSingle) {
+        this.db.query(
+            "INSERT OR REPLACE INTO ehmeta VALUES (?, ?, ?);",
+            [data.gid, JSON.stringify(data), new Date()],
+        );
     }
     add_gmeta(gmeta: GMeta) {
         this.db.queryEntries(
@@ -949,6 +966,13 @@ export class EhDb {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
     }
+    get_ehmeta(gid: number) {
+        const d = this.db.query<[string]>(
+            "SELECT data FROM ehmeta WHERE gid = ?;",
+            [gid],
+        );
+        return d.length ? JSON.parse(d[0][0]) as GalleryMetadataSingle : null;
+    }
     get_extended_pmeta(gid: number) {
         return this.convert_extended_pmeta(
             this.db.queryEntries<ExtendedPMetaRaw>(
@@ -1243,6 +1267,11 @@ export class EhDb {
     }
     optimize() {
         this.db.execute("VACUUM;");
+    }
+    remove_expired_ehmeta(cache_time: number) {
+        const date = new Date();
+        date.setTime(date.getTime() - cache_time * 3600_000);
+        this.db.query("DELETE FROM ehmeta WHERE cached_time < ?;", [date]);
     }
     remove_expired_token() {
         this.db.query("DELETE FROM token WHERE expired < ?;", [new Date()]);

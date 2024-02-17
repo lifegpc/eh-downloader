@@ -7,6 +7,7 @@ import * as $api_middleware from "./routes/api/_middleware.ts";
 import * as $api_config from "./routes/api/config.ts";
 import * as $api_deploy_id from "./routes/api/deploy_id.ts";
 import * as $api_eh_image_limit from "./routes/api/eh/image_limit.ts";
+import * as $api_eh_metadata from "./routes/api/eh/metadata.ts";
 import * as $api_exit from "./routes/api/exit.ts";
 import * as $api_export_gallery_zip_gid_ from "./routes/api/export/gallery/zip/[gid].ts";
 import * as $api_file_id_ from "./routes/api/file/[id].ts";
@@ -45,6 +46,7 @@ const manifest = {
         "./routes/api/config.ts": $api_config,
         "./routes/api/deploy_id.ts": $api_deploy_id,
         "./routes/api/eh/image_limit.ts": $api_eh_image_limit,
+        "./routes/api/eh/metadata.ts": $api_eh_metadata,
         "./routes/api/exit.ts": $api_exit,
         "./routes/api/export/gallery/zip/[gid].ts":
             $api_export_gallery_zip_gid_,

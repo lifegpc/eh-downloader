@@ -32,6 +32,8 @@ export type ConfigType = {
     ffprobe_path: string;
     redirect_to_flutter: boolean;
     download_timeout_check_interval: number;
+    /** EH metadata cache time in hours */
+    eh_metadata_cache_time: number;
 };
 
 export enum ThumbnailMethod {
@@ -194,6 +196,10 @@ export class Config {
     get download_timeout_check_interval() {
         return this._return_number("download_timeout_check_interval") || 10;
     }
+    /** EH metadata cache time in hours */
+    get eh_metadata_cache_time() {
+        return this._return_number("eh_metadata_cache_time") || 168;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -226,6 +232,7 @@ export class Config {
             redirect_to_flutter: this.redirect_to_flutter,
             download_timeout_check_interval:
                 this.download_timeout_check_interval,
+            eh_metadata_cache_time: this.eh_metadata_cache_time,
         };
     }
 }

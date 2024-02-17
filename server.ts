@@ -38,6 +38,12 @@ export async function startServer(path: string) {
     setInterval(() => {
         task_manager?.db.remove_expired_token();
     }, 86_400_000);
+    setInterval(() => {
+        if (!task_manager) return;
+        task_manager.db.remove_expired_ehmeta(
+            task_manager.cfg.eh_metadata_cache_time,
+        );
+    }, 3600_000);
     return start(manifest, {
         signal: task_manager.aborts,
         plugins: [twindPlugin(twindConfig)],
