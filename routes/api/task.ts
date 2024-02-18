@@ -121,7 +121,7 @@ export const handler: Handlers = {
                 }
             }
             try {
-                const task = t.add_download_task(gid, token, dcfg, true);
+                const task = await t.add_download_task(gid, token, dcfg, true);
                 if (task === null) {
                     return return_error(6, "task is already in the list");
                 }
