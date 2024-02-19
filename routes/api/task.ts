@@ -45,11 +45,16 @@ export const handler: Handlers = {
                 socket.send(JSON.stringify(mes));
             }
         }
+        const interval = setInterval(() => {
+            sendMessage({ type: "ping" });
+        }, 30000);
         socket.onclose = () => {
             removeListener();
+            clearInterval(interval);
         };
         socket.onerror = () => {
             removeListener();
+            clearInterval(interval);
             console.error("WebSocket error.");
         };
         socket.onmessage = (e) => {
@@ -70,6 +75,8 @@ export const handler: Handlers = {
                             running: t.get_running_task(),
                         });
                     });
+                } else if (d.type == "ping") {
+                    sendMessage({ type: "pong" });
                 }
             } catch (_) {
                 null;
@@ -144,7 +151,7 @@ export const handler: Handlers = {
                 }
             }
             try {
-                const task = t.add_export_zip_task(gid, dcfg);
+                const task = await t.add_export_zip_task(gid, dcfg);
                 return return_data(task, 201);
             } catch (e) {
                 return return_error(500, e.message);

@@ -4,17 +4,27 @@ import type { DownloadConfig } from "../tasks/download.ts";
 import type { ExportZipConfig } from "../tasks/export_zip.ts";
 import type { DiscriminatedUnion } from "../utils.ts";
 
-export type TaskServerSocketData = TaskEventData | { type: "close" } | {
-    type: "tasks";
-    tasks: Task[];
-    running: number[];
-};
+export type TaskServerSocketData =
+    | TaskEventData
+    | { type: "close" }
+    | {
+        type: "tasks";
+        tasks: Task[];
+        running: number[];
+    }
+    | { type: "ping" }
+    | { type: "pong" };
 
 type EventMap = {
     new_download_task: { gid: number; token: string; cfg?: DownloadConfig };
     new_export_zip_task: { gid: number; cfg?: ExportZipConfig };
 };
 
-export type TaskClientSocketData = DiscriminatedUnion<"type", EventMap> | {
-    type: "close";
-} | { type: "task_list" };
+export type TaskClientSocketData =
+    | DiscriminatedUnion<"type", EventMap>
+    | {
+        type: "close";
+    }
+    | { type: "task_list" }
+    | { type: "ping" }
+    | { type: "pong" };
