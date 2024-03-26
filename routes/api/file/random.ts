@@ -1,8 +1,12 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool } from "../../../server/parse_form.ts";
+import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import { get_host } from "../../../server/utils.ts";
 import { User, UserPermission } from "../../../db.ts";
+import pbkdf2Hmac from "pbkdf2-hmac";
+import { encodeBase64 as encode } from "std/encoding/base64.ts";
+import { return_data } from "../../../server/utils.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -15,6 +19,48 @@ export const handler: Handlers = {
         }
         const m = get_task_manager();
         const u = new URL(req.url);
+        const token = u.searchParams.get("token");
+        const action = u.searchParams.get("action");
+        if (token && m.cfg.random_file_secret) {
+            const s = new SortableURLSearchParams(u.search, ["token"]);
+            const r = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${s.toString2()}`,
+                        m.cfg.random_file_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            if (token !== r) {
+                return new Response("Invalid token", { status: 403 });
+            }
+        }
+        if (action == "gentoken") {
+            if (!m.cfg.random_file_secret) {
+                return new Response("Random file secret is not enabled.", {
+                    status: 400,
+                });
+            }
+            const s = new SortableURLSearchParams(u.search, ["token", "action"]);
+            const token = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${s.toString2()}`,
+                        m.cfg.random_file_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            const b = new URLSearchParams(u.search);
+            b.delete("action");
+            b.set("token", token);
+            return return_data(`${get_host(req)}/api/file/random?${b}`);
+        }
         const is_nsfw = await parse_bool(u.searchParams.get("is_nsfw"), null);
         const is_ad = await parse_bool(u.searchParams.get("is_ad"), null);
         const thumb = await parse_bool(u.searchParams.get("thumb"), false);
@@ -53,7 +99,43 @@ export const handler: Handlers = {
         }
         const f = m.db.get_random_file(is_nsfw, is_ad, gids);
         if (!f) return new Response("File not found.", { status: 404 });
+        if (m.cfg.img_verify_secret && !thumb) {
+            const verify = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${f.id}`,
+                        m.cfg.img_verify_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            const b = new URLSearchParams();
+            b.append("verify", verify);
+            return Response.redirect(
+                `${get_host(req)}/file/${f.id}?${b}`,
+            );
+        }
         const t = thumb ? "thumbnail" : "file";
+        if (m.cfg.random_file_secret) {
+            const token = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${f.id}`,
+                        m.cfg.random_file_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            const b = new URLSearchParams();
+            b.append("token", token);
+            return Response.redirect(
+                `${get_host(req)}/api/${t}/${f.id}?${b}`,
+            );
+        }
         return Response.redirect(`${get_host(req)}/api/${t}/${f.id}`);
     },
 };

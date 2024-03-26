@@ -36,10 +36,29 @@ export const handler: Handlers = {
             return new Response("Permission denied", { status: 403 });
         }
         const id = parseInt(ctx.params.id);
+        const m = get_task_manager();
+        const u = new URL(req.url);
+        const token = u.searchParams.get("token");
+        if (token && m.cfg.random_file_secret) {
+            const s = new SortableURLSearchParams(u.search, ["token"]);
+            const r = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${id}${s.toString2()}`,
+                        m.cfg.random_file_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            if (token !== r) {
+                return new Response("Invalid token", { status: 403 });
+            }
+        }
         if (isNaN(id)) {
             return new Response("Bad Request", { status: 400 });
         }
-        const m = get_task_manager();
         const b = m.cfg.thumbnail_dir;
         const method = m.cfg.thumbnail_method;
         await sure_dir(b);
@@ -47,7 +66,6 @@ export const handler: Handlers = {
         if (!f) {
             return new Response("File not found.", { status: 404 });
         }
-        const u = new URL(req.url);
         const max = await parse_int(u.searchParams.get("max"), 1200);
         const width = await parse_int(u.searchParams.get("width"), null);
         const height = await parse_int(u.searchParams.get("height"), null);

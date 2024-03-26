@@ -34,6 +34,7 @@ export type ConfigType = {
     download_timeout_check_interval: number;
     /** EH metadata cache time in hours */
     eh_metadata_cache_time: number;
+    random_file_secret?: string;
 };
 
 export enum ThumbnailMethod {
@@ -200,6 +201,9 @@ export class Config {
     get eh_metadata_cache_time() {
         return this._return_number("eh_metadata_cache_time") || 168;
     }
+    get random_file_secret() {
+        return this._return_string("random_file_secret");
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -233,6 +237,7 @@ export class Config {
             download_timeout_check_interval:
                 this.download_timeout_check_interval,
             eh_metadata_cache_time: this.eh_metadata_cache_time,
+            random_file_secret: this.random_file_secret,
         };
     }
 }

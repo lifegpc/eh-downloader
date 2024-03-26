@@ -10,6 +10,7 @@ import { encodeBase64 as encode } from "std/encoding/base64.ts";
 import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
 import { User, UserPermission } from "../../../db.ts";
+import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -21,13 +22,31 @@ export const handler: Handlers = {
             return return_error(403, "Permission denied.");
         }
         const u = new URL(req.url);
+        const m = get_task_manager();
+        const token = u.searchParams.get("token");
         const data = await parse_bool(u.searchParams.get("data"), false);
         const id = parseInt(ctx.params.id);
+        if (token && m.cfg.random_file_secret) {
+            const s = new SortableURLSearchParams(u.search, ["token"]);
+            const r = encode(
+                new Uint8Array(
+                    await pbkdf2Hmac(
+                        `${id}${s.toString2()}`,
+                        m.cfg.random_file_secret,
+                        1000,
+                        64,
+                        "SHA-512",
+                    ),
+                ),
+            );
+            if (token !== r) {
+                return new Response("Invalid token", { status: 403 });
+            }
+        }
         if (isNaN(id)) {
             if (data) return return_error(400, "Bad Request");
             return new Response("Bad Request", { status: 400 });
         }
-        const m = get_task_manager();
         const f = m.db.get_file(id);
         if (!f) {
             if (data) return return_error(404, "File not found.");

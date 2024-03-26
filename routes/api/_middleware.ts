@@ -22,6 +22,9 @@ function handle_auth(req: Request, ctx: FreshContext) {
         if (u.pathname === "/api/health_check" && req.method === "GET") {
             return true;
         }
+        if (m.cfg.random_file_secret && (u.pathname == "/api/file/random" || u.pathname.match(/^\/api\/file\/\d+/) || u.pathname.match(/^\/api\/thumbnail\/\d+/)) && req.method === "GET" && u.searchParams.get("token")) {
+            return true;
+        }
         return false;
     };
     if (!token) return check();
