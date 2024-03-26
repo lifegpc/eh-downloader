@@ -1,4 +1,4 @@
-import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { FreshContext } from "$fresh/server.ts";
 import { join } from "std/path/mod.ts";
 import {
     get_file_response,
@@ -10,7 +10,7 @@ import { build_sw } from "../server/build_sw.ts";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
-export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
+export async function handler(req: Request, ctx: FreshContext) {
     const url = new URL(req.url);
     if (url.pathname == "/sw.js") {
         build_sw();

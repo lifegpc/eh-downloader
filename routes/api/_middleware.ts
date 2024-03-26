@@ -1,10 +1,10 @@
-import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { FreshContext } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
 import { parse_cookies } from "../../server/cookies.ts";
 import { return_error } from "../../server/utils.ts";
 import type { Token } from "../../db.ts";
 
-function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
+function handle_auth(req: Request, ctx: FreshContext) {
     if (req.method === "OPTIONS") return true;
     const m = get_task_manager();
     if (m.db.get_user_count() === 0) return true;
@@ -40,7 +40,7 @@ function handle_auth(req: Request, ctx: MiddlewareHandlerContext) {
     return true;
 }
 
-export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
+export async function handler(req: Request, ctx: FreshContext) {
     const m = get_task_manager();
     if (!(handle_auth(req, ctx))) {
         const headers: HeadersInit = {};

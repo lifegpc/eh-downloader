@@ -1,7 +1,7 @@
-import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { FreshContext } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
 
-export async function handler(req: Request, ctx: MiddlewareHandlerContext) {
+export async function handler(req: Request, ctx: FreshContext) {
     const res = await ctx.next();
     const m = get_task_manager();
     if (req.method === "OPTIONS" && res.status === 405) {
