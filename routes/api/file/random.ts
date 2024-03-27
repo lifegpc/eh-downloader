@@ -44,7 +44,10 @@ export const handler: Handlers = {
                     status: 400,
                 });
             }
-            const s = new SortableURLSearchParams(u.search, ["token", "action"]);
+            const s = new SortableURLSearchParams(u.search, [
+                "token",
+                "action",
+            ]);
             const token = encode(
                 new Uint8Array(
                     await pbkdf2Hmac(
@@ -64,6 +67,11 @@ export const handler: Handlers = {
         const is_nsfw = await parse_bool(u.searchParams.get("is_nsfw"), null);
         const is_ad = await parse_bool(u.searchParams.get("is_ad"), null);
         const thumb = await parse_bool(u.searchParams.get("thumb"), false);
+        const svg = await parse_bool(u.searchParams.get("svg"), false);
+        const jpn_title = await parse_bool(
+            u.searchParams.get("jpn_title"),
+            false,
+        );
         const tgids = u.searchParams.get("gids");
         let gids = tgids
             ? new Set(
@@ -98,6 +106,7 @@ export const handler: Handlers = {
             }
         }
         const f = m.db.get_random_file(is_nsfw, is_ad, gids);
+        let url: string | undefined = undefined;
         if (!f) return new Response("File not found.", { status: 404 });
         if (m.cfg.img_verify_secret && !thumb) {
             const verify = encode(
@@ -113,29 +122,53 @@ export const handler: Handlers = {
             );
             const b = new URLSearchParams();
             b.append("verify", verify);
-            return Response.redirect(
-                `${get_host(req)}/file/${f.id}?${b}`,
-            );
-        }
-        const t = thumb ? "thumbnail" : "file";
-        if (m.cfg.random_file_secret) {
-            const token = encode(
-                new Uint8Array(
-                    await pbkdf2Hmac(
-                        `${f.id}`,
-                        m.cfg.random_file_secret,
-                        1000,
-                        64,
-                        "SHA-512",
+            url = `${get_host(req)}/file/${f.id}?${b}`;
+        } else {
+            const t = thumb ? "thumbnail" : "file";
+            if (m.cfg.random_file_secret) {
+                const token = encode(
+                    new Uint8Array(
+                        await pbkdf2Hmac(
+                            `${f.id}`,
+                            m.cfg.random_file_secret,
+                            1000,
+                            64,
+                            "SHA-512",
+                        ),
                     ),
-                ),
-            );
-            const b = new URLSearchParams();
-            b.append("token", token);
-            return Response.redirect(
-                `${get_host(req)}/api/${t}/${f.id}?${b}`,
-            );
+                );
+                const b = new URLSearchParams();
+                b.append("token", token);
+                url = `${get_host(req)}/api/${t}/${f.id}?${b}`;
+            } else {
+                url = `${get_host(req)}/api/${t}/${f.id}`;
+            }
         }
-        return Response.redirect(`${get_host(req)}/api/${t}/${f.id}`);
+        if (svg) {
+            const pmeta = m.db.get_pmeta_by_token_only(f.token);
+            let y = f.height + 17;
+            const lines = pmeta.map((d) => {
+                const g = m.db.get_gmeta_by_gid(d.gid);
+                const title =
+                    (jpn_title ? g?.title_jpn ?? g?.title : g?.title) ?? "";
+                const t = `<text font-size="16" y="${y}"><a href="${
+                    get_host(req)
+                }/flutter/gallery/${d.gid}/page/${d.index}">${
+                    title ? title + " - " : title
+                }${d.name}</a> <a href="https://e-hentai.org/s/${d.token}/${d.gid}-${d.index}" target="_blank">EH</a></text>`;
+                y += 23;
+                return t;
+            });
+            const dom = `<svg width="${f.width}" height="${
+                f.height + pmeta.length * 23
+            }" xmlns="http://www.w3.org/2000/svg">
+<a href="${url}"><image href="${url}" /></a>
+${lines.join("\n")}
+</svg>`;
+            return new Response(dom, {
+                headers: { "Content-Type": "image/svg+xml" },
+            });
+        }
+        return Response.redirect(url);
     },
 };
