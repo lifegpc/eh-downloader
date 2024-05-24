@@ -97,7 +97,7 @@ COPY ./LICENSE ./
 ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
 
-RUN deno task fetch && deno task server-build && deno task prebuild && \
+RUN deno task server-build && deno task prebuild && \
     deno task cache && rm -rf ~/.cache && \
     mkdir -p ./thumbnails && chmod 777 ./thumbnails && \
     mkdir -p ./downloads && chmod 777 ./downloads && \

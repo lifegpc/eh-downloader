@@ -30,14 +30,9 @@ import * as $api_user from "./routes/api/user.ts";
 import * as $file_id_ from "./routes/file/[id].ts";
 import * as $file_verify_id_ from "./routes/file/[verify]/[id].ts";
 import * as $file_middleware from "./routes/file/_middleware.ts";
-import * as $index from "./routes/index.tsx";
-import * as $manifest_json from "./routes/manifest.json.ts";
 import * as $thumbnail_id_ from "./routes/thumbnail/[id].ts";
 import * as $thumbnail_middleware from "./routes/thumbnail/_middleware.ts";
 import * as $upload from "./routes/upload.tsx";
-import * as $Container from "./islands/Container.tsx";
-import * as $Settings from "./islands/Settings.tsx";
-import * as $TaskManager from "./islands/TaskManager.tsx";
 import * as $Upload from "./islands/Upload.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -72,16 +67,11 @@ const manifest = {
         "./routes/file/[id].ts": $file_id_,
         "./routes/file/[verify]/[id].ts": $file_verify_id_,
         "./routes/file/_middleware.ts": $file_middleware,
-        "./routes/index.tsx": $index,
-        "./routes/manifest.json.ts": $manifest_json,
         "./routes/thumbnail/[id].ts": $thumbnail_id_,
         "./routes/thumbnail/_middleware.ts": $thumbnail_middleware,
         "./routes/upload.tsx": $upload,
     },
     islands: {
-        "./islands/Container.tsx": $Container,
-        "./islands/Settings.tsx": $Settings,
-        "./islands/TaskManager.tsx": $TaskManager,
         "./islands/Upload.tsx": $Upload,
     },
     baseUrl: import.meta.url,
