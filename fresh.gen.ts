@@ -30,6 +30,7 @@ import * as $api_user from "./routes/api/user.ts";
 import * as $file_id_ from "./routes/file/[id].ts";
 import * as $file_verify_id_ from "./routes/file/[verify]/[id].ts";
 import * as $file_middleware from "./routes/file/_middleware.ts";
+import * as $index from "./routes/index.ts";
 import * as $thumbnail_id_ from "./routes/thumbnail/[id].ts";
 import * as $thumbnail_middleware from "./routes/thumbnail/_middleware.ts";
 import * as $upload from "./routes/upload.tsx";
@@ -67,6 +68,7 @@ const manifest = {
         "./routes/file/[id].ts": $file_id_,
         "./routes/file/[verify]/[id].ts": $file_verify_id_,
         "./routes/file/_middleware.ts": $file_middleware,
+        "./routes/index.ts": $index,
         "./routes/thumbnail/[id].ts": $thumbnail_id_,
         "./routes/thumbnail/_middleware.ts": $thumbnail_middleware,
         "./routes/upload.tsx": $upload,
