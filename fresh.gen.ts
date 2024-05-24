@@ -4,6 +4,7 @@
 
 import * as $_middleware from "./routes/_middleware.ts";
 import * as $api_middleware from "./routes/api/_middleware.ts";
+import * as $api_client_config from "./routes/api/client/config.ts";
 import * as $api_config from "./routes/api/config.ts";
 import * as $api_deploy_id from "./routes/api/deploy_id.ts";
 import * as $api_eh_image_limit from "./routes/api/eh/image_limit.ts";
@@ -44,6 +45,7 @@ const manifest = {
     routes: {
         "./routes/_middleware.ts": $_middleware,
         "./routes/api/_middleware.ts": $api_middleware,
+        "./routes/api/client/config.ts": $api_client_config,
         "./routes/api/config.ts": $api_config,
         "./routes/api/deploy_id.ts": $api_deploy_id,
         "./routes/api/eh/image_limit.ts": $api_eh_image_limit,

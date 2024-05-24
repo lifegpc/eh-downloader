@@ -177,6 +177,12 @@ type TokenRaw = {
     client_version: string | null;
     client_platform: string | null;
 };
+export type ClientConfig = {
+    uid: number;
+    client: string;
+    name: string;
+    data: string;
+};
 const ALL_TABLES = [
     "version",
     "task",
@@ -189,6 +195,7 @@ const ALL_TABLES = [
     "user",
     "token",
     "ehmeta",
+    "client_config",
 ];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
@@ -281,6 +288,13 @@ const EHMETA_TABLE = `CREATE TABLE ehmeta (
     data TEXT,
     cached_time TEXT,
     PRIMARY KEY (gid)
+);`;
+const CLIENT_CONFIG_TABLE = `CREATE TABLE client_config (
+    uid INT,
+    client TEXT,
+    name TEXT,
+    data TEXT,
+    PRIMARY KEY (uid, client, name)
 );`;
 
 function escape_fields(fields: string, namespace: string) {
@@ -508,6 +522,9 @@ export class EhDb {
         if (!this.#exist_table.has("ehmeta")) {
             this.db.execute(EHMETA_TABLE);
         }
+        if (!this.#exist_table.has("client_config")) {
+            this.db.execute(CLIENT_CONFIG_TABLE);
+        }
         this.#updateExistsTable();
     }
     #read_version() {
@@ -548,6 +565,12 @@ export class EhDb {
                 format_ver(this.version),
             ]);
         });
+    }
+    add_client_config(config: ClientConfig) {
+        this.db.queryEntries(
+            "INSERT OR REPLACE INTO client_config VALUES (:uid, :client, :name, :data);",
+            config,
+        );
     }
     add_ehmeta(data: GalleryMetadataSingle) {
         this.db.query(
@@ -908,6 +931,12 @@ export class EhDb {
             return t;
         });
     }
+    delete_client_config(uid: number, client: string, name: string) {
+        this.db.query(
+            "DELETE FROM client_config WHERE uid = ? AND client = ? AND name = ?;",
+            [uid, client, name],
+        );
+    }
     delete_file(f: EhFile) {
         this.db.query("DELETE FROM file WHERE id = ?;", [f.id]);
     }
@@ -965,6 +994,13 @@ export class EhDb {
     dbunlock() {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
+    }
+    get_client_config(uid: number, client: string, name: string) {
+        const d = this.db.queryEntries<ClientConfig>(
+            "SELECT * FROM client_config WHERE uid = ? AND client = ? AND name = ?;",
+            [uid, client, name],
+        );
+        return d.length ? d[0] : null;
     }
     get_ehmeta(gid: number) {
         const d = this.db.query<[string]>(
@@ -1264,6 +1300,12 @@ export class EhDb {
     }
     get_user_count() {
         return this.db.query<[number]>("SELECT COUNT(*) FROM user;")[0][0];
+    }
+    list_client_configs(uid: number, client: string) {
+        return this.db.queryEntries<ClientConfig>(
+            "SELECT * FROM client_config WHERE uid = ? AND client = ?;",
+            [uid, client],
+        );
     }
     optimize() {
         this.db.execute("VACUUM;");

@@ -63,7 +63,8 @@ export function i18n_handle_request(req: Request) {
         const a = req.headers.get("Accept-Language");
         const l = (a
             ? pick(LANGUAGES, a) || pick(LANGUAGES, a, { loose: true })
-            : null) || "en";
+            : null) ||
+            "en";
         const params = new URLSearchParams();
         params.append("lang", l);
         for (const p of u.searchParams.entries()) {
