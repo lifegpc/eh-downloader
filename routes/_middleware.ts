@@ -7,6 +7,7 @@ import {
 import { exists } from "std/fs/exists.ts";
 import { get_task_manager } from "../server.ts";
 import { build_sw } from "../server/build_sw.ts";
+import { i18n_get_lang } from "../server/i18ns.ts";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
@@ -48,6 +49,15 @@ export async function handler(req: Request, ctx: FreshContext) {
         let p = join(flutter_base, u.pathname.slice(8));
         if (!(await exists(p)) || p === flutter_base) {
             p = join(flutter_base, "/index.html");
+        }
+        if (u.pathname == "/flutter/manifest.json") {
+            const lang = i18n_get_lang(req, ["zh-cn"]);
+            if (lang !== "en") {
+                const tp = join(flutter_base, `/manifest.${lang}.json`);
+                if (await exists(tp)) {
+                    p = tp;
+                }
+            }
         }
         const opts: GetFileResponseOptions = {};
         opts.range = req.headers.get("range");

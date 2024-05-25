@@ -54,6 +54,20 @@ export function get_i18nmap(lang: string, ...modules: MODULE[]) {
     return r;
 }
 
+export function i18n_get_lang(req: Request, langs: string[]) {
+    const u = new URL(req.url);
+    const lang = u.searchParams.get("lang");
+    if (lang && (lang === "en" || langs.includes(lang))) {
+        return lang;
+    } else {
+        const a = req.headers.get("Accept-Language");
+        const l =
+            (a ? pick(langs, a) || pick(langs, a, { loose: true }) : null) ||
+            "en";
+        return l;
+    }
+}
+
 export function i18n_handle_request(req: Request) {
     const u = new URL(req.url);
     const lang = u.searchParams.get("lang");
