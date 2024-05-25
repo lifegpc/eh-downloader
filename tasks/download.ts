@@ -157,7 +157,7 @@ class DownloadManager {
             const now = Date.now();
             this.#progress.downloaded_bytes += num;
             d.downloaded = downloaded;
-            d.speed = num / (now - d.last_updated);
+            d.speed = now == d.last_updated ? 0 : num / (now - d.last_updated);
             d.last_updated = now;
         }
         this.#sendEvent();
