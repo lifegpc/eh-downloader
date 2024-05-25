@@ -17,10 +17,10 @@ export const handler: Handlers = {
                 flutter_base = m.cfg.flutter_frontend;
             }
             if (!await exists(flutter_base)) {
-                return new Response("404 Not Found", {status: 404});
+                return new Response("404 Not Found", { status: 404 });
             }
             return Response.redirect(`${get_host(req)}/flutter/`);
         }
-        return new Response("404 Not Found", {status: 404});
-    }
+        return new Response("404 Not Found", { status: 404 });
+    },
 };

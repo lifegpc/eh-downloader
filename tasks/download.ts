@@ -62,6 +62,8 @@ class DownloadManager {
             downloaded_page: 0,
             failed_page: 0,
             total_page: 0,
+            downloaded_bytes: 0,
+            started: Date.now(),
             details: [],
         };
         this.#task = task;
@@ -150,12 +152,22 @@ class DownloadManager {
     }
     set_details_downloaded(index: number, downloaded: number) {
         const d = this.#progress.details.find((v) => v.index === index);
-        if (d) d.downloaded = downloaded;
+        if (d) {
+            const num = downloaded - d.downloaded;
+            const now = Date.now();
+            this.#progress.downloaded_bytes += num;
+            d.downloaded = downloaded;
+            d.speed = num / (now - d.last_updated);
+            d.last_updated = now;
+        }
         this.#sendEvent();
     }
     set_details_started(index: number) {
         const d = this.#progress.details.find((v) => v.index === index);
-        if (d) d.started = (new Date()).getTime();
+        if (d) {
+            d.started = (new Date()).getTime();
+            d.last_updated = d.started;
+        }
         this.#sendEvent();
     }
     set_details_total(index: number, total: number) {
@@ -322,6 +334,8 @@ export async function download_task(
                 total: 0,
                 width: f.width,
                 started: 0,
+                speed: 0,
+                last_updated: 0,
             });
             function download_img() {
                 return new Promise<void>((resolve, reject) => {

@@ -24,12 +24,16 @@ export type TaskDownloadSingleProgress = {
     total: number;
     started: number;
     downloaded: number;
+    speed: number;
+    last_updated: number;
 };
 
 export type TaskDownloadProgess = {
     downloaded_page: number;
     failed_page: number;
     total_page: number;
+    started: number;
+    downloaded_bytes: number;
     details: TaskDownloadSingleProgress[];
 };
 
