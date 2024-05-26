@@ -151,7 +151,7 @@ export const handler: Handlers = {
             headers["Set-Cookie"] =
                 `token=${token.token}; Expires=${token.expired.toUTCString()}${
                     http_only ? "; HttpOnly" : ""
-                }${secure ? "; Secure" : ""}; Path=/api`;
+                }${secure ? "; SameSite=None; Secure" : ""}; Path=/api`;
         }
         return return_data(token, 201, headers);
     },
