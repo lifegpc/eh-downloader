@@ -95,7 +95,7 @@ export async function handler(req: Request, ctx: FreshContext) {
                         "Set-Cookie",
                         `token=${t.token}; Expires=${t.expired.toUTCString()}${
                             t.http_only ? "; HttpOnly" : ""
-                        }${t.secure ? "; Secure" : ""}; Path=/api`,
+                        }${t.secure ? "; SameSite=None; Secure" : ""}; Path=/api`,
                     );
                 } catch {
                     null;

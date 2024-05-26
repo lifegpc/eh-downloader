@@ -67,7 +67,7 @@ export const handler: Handlers = {
         if (is_from_auth && is_from_cookie) {
             headers["Set-Cookie"] = `token=${token.token}; Max-Age=0${
                 token.http_only ? "; HttpOnly" : ""
-            }${token.secure ? "; Secure" : ""}; Path=/api`;
+            }${token.secure ? "; SameSite=None; Secure" : ""}; Path=/api`;
         }
         return return_data(true, 200, headers);
     },
