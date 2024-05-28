@@ -20,15 +20,13 @@ export const handler: Handlers = {
         }
         const id = await parse_int(data.get("id"), null);
         const username = await get_string(data.get("username"));
-        if (id === null && !username && !user) {
+        if (id === null && !username) {
             return return_error(1, "user not specified.");
         }
         const m = get_task_manager();
         const us = id !== null
             ? m.db.get_user(id)
-            : username
-            ? m.db.get_user_by_name(username)
-            : user;
+            : m.db.get_user_by_name(username ?? "");
         if (!us) return return_error(404, "User not found.");
         if (us.id == 0) return return_error(6, "root user can not be deleted.");
         if (user && us.is_admin && user.id != 0) {
@@ -37,6 +35,9 @@ export const handler: Handlers = {
                 "Only root user can delete admin user.",
                 403,
             );
+        }
+        if (user && us.id == user.id) {
+            return return_error(8, "User can not delete himself.");
         }
         m.db.delete_user(us.id);
         return return_data(true);
