@@ -979,6 +979,20 @@ export class EhDb {
     delete_token(token: string) {
         this.db.query("DELETE FROM token WHERE token = ?;", [token]);
     }
+    delete_user(id: number) {
+        this.db.query("DELETE FROM user WHERE id = ?;", [id]);
+        this.db.query("DELETE FROM token WHERE uid = ?;", [id]);
+        this.db.query("DELETE FROM client_config WHERE uid = ?;", [id]);
+    }
+    delete_user_token(uid: number, excluded_token?: number) {
+        let where = "";
+        const args = [uid];
+        if (excluded_token) {
+            where = " AND id != ?";
+            args.push(excluded_token);
+        }
+        this.db.query(`DELETE FROM token WHERE uid = ?${where};`, args);
+    }
     async flock() {
         if (!this.#file) return;
         await eval(`Deno.flock(${this.#file.rid}, true);`);
@@ -1436,6 +1450,18 @@ export class EhDb {
         this.db.query(
             "UPDATE token SET last_used = ? WHERE token = ?;",
             [new Date(), token],
+        );
+    }
+    update_user(user: User) {
+        this.db.query(
+            "INSERT OR REPLACE INTO user VALUES (?, ?, ?, ?, ?);",
+            [
+                user.id,
+                user.username,
+                user.password,
+                user.is_admin,
+                user.permissions,
+            ],
         );
     }
 }
