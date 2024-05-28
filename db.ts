@@ -1315,6 +1315,21 @@ export class EhDb {
     get_user_count() {
         return this.db.query<[number]>("SELECT COUNT(*) FROM user;")[0][0];
     }
+    get_users(limit?: number, offset?: number) {
+        let sql = "";
+        const args = [];
+        if (limit !== undefined) {
+            sql += " LIMIT ?";
+            args.push(limit);
+        }
+        if (offset !== undefined) {
+            sql += " OFFSET ?";
+            args.push(offset);
+        }
+        return this.convert_user(
+            this.db.queryEntries<UserRaw>(`SELECT * FROM user${sql};`, args),
+        );
+    }
     list_client_configs(uid: number, client: string) {
         return this.db.queryEntries<ClientConfig>(
             "SELECT * FROM client_config WHERE uid = ? AND client = ?;",

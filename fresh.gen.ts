@@ -29,6 +29,7 @@ import * as $api_task_export_zip_cfg from "./routes/api/task/export_zip_cfg.ts";
 import * as $api_thumbnail_id_ from "./routes/api/thumbnail/[id].ts";
 import * as $api_token from "./routes/api/token.ts";
 import * as $api_user from "./routes/api/user.ts";
+import * as $api_user_list from "./routes/api/user/list.ts";
 import * as $file_id_ from "./routes/file/[id].ts";
 import * as $file_verify_id_ from "./routes/file/[verify]/[id].ts";
 import * as $file_middleware from "./routes/file/_middleware.ts";
@@ -69,6 +70,7 @@ const manifest = {
         "./routes/api/thumbnail/[id].ts": $api_thumbnail_id_,
         "./routes/api/token.ts": $api_token,
         "./routes/api/user.ts": $api_user,
+        "./routes/api/user/list.ts": $api_user_list,
         "./routes/file/[id].ts": $file_id_,
         "./routes/file/[verify]/[id].ts": $file_verify_id_,
         "./routes/file/_middleware.ts": $file_middleware,
