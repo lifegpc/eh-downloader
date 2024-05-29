@@ -35,8 +35,8 @@ class TimestampCache {
     }
 }
 
-const timestamp_cache = new TimestampCache();
-const cache_mutex = new Mutex();
+export const timestamp_cache = new TimestampCache();
+export const cache_mutex = new Mutex();
 
 export const handler: Handlers = {
     async DELETE(req, ctx) {
