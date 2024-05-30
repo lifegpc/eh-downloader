@@ -15,7 +15,8 @@ export const handler: Handlers = {
         if (u && !u.is_admin && !(u.permissions & UserPermission.ReadGallery)) {
             return return_error(403, "Permission denied.");
         }
-        const ids = ctx.params.id.split(",");
+        const ids = decodeURIComponent(ctx.params.id.replaceAll("+", "%20"))
+            .split(",");
         const r: Record<string, JSONResult<Tag>> = {};
         for (const _id of ids) {
             const id = parseInt(_id);
