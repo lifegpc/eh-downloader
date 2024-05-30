@@ -47,7 +47,7 @@ export async function export_zip(
     };
     sendEvent();
     const title = (jpn_title && g.title_jpn) ? g.title_jpn : g.title;
-    const output = ecfg.output === undefined
+    const output = !ecfg.output
         ? join(cfg.base, filterFilename(title + ".zip"))
         : ecfg.output;
     const maxLength = ecfg.max_length || 0;

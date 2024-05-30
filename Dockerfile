@@ -21,9 +21,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cd ~ && \
-    curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n6.1.1.tar.gz" -o ffmpeg.tar.gz && \
+    curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.0.1.tar.gz" -o ffmpeg.tar.gz && \
     tar -xzvf ffmpeg.tar.gz && \
-    cd FFmpeg-n6.1.1 && \
+    cd FFmpeg-n7.0.1 && \
     ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
     --enable-gpl --enable-version3 --disable-doc --disable-ffplay \
     --disable-network --disable-autodetect --enable-zlib \
@@ -36,12 +36,12 @@ RUN cd ~ && \
     --disable-protocols --enable-protocol=async,concat,concatf,data,fd,file,md5,pipe,subfile \
     --disable-devices --disable-filters --enable-filter=scale && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
-    cd ~ && rm -rf FFmpeg-n6.1.1 ffmpeg.tar.gz
+    cd ~ && rm -rf FFmpeg-n7.0.1 ffmpeg.tar.gz
 
 RUN cd ~ && \
-    curl -L "https://github.com/curl/curl/releases/download/curl-8_5_0/curl-8.5.0.tar.gz" -o curl-8.5.0.tar.gz && \
-    tar -xzvf curl-8.5.0.tar.gz && \
-    cd curl-8.5.0 && \
+    curl -L "https://github.com/curl/curl/releases/download/curl-8_8_0/curl-8.8.0.tar.gz" -o curl-8.8.0.tar.gz && \
+    tar -xzvf curl-8.8.0.tar.gz && \
+    cd curl-8.8.0 && \
     mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DCURL_DISABLE_ALTSVC=ON -DCURL_DISABLE_SRP=ON \
     -DCURL_DISABLE_COOKIES=ON -DCURL_DISABLE_BASIC_AUTH=ON -DCURL_DISABLE_BEARER_AUTH=ON \
@@ -55,9 +55,9 @@ RUN cd ~ && \
     -DCURL_DISABLE_PROXY=ON -DCURL_DISABLE_RTSP=ON -DCURL_DISABLE_SMB=ON \
     -DCURL_DISABLE_SMTP=ON -DCURL_DISABLE_TELNET=ON -DCURL_DISABLE_TFTP=ON \
     -DUSE_MANUAL=OFF -DCURL_ENABLE_SSL=OFF -DUSE_LIBIDN2=ON -DCURL_USE_LIBPSL=OFF \
-    -DCURL_USE_LIBSSH2=OFF -DCMAKE_INSTALL_PREFIX=/clib ../ && \
+    -DCURL_USE_LIBSSH2=OFF -DCMAKE_INSTALL_PREFIX=/clib -DBUILD_TESTING=OFF ../ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
-    cd ~ && rm -rf curl-8.5.0 curl-8.5.0.tar.gz
+    cd ~ && rm -rf curl-8.8.0 curl-8.8.0.tar.gz
 
 RUN cd ~ && \
     curl -L "https://www.sqlite.org/snapshot/sqlite-snapshot-202401231504.tar.gz" -o sqlite-snapshot-202401231504.tar.gz && \
