@@ -212,7 +212,7 @@ export async function download_task(
         task.gid,
         task.token,
     ]);
-    const gdata = gdatas.map.get(task.gid);
+    const gdata = gdatas.map.get(BigInt(task.gid));
     if (gdata === undefined) throw Error("Gallery metadata not included.");
     if (typeof gdata === "string") throw Error(gdata);
     const gmeta = gdatas.convert(gdata);

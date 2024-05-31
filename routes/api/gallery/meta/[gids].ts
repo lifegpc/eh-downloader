@@ -23,7 +23,7 @@ export const handler: Handlers = {
         const gids = new Set(
             ctx.params.gids.split(",").map((v) => parseBigInt(v)).filter((v) =>
                 !isNumNaN(v)
-            ),
+            ).map((v) => BigInt(v)),
         );
         const m = get_task_manager();
         const re: Record<string, JSONResult<GMeta>> = {};

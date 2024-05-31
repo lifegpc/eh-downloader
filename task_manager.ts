@@ -55,7 +55,7 @@ export class TaskManager extends EventTarget {
     cfg;
     client;
     db;
-    running_tasks: Map<number | bigint, RunningTask>;
+    running_tasks: Map<bigint, RunningTask>;
     max_task_count;
     meilisearch?: MeiliSearchServer;
     #abort;
@@ -190,7 +190,7 @@ export class TaskManager extends EventTarget {
     async check_task_is_running(task: Task) {
         this.#check_closed();
         if (task.pid == Deno.pid) {
-            return this.running_tasks.has(task.id);
+            return this.running_tasks.has(BigInt(task.id));
         } else {
             const r = await check_running(task.pid);
             return r === true;
@@ -221,7 +221,7 @@ export class TaskManager extends EventTarget {
             }
         }
         for (const id of removed_task) {
-            this.running_tasks.delete(id);
+            this.running_tasks.delete(BigInt(id));
         }
         for (const id of fataled_task) {
             await this.db.delete_task_by_id(id);
@@ -309,7 +309,7 @@ export class TaskManager extends EventTarget {
                 ? JSON.parse(task.details)
                 : DEFAULT_DOWNLOAD_CONFIG;
             this.running_tasks.set(
-                task.id,
+                BigInt(task.id),
                 {
                     task: download_task(
                         task,
@@ -329,7 +329,7 @@ export class TaskManager extends EventTarget {
                 ? JSON.parse(task.details)
                 : DEFAULT_EXPORT_ZIP_CONFIG;
             this.running_tasks.set(
-                task.id,
+                BigInt(task.id),
                 {
                     task: export_zip(
                         task,
@@ -344,20 +344,20 @@ export class TaskManager extends EventTarget {
             );
         } else if (task.type === TaskType.UpdateMeiliSearchData) {
             await this.waiting_unfinished_task();
-            this.running_tasks.set(task.id, {
+            this.running_tasks.set(BigInt(task.id), {
                 task: update_meili_search_data(task, this),
                 base: task,
             });
         } else if (task.type === TaskType.FixGalleryPage) {
             await this.waiting_unfinished_task();
-            this.running_tasks.set(task.id, {
+            this.running_tasks.set(BigInt(task.id), {
                 task: fix_gallery_page(task, this),
                 base: task,
             });
         }
     }
     async update_task(t: Task) {
-        const r = this.running_tasks.get(t.id);
+        const r = this.running_tasks.get(BigInt(t.id));
         if (r) {
             r.base.details = t.details;
         }
