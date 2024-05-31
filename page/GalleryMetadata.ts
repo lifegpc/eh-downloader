@@ -42,7 +42,7 @@ class GalleryMetadata {
         this.obj = JSON.parse(text);
         this.map = new Map();
         for (const m of this.obj["gmetadata"]) {
-            this.map.set(m.gid, m.error ? m.error : m);
+            this.map.set(BigInt(m.gid), m.error ? m.error : m);
         }
     }
     convert(g: GalleryMetadataSingle): GMeta {
