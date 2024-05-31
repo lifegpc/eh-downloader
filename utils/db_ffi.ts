@@ -1,4 +1,4 @@
-import { Database, DatabaseOpenOptions } from "sqlite3/mod.ts";
+import { Database, DatabaseOpenOptions } from "sqlite3";
 import { QueryParameterSet, Row, RowObject } from "./db_interface.ts";
 
 export class DbFfi {

@@ -1,4 +1,4 @@
-import { DOMParser } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { DOMParser } from "deno_dom/wasm-noinit";
 import { Client } from "../client.ts";
 import { initDOMParser } from "../utils.ts";
 

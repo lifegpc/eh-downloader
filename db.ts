@@ -7,7 +7,7 @@ import {
 import { unescape } from "@std/html";
 import { join, resolve } from "@std/path";
 import { SqliteError } from "sqlite/mod.ts";
-import { SqliteError as Sqlite3Error } from "sqlite3/mod.ts";
+import { SqliteError as Sqlite3Error } from "sqlite3";
 import { Status } from "sqlite/src/constants.ts";
 import { parse_bool, sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
 import { Task, TaskType } from "./task.ts";

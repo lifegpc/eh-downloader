@@ -1,4 +1,4 @@
-import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { DOMParser, Element } from "deno_dom/wasm-noinit";
 import { extname } from "@std/path";
 import { Client } from "../client.ts";
 import type { EhFile, PMeta } from "../db.ts";

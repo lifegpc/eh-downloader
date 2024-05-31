@@ -2,8 +2,8 @@ import { dirname } from "@std/path";
 import { sure_dir } from "../utils.ts";
 
 const map = JSON.parse(await Deno.readTextFile("./import_map.json")).imports;
-const re = /x\/sqlite3@([0-9\.]+)/;
-const sqlite3_version = map["sqlite3/"].match(re)[1];
+const re = /@db\/sqlite@([0-9\.]+)/;
+const sqlite3_version = map["sqlite3"].match(re)[1];
 
 async function fetch_file(u: string | URL, p: string) {
     await sure_dir(dirname(p));

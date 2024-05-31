@@ -1,4 +1,4 @@
-import { DOMParser, Element } from "deno_dom/deno-dom-wasm-noinit.ts";
+import { DOMParser, Element } from "deno_dom/wasm-noinit";
 import { initDOMParser } from "../utils.ts";
 
 export class HomeOverviewPage {
