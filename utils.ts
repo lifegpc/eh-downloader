@@ -281,3 +281,11 @@ export function isDocker() {
     }
     return _isDocker;
 }
+
+export function toJSON(obj: unknown) {
+    return JSON.stringify(
+        obj,
+        (_, value) =>
+            typeof value === "bigint" ? parseInt(value.toString()) : value,
+    );
+}

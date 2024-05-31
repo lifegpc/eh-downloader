@@ -12,6 +12,7 @@ import {
     PromiseStatus,
     sleep,
     sure_dir,
+    toJSON,
 } from "./utils.ts";
 import { md5 } from "lifegpc-md5";
 
@@ -157,4 +158,12 @@ Deno.test("map_test", () => {
         return n + 2;
     }, d);
     assertEquals(re, [3, 4]);
+});
+
+Deno.test("toJSON_test", () => {
+    assertEquals(toJSON({ a: 3n }), '{"a":3}');
+    assertEquals(
+        toJSON([1099511627776n, { a: 45n }]),
+        '[1099511627776,{"a":45}]',
+    );
 });

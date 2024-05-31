@@ -9,7 +9,13 @@ import { join, resolve } from "@std/path";
 import { SqliteError } from "sqlite/mod.ts";
 import { SqliteError as Sqlite3Error } from "sqlite3";
 import { Status } from "sqlite/src/constants.ts";
-import { parse_bool, sleep, sure_dir_sync, try_remove_sync } from "./utils.ts";
+import {
+    parse_bool,
+    sleep,
+    sure_dir_sync,
+    toJSON,
+    try_remove_sync,
+} from "./utils.ts";
 import { Task, TaskType } from "./task.ts";
 import { generate as randomstring } from "randomstring";
 import type { GalleryMetadataSingle } from "./page/GalleryMetadata.ts";
@@ -575,7 +581,7 @@ export class EhDb {
     add_ehmeta(data: GalleryMetadataSingle) {
         this.db.query(
             "INSERT OR REPLACE INTO ehmeta VALUES (?, ?, ?);",
-            [data.gid, JSON.stringify(data), new Date()],
+            [data.gid, toJSON(data), new Date()],
         );
     }
     add_gmeta(gmeta: GMeta) {

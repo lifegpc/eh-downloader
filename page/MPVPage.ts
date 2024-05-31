@@ -1,7 +1,7 @@
 import { DOMParser } from "deno_dom/wasm-noinit";
 import { extname } from "@std/path";
 import { Client } from "../client.ts";
-import { initDOMParser } from "../utils.ts";
+import { initDOMParser, toJSON } from "../utils.ts";
 import type { EhFile, PMeta } from "../db.ts";
 
 export type MPVRawImage = {
@@ -255,7 +255,7 @@ class MPVPage {
         };
         if (nl) param.nl = nl;
         const re = await this.client.post(this.api_url, {
-            body: JSON.stringify(param),
+            body: toJSON(param),
             headers: { "content-type": "application/json" },
         });
         if (re.status != 200) {

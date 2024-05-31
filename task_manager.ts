@@ -23,6 +23,7 @@ import {
     PromiseStatus,
     RecoverableError,
     sleep,
+    toJSON,
 } from "./utils.ts";
 
 export class AlreadyClosedError extends Error {
@@ -124,7 +125,7 @@ export class TaskManager extends EventTarget {
             id: 0,
             pid: Deno.pid,
             type: TaskType.Download,
-            details: cfg ? JSON.stringify(cfg) : null,
+            details: cfg ? toJSON(cfg) : null,
         };
         return await this.#add_task(task);
     }
@@ -135,7 +136,7 @@ export class TaskManager extends EventTarget {
             id: 0,
             pid: Deno.pid,
             type: TaskType.ExportZip,
-            details: JSON.stringify(cfg || DEFAULT_EXPORT_ZIP_CONFIG),
+            details: toJSON(cfg || DEFAULT_EXPORT_ZIP_CONFIG),
         };
         return await this.#add_task(task);
     }

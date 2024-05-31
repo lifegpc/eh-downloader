@@ -1,3 +1,5 @@
+import { toJSON } from "../utils.ts";
+
 export function get_ws_host() {
     const protocol = document.location.protocol === "https:" ? "wss:" : "ws:";
     return `${protocol}//${document.location.host}`;
@@ -23,7 +25,7 @@ function gen_response<T>(
     }
     const h = new Headers(headers);
     h.set("Content-Type", "application/json; charset=UTF-8");
-    return new Response(JSON.stringify(d), { status, headers: h });
+    return new Response(toJSON(d), { status, headers: h });
 }
 
 export function return_error<T = unknown>(
@@ -55,7 +57,7 @@ export function gen_error<T = unknown>(
 }
 
 export function return_json<T = unknown>(data: T, status = 200) {
-    return new Response(JSON.stringify(data), {
+    return new Response(toJSON(data), {
         status,
         headers: { "Content-Type": "application/json; chatset=UTF-8" },
     });

@@ -4,7 +4,7 @@ import { load_gallery_page } from "./page/GalleryPage.ts";
 import { load_home_overview_page } from "./page/HomeOverviewPage.ts";
 import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
-import { RecoverableError, TimeoutError } from "./utils.ts";
+import { RecoverableError, TimeoutError, toJSON } from "./utils.ts";
 
 export type GID = [number, string];
 
@@ -172,7 +172,7 @@ export class Client {
         if (gids.length > 25) throw Error("Load limiting is reached.");
         const data = { method: "gdata", gidlist: gids, namespace: 1 };
         const re = await this.post(`https://${this.host}/api.php`, {
-            body: JSON.stringify(data),
+            body: toJSON(data),
             headers: { "content-type": "application/json" },
         });
         if (re.status != 200) {

@@ -1,6 +1,6 @@
 import { exists } from "@std/fs/exists";
 import { JsonValue, parse } from "@std/jsonc";
-import { isDocker } from "./utils.ts";
+import { isDocker, toJSON } from "./utils.ts";
 
 export type ConfigType = {
     cookies: boolean;
@@ -252,5 +252,5 @@ export async function load_settings(path: string) {
 }
 
 export function save_settings(path: string, cfg: Config, signal?: AbortSignal) {
-    return Deno.writeTextFile(path, JSON.stringify(cfg._data), { signal });
+    return Deno.writeTextFile(path, toJSON(cfg._data), { signal });
 }

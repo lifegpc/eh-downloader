@@ -11,6 +11,7 @@ import { return_data, return_error } from "../../server/utils.ts";
 import type { DownloadConfig } from "../../tasks/download.ts";
 import type { ExportZipConfig } from "../../tasks/export_zip.ts";
 import { User, UserPermission } from "../../db.ts";
+import { toJSON } from "../../utils.ts";
 
 export const handler: Handlers = {
     GET(req, ctx) {
@@ -24,7 +25,7 @@ export const handler: Handlers = {
             e: CustomEvent<Task | TaskProgress | { task: Task; error: string }>,
         ) => {
             if (socket.readyState === socket.OPEN) {
-                socket.send(JSON.stringify({ type: e.type, detail: e.detail }));
+                socket.send(toJSON({ type: e.type, detail: e.detail }));
             }
         };
         const close_handle = () => {
@@ -42,7 +43,7 @@ export const handler: Handlers = {
         };
         function sendMessage(mes: TaskServerSocketData) {
             if (socket.readyState === socket.OPEN) {
-                socket.send(JSON.stringify(mes));
+                socket.send(toJSON(mes));
             }
         }
         const interval = setInterval(() => {

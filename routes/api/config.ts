@@ -9,6 +9,7 @@ import { parse_bool } from "../../server/parse_form.ts";
 import { return_json } from "../../server/utils.ts";
 import { ExitTarget } from "../../signal_handler.ts";
 import type { User } from "../../db.ts";
+import { toJSON } from "../../utils.ts";
 
 const UNSAFE_TYPE: (keyof ConfigType)[] = [
     "base",
@@ -39,7 +40,7 @@ export const handler: Handlers = {
                 };
                 const sendMessage = (mes: ConfigSeverSocketData) => {
                     if (socket.readyState === socket.OPEN) {
-                        socket.send(JSON.stringify(mes));
+                        socket.send(toJSON(mes));
                     }
                 };
                 const close_handle = () => {
