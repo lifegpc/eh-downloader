@@ -11,6 +11,7 @@ import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
 import { User, UserPermission } from "../../../db.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
+import { isNumNaN, parseBigInt } from "../../../utils.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -25,7 +26,7 @@ export const handler: Handlers = {
         const m = get_task_manager();
         const token = u.searchParams.get("token");
         const data = await parse_bool(u.searchParams.get("data"), false);
-        const id = parseInt(ctx.params.id);
+        const id = parseBigInt(ctx.params.id);
         if (token && m.cfg.random_file_secret) {
             const s = new SortableURLSearchParams(u.search, ["token"]);
             const r = encode(
@@ -43,7 +44,7 @@ export const handler: Handlers = {
                 return new Response("Invalid token", { status: 403 });
             }
         }
-        if (isNaN(id)) {
+        if (isNumNaN(id)) {
             if (data) return return_error(400, "Bad Request");
             return new Response("Bad Request", { status: 400 });
         }

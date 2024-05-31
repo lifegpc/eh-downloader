@@ -132,7 +132,7 @@ export class MeiliSearchServer {
         const gmeta = await this.gmeta;
         await this.waitTask(gmeta.deleteAllDocuments());
     }
-    async updateGallery(...gids: number[]) {
+    async updateGallery(...gids: (number | bigint)[]) {
         const gmeta = await this.gmeta;
         const datas = gids.map((gid) => {
             const d = this.db.get_gmeta_by_gid(gid);

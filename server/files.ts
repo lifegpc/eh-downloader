@@ -1,14 +1,14 @@
 export type EhFileBasic = {
-    id: number;
-    width: number;
-    height: number;
+    id: number | bigint;
+    width: number | bigint;
+    height: number | bigint;
     is_original: boolean;
 };
 
 export type EhFileExtend = {
-    id: number;
-    width: number;
-    height: number;
+    id: number | bigint;
+    width: number | bigint;
+    height: number | bigint;
     is_original: boolean;
     token: string;
 };

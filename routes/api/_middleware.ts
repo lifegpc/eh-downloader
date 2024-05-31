@@ -7,7 +7,8 @@ import type { Token } from "../../db.ts";
 function handle_auth(req: Request, ctx: FreshContext) {
     if (req.method === "OPTIONS") return true;
     const m = get_task_manager();
-    if (m.db.get_user_count() === 0) return true;
+    const c = m.db.get_user_count();
+    if (c === 0 || c === 0n) return true;
     const u = new URL(req.url);
     let is_from_cookie = false;
     let token: string | null | undefined = req.headers.get("X-TOKEN");

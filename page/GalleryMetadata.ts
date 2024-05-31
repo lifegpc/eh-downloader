@@ -37,7 +37,7 @@ export type GalleryMetadataSingle = {
 
 class GalleryMetadata {
     obj;
-    map: Map<number, GalleryMetadataSingle | string>;
+    map: Map<number | bigint, GalleryMetadataSingle | string>;
     constructor(text: string) {
         this.obj = JSON.parse(text);
         this.map = new Map();

@@ -3,7 +3,7 @@ import { exists } from "@std/fs/exists";
 import { get_task_manager } from "../../server.ts";
 import { parse_int } from "../../server/parse_form.ts";
 import { generate_filename, ThumbnailConfig } from "../../thumbnail/base.ts";
-import { sure_dir } from "../../utils.ts";
+import { isNumNaN, parseBigInt, sure_dir } from "../../utils.ts";
 import {
     get_file_response,
     GetFileResponseOptions,
@@ -14,8 +14,8 @@ import { SortableURLSearchParams } from "../../server/SortableURLSearchParams.ts
 
 export const handler: Handlers = {
     async GET(req, ctx) {
-        const id = parseInt(ctx.params.id);
-        if (isNaN(id)) {
+        const id = parseBigInt(ctx.params.id);
+        if (isNumNaN(id)) {
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();

@@ -1,4 +1,4 @@
-import { Db } from "./utils/db_interface.ts";
+import { Db, QueryParameter } from "./utils/db_interface.ts";
 import {
     compare as compare_ver,
     format as format_ver,
@@ -33,97 +33,97 @@ export enum SqliteTransactionType {
     EXCLUSIVE = "EXCLUSIVE",
 }
 export type GMeta = {
-    gid: number;
+    gid: number | bigint;
     token: string;
     title: string;
     title_jpn: string;
     category: string;
     uploader: string;
-    posted: number;
-    filecount: number;
-    filesize: number;
+    posted: number | bigint;
+    filecount: number | bigint;
+    filesize: number | bigint;
     expunged: boolean;
-    rating: number;
-    parent_gid: number | null;
+    rating: number | bigint;
+    parent_gid: number | bigint | null;
     parent_key: string | null;
-    first_gid: number | null;
+    first_gid: number | bigint | null;
     first_key: string | null;
 };
 export type GMetaRaw = {
-    gid: number;
+    gid: number | bigint;
     token: string;
     title: string;
     title_jpn: string;
     category: string;
     uploader: string;
-    posted: number;
-    filecount: number;
-    filesize: number;
-    expunged: number;
-    rating: number;
-    parent_gid: number | null;
+    posted: number | bigint;
+    filecount: number | bigint;
+    filesize: number | bigint;
+    expunged: number | bigint;
+    rating: number | bigint;
+    parent_gid: number | bigint | null;
     parent_key: string | null;
-    first_gid: number | null;
+    first_gid: number | bigint | null;
     first_key: string | null;
 };
 export type PMeta = {
-    gid: number;
-    index: number;
+    gid: number | bigint;
+    index: number | bigint;
     token: string;
     name: string;
-    width: number;
-    height: number;
+    width: number | bigint;
+    height: number | bigint;
 };
 export type ExtendedPMeta = {
-    gid: number;
-    index: number;
+    gid: number | bigint;
+    index: number | bigint;
     token: string;
     name: string;
-    width: number;
-    height: number;
+    width: number | bigint;
+    height: number | bigint;
     is_nsfw: boolean;
     is_ad: boolean;
 };
 export type ExtendedPMetaRaw = {
-    gid: number;
-    index: number;
+    gid: number | bigint;
+    index: number | bigint;
     token: string;
     name: string;
-    width: number;
-    height: number;
-    is_nsfw: number | null;
-    is_ad: number | null;
+    width: number | bigint;
+    height: number | bigint;
+    is_nsfw: number | bigint | null;
+    is_ad: number | bigint | null;
 };
 export type Tag = {
-    id: number;
+    id: number | bigint;
     tag: string;
     translated: string | undefined;
     intro: string | undefined;
 };
 export type EhFile = {
-    id: number;
+    id: number | bigint;
     token: string;
     path: string;
-    width: number;
-    height: number;
+    width: number | bigint;
+    height: number | bigint;
     is_original: boolean;
 };
 type EhFileRawV1 = {
-    id: number;
-    gid: number;
+    id: number | bigint;
+    gid: number | bigint;
     token: string;
     path: string;
-    width: number;
-    height: number;
-    is_original: number;
+    width: number | bigint;
+    height: number | bigint;
+    is_original: number | bigint;
 };
 export type EhFileRaw = {
-    id: number;
+    id: number | bigint;
     token: string;
     path: string;
-    width: number;
-    height: number;
-    is_original: number;
+    width: number | bigint;
+    height: number | bigint;
+    is_original: number | bigint;
 };
 export type EhFileMeta = {
     token: string;
@@ -132,8 +132,8 @@ export type EhFileMeta = {
 };
 export type EhFileMetaRaw = {
     token: string;
-    is_nsfw: number;
-    is_ad: number;
+    is_nsfw: number | bigint;
+    is_ad: number | bigint;
 };
 export enum UserPermission {
     None = 0,
@@ -144,22 +144,22 @@ export enum UserPermission {
     All = ~(~0 << 4),
 }
 export type User = {
-    id: number;
+    id: number | bigint;
     username: string;
     password: Uint8Array;
     is_admin: boolean;
     permissions: UserPermission;
 };
 type UserRaw = {
-    id: number;
+    id: number | bigint;
     username: string;
     password: Uint8Array;
-    is_admin: number;
+    is_admin: number | bigint;
     permissions: UserPermission;
 };
 export type Token = {
-    id: number;
-    uid: number;
+    id: number | bigint;
+    uid: number | bigint;
     token: string;
     expired: Date;
     http_only: boolean;
@@ -171,12 +171,12 @@ export type Token = {
     client_platform: string | null;
 };
 type TokenRaw = {
-    id: number;
-    uid: number;
+    id: number | bigint;
+    uid: number | bigint;
     token: string;
     expired: string;
-    http_only: number;
-    secure: number;
+    http_only: number | bigint;
+    secure: number | bigint;
     last_used: string;
     client: string | null;
     device: string | null;
@@ -184,7 +184,7 @@ type TokenRaw = {
     client_platform: string | null;
 };
 export type ClientConfig = {
-    uid: number;
+    uid: number | bigint;
     client: string;
     name: string;
     data: string;
@@ -319,7 +319,7 @@ export class EhDb {
     #exist_table: Set<string> = new Set();
     #lock_file: string | undefined;
     #dblock_file: string | undefined;
-    #_tags: Map<string, number> | undefined;
+    #_tags: Map<string, number | bigint> | undefined;
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
@@ -547,7 +547,7 @@ export class EhDb {
     get #tags() {
         if (this.#_tags === undefined) {
             const tags = this.db.queryEntries<Tag>("SELECT * FROM tag;");
-            const re = new Map<string, number>();
+            const re = new Map<string, number | bigint>();
             tags.forEach((v) => re.set(v.tag, v.id));
             this.#_tags = re;
             return re;
@@ -590,7 +590,7 @@ export class EhDb {
             gmeta,
         );
     }
-    async add_gtag(gid: number, tags: Set<string>) {
+    async add_gtag(gid: number | bigint, tags: Set<string>) {
         const otags = this.get_gtags(gid);
         const deleted: string[] = [];
         const added: string[] = [];
@@ -703,7 +703,7 @@ export class EhDb {
         });
     }
     add_token(
-        uid: number,
+        uid: number | bigint,
         added: number,
         http_only: boolean,
         secure: boolean,
@@ -736,7 +736,7 @@ export class EhDb {
         return t;
     }
     add_user(user: User) {
-        if (user.id === 0) {
+        if (user.id === 0 || user.id === 0n) {
             this.db.query(
                 "INSERT INTO user (username, password, is_admin, permissions) VALUES (?, ?, ?, ?);",
                 [
@@ -778,18 +778,20 @@ export class EhDb {
         }
     }
     better_optimize() {
-        const d = this.db.query<[string, number]>(
+        const d = this.db.query<[string, number | bigint]>(
             "SELECT * FROM main.sqlite_sequence",
         );
         d.forEach(([name, count]) => {
-            const c = this.db.query<[number]>(
+            const c = this.db.query<[number | bigint]>(
                 `SELECT COUNT(*) FROM "${name}";`,
             )[0][0];
-            if (c !== count) {
-                const d = this.db.query<[number]>(`SELECT id FROM "${name}";`);
+            if (c != count) {
+                const d = this.db.query<[number | bigint]>(
+                    `SELECT id FROM "${name}";`,
+                );
                 d.forEach((d, i) => {
                     const r = i + 1;
-                    if (d[0] !== r) {
+                    if (d[0] != r) {
                         this.db.query(
                             `UPDATE "${name}" SET id = ? WHERE id = ?;`,
                             [r, d[0]],
@@ -809,7 +811,7 @@ export class EhDb {
             }
         });
     }
-    check_download_task(gid: number, token: string) {
+    check_download_task(gid: number | bigint, token: string) {
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(
                 "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ?;",
@@ -836,8 +838,8 @@ export class EhDb {
             return r;
         });
     }
-    check_update_meili_search_data_task(gid?: number) {
-        const args = [TaskType.UpdateMeiliSearchData];
+    check_update_meili_search_data_task(gid?: number | bigint) {
+        const args: QueryParameter[] = [TaskType.UpdateMeiliSearchData];
         let wsql = "";
         if (gid !== undefined) {
             wsql = " AND gid = ?";
@@ -889,7 +891,7 @@ export class EhDb {
     }
     convert_file(f: EhFileRaw[]) {
         return f.map((m) => {
-            const b = m.is_original !== 0;
+            const b = m.is_original != 0;
             const t = <EhFile> <unknown> m;
             t.is_original = b;
             return t;
@@ -897,8 +899,8 @@ export class EhDb {
     }
     convert_filemeta(m: EhFileMetaRaw[]) {
         return m.map((m) => {
-            const n = m.is_nsfw !== 0;
-            const a = m.is_ad !== 0;
+            const n = m.is_nsfw != 0;
+            const a = m.is_ad != 0;
             const t = <EhFileMeta> <unknown> m;
             t.is_nsfw = n;
             t.is_ad = a;
@@ -908,7 +910,7 @@ export class EhDb {
     convert_gmeta(m: GMetaRaw[]): GMeta[] {
         return m.map((m) => {
             if (m.expunged === undefined) return <GMeta> <unknown> m;
-            const b = m.expunged !== 0;
+            const b = m.expunged != 0;
             const t = <GMeta> <unknown> m;
             t.expunged = b;
             return t;
@@ -917,8 +919,8 @@ export class EhDb {
     convert_token(m: TokenRaw[]) {
         return m.map((m) => {
             const e = new Date(m.expired);
-            const h = m.http_only !== 0;
-            const s = m.secure !== 0;
+            const h = m.http_only != 0;
+            const s = m.secure != 0;
             const t = <Token> <unknown> m;
             const l = new Date(m.last_used);
             t.expired = e;
@@ -930,14 +932,14 @@ export class EhDb {
     }
     convert_user(m: UserRaw[]) {
         return m.map((m) => {
-            const a = m.is_admin !== 0;
+            const a = m.is_admin != 0;
             const t = <User> <unknown> m;
             t.is_admin = a;
             if (t.is_admin) t.permissions = UserPermission.All;
             return t;
         });
     }
-    delete_client_config(uid: number, client: string, name: string) {
+    delete_client_config(uid: number | bigint, client: string, name: string) {
         this.db.query(
             "DELETE FROM client_config WHERE uid = ? AND client = ? AND name = ?;",
             [uid, client, name],
@@ -955,7 +957,7 @@ export class EhDb {
             console.log("Deleted ", f.path);
         });
     }
-    delete_gallery(gid: number) {
+    delete_gallery(gid: number | bigint) {
         this.db.query("DELETE FROM gmeta WHERE gid = ?;", [gid]);
         this.db.query("DELETE FROM gtag WHERE gid = ?;", [gid]);
         const tokens = new Set(
@@ -965,11 +967,11 @@ export class EhDb {
         );
         this.db.query("DELETE FROM pmeta WHERE gid = ?;", [gid]);
         for (const token of tokens) {
-            const count = this.db.query<[number]>(
+            const count = this.db.query<[number | bigint]>(
                 "SELECT COUNT(*) FROM pmeta WHERE token = ?;",
                 [token],
             )[0][0];
-            if (count === 0) this.delete_files(token);
+            if (count === 0 || count === 0n) this.delete_files(token);
         }
     }
     delete_task(task: Task) {
@@ -977,7 +979,7 @@ export class EhDb {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);
         });
     }
-    delete_task_by_id(id: number) {
+    delete_task_by_id(id: number | bigint) {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [id]);
         });
@@ -985,12 +987,12 @@ export class EhDb {
     delete_token(token: string) {
         this.db.query("DELETE FROM token WHERE token = ?;", [token]);
     }
-    delete_user(id: number) {
+    delete_user(id: number | bigint) {
         this.db.query("DELETE FROM user WHERE id = ?;", [id]);
         this.db.query("DELETE FROM token WHERE uid = ?;", [id]);
         this.db.query("DELETE FROM client_config WHERE uid = ?;", [id]);
     }
-    delete_user_token(uid: number, excluded_token?: number) {
+    delete_user_token(uid: number | bigint, excluded_token?: number | bigint) {
         let where = "";
         const args = [uid];
         if (excluded_token) {
@@ -1015,21 +1017,21 @@ export class EhDb {
         if (!this.#dblock) return;
         eval(`Deno.funlockSync(${this.#dblock.rid});`);
     }
-    get_client_config(uid: number, client: string, name: string) {
+    get_client_config(uid: number | bigint, client: string, name: string) {
         const d = this.db.queryEntries<ClientConfig>(
             "SELECT * FROM client_config WHERE uid = ? AND client = ? AND name = ?;",
             [uid, client, name],
         );
         return d.length ? d[0] : null;
     }
-    get_ehmeta(gid: number) {
+    get_ehmeta(gid: number | bigint) {
         const d = this.db.query<[string]>(
             "SELECT data FROM ehmeta WHERE gid = ?;",
             [gid],
         );
         return d.length ? JSON.parse(d[0][0]) as GalleryMetadataSingle : null;
     }
-    get_extended_pmeta(gid: number) {
+    get_extended_pmeta(gid: number | bigint) {
         return this.convert_extended_pmeta(
             this.db.queryEntries<ExtendedPMetaRaw>(
                 "SELECT pmeta.*, filemeta.is_nsfw, filemeta.is_ad FROM pmeta LEFT JOIN filemeta ON filemeta.token = pmeta.token WHERE gid = ?;",
@@ -1037,7 +1039,7 @@ export class EhDb {
             ),
         );
     }
-    get_file(id: number) {
+    get_file(id: number | bigint) {
         const d = this.convert_file(this.db.queryEntries<EhFileRaw>(
             "SELECT * FROM file WHERE id = ?;",
             [id],
@@ -1058,10 +1060,12 @@ export class EhDb {
         ));
     }
     get_gallery_count() {
-        return this.db.query<[number]>("SELECT COUNT(*) FROM gmeta;")[0][0];
+        return this.db.query<[number | bigint]>(
+            "SELECT COUNT(*) FROM gmeta;",
+        )[0][0];
     }
     get_gids(offset = 0, limit = 20) {
-        return this.db.query<[number]>(
+        return this.db.query<[number | bigint]>(
             "SELECT gid FROM gmeta LIMIT ? OFFSET ?;",
             [limit, offset],
         ).map((n) => n[0]);
@@ -1148,7 +1152,7 @@ export class EhDb {
             ),
         );
     }
-    get_gmeta_by_gid(gid: number) {
+    get_gmeta_by_gid(gid: number | bigint) {
         const s = this.convert_gmeta(
             this.db.queryEntries<GMetaRaw>(
                 "SELECT * FROM gmeta WHERE gid = ?;",
@@ -1157,7 +1161,7 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
-    get_gtags(gid: number) {
+    get_gtags(gid: number | bigint) {
         return new Set(
             this.db.query<[string]>(
                 "SELECT tag.tag FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
@@ -1165,26 +1169,26 @@ export class EhDb {
             ).map((v) => v[0]),
         );
     }
-    get_gtags_full(gid: number) {
+    get_gtags_full(gid: number | bigint) {
         return this.db.queryEntries<Tag>(
             "SELECT tag.* FROM gtag INNER JOIN tag ON tag.id = gtag.id WHERE gid = ?;",
             [gid],
         );
     }
-    get_pmeta(gid: number) {
+    get_pmeta(gid: number | bigint) {
         return this.db.queryEntries<PMeta>(
             "SELECT * FROM pmeta WHERE gid = ?;",
             [gid],
         );
     }
-    get_pmeta_by_index(gid: number, index: number) {
+    get_pmeta_by_index(gid: number | bigint, index: number | bigint) {
         const s = this.db.queryEntries<PMeta>(
             'SELECT * FROM pmeta WHERE gid = ? AND "index" = ?;',
             [gid, index],
         );
         return s.length ? s[0] : undefined;
     }
-    get_pmeta_by_token(gid: number, token: string) {
+    get_pmeta_by_token(gid: number | bigint, token: string) {
         const s = this.db.queryEntries<PMeta>(
             "SELECT * FROM pmeta WHERE gid = ? AND token = ?;",
             [gid, token],
@@ -1198,7 +1202,7 @@ export class EhDb {
         );
         return s;
     }
-    get_pmeta_count(gid: number) {
+    get_pmeta_count(gid: number | bigint) {
         return this.db.query<[number]>(
             "SELECT COUNT(*) FROM pmeta WHERE gid = ?;",
             [gid],
@@ -1246,7 +1250,7 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
-    get_tag(id: number) {
+    get_tag(id: number | bigint) {
         const s = this.db.queryEntries<Tag>(
             "SELECT * FROM tag WHERE id = ?;",
             [id],
@@ -1266,7 +1270,7 @@ export class EhDb {
             ["rows:%"],
         );
     }
-    async get_task(id: number) {
+    async get_task(id: number | bigint) {
         const s = await this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task WHERE id = ?;", [id])
         );
@@ -1277,7 +1281,7 @@ export class EhDb {
             this.db.queryEntries<Task>("SELECT * FROM task;")
         );
     }
-    get_tasks_by_pid(pid: number) {
+    get_tasks_by_pid(pid: number | bigint) {
         return this.transaction(() =>
             this.db.queryEntries<Task>("SELECT * FROM task WHERE pid = ?;", [
                 pid,
@@ -1300,7 +1304,7 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
-    get_user(id: number) {
+    get_user(id: number | bigint) {
         const s = this.convert_user(
             this.db.queryEntries<UserRaw>(
                 "SELECT * FROM user WHERE id = ?;",
@@ -1319,7 +1323,9 @@ export class EhDb {
         return s.length ? s[0] : undefined;
     }
     get_user_count() {
-        return this.db.query<[number]>("SELECT COUNT(*) FROM user;")[0][0];
+        return this.db.query<[number | bigint]>(
+            "SELECT COUNT(*) FROM user;",
+        )[0][0];
     }
     get_users(limit?: number, offset?: number) {
         let sql = "";
@@ -1336,7 +1342,7 @@ export class EhDb {
             this.db.queryEntries<UserRaw>(`SELECT * FROM user${sql};`, args),
         );
     }
-    list_client_configs(uid: number, client: string) {
+    list_client_configs(uid: number | bigint, client: string) {
         return this.db.queryEntries<ClientConfig>(
             "SELECT * FROM client_config WHERE uid = ? AND client = ?;",
             [uid, client],

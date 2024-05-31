@@ -18,7 +18,7 @@ export async function update_meili_search_data(
             progress,
         );
     };
-    if (task.gid !== 0) {
+    if (task.gid != 0) {
         progress.total_gallery = 1;
         sendEvent();
         await manager.meilisearch.updateGallery(task.gid);

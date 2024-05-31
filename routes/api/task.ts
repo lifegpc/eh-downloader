@@ -6,7 +6,7 @@ import type {
     TaskServerSocketData,
 } from "../../server/task.ts";
 import { ExitTarget } from "../../signal_handler.ts";
-import { get_string, parse_int } from "../../server/parse_form.ts";
+import { get_string, parse_big_int } from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import type { DownloadConfig } from "../../tasks/download.ts";
 import type { ExportZipConfig } from "../../tasks/export_zip.ts";
@@ -111,7 +111,7 @@ export const handler: Handlers = {
             return return_error(1, "type is required");
         }
         if (typ == "download") {
-            const gid = await parse_int(form.get("gid"), null);
+            const gid = await parse_big_int(form.get("gid"), null);
             const token = await get_string(form.get("token"));
             if (gid === null) {
                 return return_error(2, "gid is required");
@@ -138,7 +138,7 @@ export const handler: Handlers = {
                 return return_error(500, e.message);
             }
         } else if (typ == "export_zip") {
-            const gid = await parse_int(form.get("gid"), null);
+            const gid = await parse_big_int(form.get("gid"), null);
             if (gid === null) {
                 return return_error(2, "gid is required");
             }

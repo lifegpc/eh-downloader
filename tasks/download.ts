@@ -30,7 +30,7 @@ export type DownloadConfig = {
     download_original_img?: boolean;
     max_retry_count?: number;
     remove_previous_gallery?: boolean;
-    replaced_gallery?: { gid: number; token: string }[];
+    replaced_gallery?: { gid: number | bigint; token: string }[];
 };
 
 export const DEFAULT_DOWNLOAD_CONFIG: DownloadConfig = {};
@@ -326,13 +326,13 @@ export async function download_task(
             if (f === undefined) throw Error("Failed to get file.");
             m.add_new_details({
                 downloaded: 0,
-                height: f.height,
+                height: Number(f.height),
                 index: i.index,
                 is_original: f.is_original,
                 name: i.name,
                 token: i.page_token,
                 total: 0,
-                width: f.width,
+                width: Number(f.width),
                 started: 0,
                 speed: 0,
                 last_updated: 0,

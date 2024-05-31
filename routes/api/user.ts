@@ -1,7 +1,12 @@
 import { Handlers } from "$fresh/server.ts";
 import { Token, User, UserPermission } from "../../db.ts";
 import { get_task_manager } from "../../server.ts";
-import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
+import {
+    get_string,
+    parse_big_int,
+    parse_bool,
+    parse_int,
+} from "../../server/parse_form.ts";
 import type { BUser } from "../../server/user.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
@@ -18,7 +23,7 @@ export const handler: Handlers = {
         } catch (_) {
             return return_error(3, "Invalid parameters.");
         }
-        const id = await parse_int(data.get("id"), null);
+        const id = await parse_big_int(data.get("id"), null);
         const username = await get_string(data.get("username"));
         if (id === null && !username) {
             return return_error(1, "user not specified.");
@@ -44,7 +49,7 @@ export const handler: Handlers = {
     },
     async GET(req, ctx) {
         const u = new URL(req.url);
-        const id = await parse_int(u.searchParams.get("id"), null);
+        const id = await parse_big_int(u.searchParams.get("id"), null);
         const username = u.searchParams.get("username");
         const user = <User | undefined> ctx.state.user;
         if (id === null && !username && !user) {
@@ -78,7 +83,7 @@ export const handler: Handlers = {
         } catch (_) {
             return return_error(3, "Invalid parameters.");
         }
-        const id = await parse_int(data.get("id"), null);
+        const id = await parse_big_int(data.get("id"), null);
         const username = await get_string(data.get("username"));
         if (id === null && !username && !user) {
             return return_error(1, "user not specified.");
@@ -139,7 +144,7 @@ export const handler: Handlers = {
         m.db.update_user(us);
         if (revoke_token) {
             const token = <Token | undefined> ctx.state.token;
-            let tid: number | undefined = undefined;
+            let tid: number | bigint | undefined = undefined;
             if (user && us.id == user.id && token) tid = token.id;
             m.db.delete_user_token(us.id, tid);
         }
@@ -182,7 +187,8 @@ export const handler: Handlers = {
                 "SHA-512",
             ),
         );
-        if (m.db.get_user_count() === 0) {
+        const c = m.db.get_user_count();
+        if (c === 0 || c === 0n) {
             m.db.add_root_user(name, hpassword);
             return return_data(0, 201);
         } else {

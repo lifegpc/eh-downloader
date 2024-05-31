@@ -1,9 +1,14 @@
 import { Handlers } from "$fresh/server.ts";
 import type { EhFileMeta } from "../../db.ts";
 import { get_task_manager } from "../../server.ts";
-import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
+import {
+    get_string,
+    parse_big_int,
+    parse_bool,
+} from "../../server/parse_form.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import { User, UserPermission } from "../../db.ts";
+import { isNumNaN, parseBigInt } from "../../utils.ts";
 
 export function get_filemeta(token: string) {
     const m = get_task_manager();
@@ -30,7 +35,7 @@ export function put_filemeta(d: EhFileMeta) {
 }
 
 export function put_gallery_filemeta(
-    gid: number,
+    gid: number | bigint,
     is_nsfw: boolean,
     is_ad: boolean,
     excludes: Set<string>,
@@ -84,7 +89,13 @@ export const handler: Handlers = {
                 }
                 m.db.add_filemeta(f);
                 return return_data({});
-            } else if (typeof b.gid === "number") {
+            } else if (typeof b.gid === "number" || typeof b.gid === "string") {
+                const gid: number | bigint = typeof b.gid === "string"
+                    ? parseBigInt(b.gid)
+                    : b.gid;
+                if (isNumNaN(gid)) {
+                    return return_error(8, "Invalid gid.");
+                }
                 const m = get_task_manager();
                 const excludes: Set<string> = Array.isArray(b.excludes) &&
                         // @ts-ignore Any
@@ -92,7 +103,7 @@ export const handler: Handlers = {
                     ? new Set(b.excludes)
                     : new Set();
                 const tokens = new Set(
-                    m.db.get_pmeta(b.gid).map((d) => d.token),
+                    m.db.get_pmeta(gid).map((d) => d.token),
                 );
                 for (const token of tokens) {
                     if (excludes.has(token)) continue;
@@ -156,7 +167,7 @@ export const handler: Handlers = {
             const token = await get_string(d.get("token"));
             const is_nsfw = await parse_bool(d.get("is_nsfw"), null);
             const is_ad = await parse_bool(d.get("is_ad"), null);
-            const gid = await parse_int(d.get("gid"), null);
+            const gid = await parse_big_int(d.get("gid"), null);
             const tokens = await get_string(d.get("tokens"));
             if (token) {
                 const m = get_task_manager();
@@ -231,7 +242,13 @@ export const handler: Handlers = {
                 ) {
                     return put_filemeta(b);
                 } else return return_error(3, "Invalid parameters.");
-            } else if (typeof b.gid === "number") {
+            } else if (typeof b.gid === "number" || typeof b.gid === "string") {
+                const gid: number | bigint = typeof b.gid === "string"
+                    ? parseBigInt(b.gid)
+                    : b.gid;
+                if (isNumNaN(gid)) {
+                    return return_error(8, "Invalid gid.");
+                }
                 if (
                     typeof b.is_nsfw === "boolean" &&
                     typeof b.is_ad === "boolean"
@@ -242,7 +259,7 @@ export const handler: Handlers = {
                         ? new Set(b.excludes)
                         : new Set();
                     return put_gallery_filemeta(
-                        b.gid,
+                        gid,
                         b.is_nsfw,
                         b.is_ad,
                         excludes,
@@ -293,7 +310,7 @@ export const handler: Handlers = {
                 return return_error(3, "Invalid parameters.");
             }
             const token = await get_string(d.get("token"));
-            const gid = await parse_int(d.get("gid"), null);
+            const gid = await parse_big_int(d.get("gid"), null);
             const is_nsfw = await parse_bool(d.get("is_nsfw"), null);
             const is_ad = await parse_bool(d.get("is_ad"), null);
             const tokens = await get_string(d.get("tokens"));

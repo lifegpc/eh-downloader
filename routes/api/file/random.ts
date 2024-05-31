@@ -146,7 +146,9 @@ export const handler: Handlers = {
         }
         if (svg) {
             const pmeta = m.db.get_pmeta_by_token_only(f.token);
-            let y = f.height + 17;
+            let y = typeof f.height === "bigint"
+                ? f.height + 17n
+                : f.height + 17;
             const lines = pmeta.map((d) => {
                 const g = m.db.get_gmeta_by_gid(d.gid);
                 const title =
@@ -156,11 +158,14 @@ export const handler: Handlers = {
                 }/flutter/gallery/${d.gid}/page/${d.index}">${
                     title ? title + " - " : title
                 }${d.name}</a> <a href="https://e-hentai.org/s/${d.token}/${d.gid}-${d.index}" target="_blank">EH</a></text>`;
-                y += 23;
+                typeof y === "bigint" ? y += 23n : y += 23;
                 return t;
             });
+            const le = pmeta.length * 23;
             const dom = `<svg width="${f.width}" height="${
-                f.height + pmeta.length * 23
+                typeof f.height === "bigint"
+                    ? f.height + BigInt(le)
+                    : f.height + le
             }" xmlns="http://www.w3.org/2000/svg">
 <a href="${url}"><image href="${url}" /></a>
 ${lines.join("\n")}

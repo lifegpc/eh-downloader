@@ -4,6 +4,7 @@ import { get_export_zip_response } from "../../../../../server/export_zip.ts";
 import { parse_bool, parse_int } from "../../../../../server/parse_form.ts";
 import type { ExportZipConfig } from "../../../../../tasks/export_zip.ts";
 import { User, UserPermission } from "../../../../../db.ts";
+import { isNumNaN, parseBigInt } from "../../../../../utils.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -11,8 +12,8 @@ export const handler: Handlers = {
         if (u && !u.is_admin && !(u.permissions & UserPermission.ReadGallery)) {
             return new Response("Permission denied", { status: 403 });
         }
-        const gid = parseInt(ctx.params.gid);
-        if (isNaN(gid)) {
+        const gid = parseBigInt(ctx.params.gid);
+        if (isNumNaN(gid)) {
             return new Response("Bad Request", { status: 400 });
         }
         const params = new URL(req.url).searchParams;

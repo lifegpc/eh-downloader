@@ -6,11 +6,12 @@ import {
 } from "../../../server/get_file_response.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
+import { isNumNaN, parseBigInt } from "../../../utils.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
-        const id = parseInt(ctx.params.id);
-        if (isNaN(id)) {
+        const id = parseBigInt(ctx.params.id);
+        if (isNumNaN(id)) {
             return new Response("Bad Request", { status: 400 });
         }
         const m = get_task_manager();

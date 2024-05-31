@@ -8,6 +8,7 @@ import {
     return_error,
 } from "../../../../server/utils.ts";
 import { GMeta, User, UserPermission } from "../../../../db.ts";
+import { isNumNaN, parseBigInt } from "../../../../utils.ts";
 
 export const handler: Handlers = {
     GET(_req, ctx) {
@@ -20,18 +21,18 @@ export const handler: Handlers = {
             return return_error(403, "Permission denied.");
         }
         const gids = new Set(
-            ctx.params.gids.split(",").map((v) => parseInt(v)).filter((v) =>
-                !isNaN(v)
+            ctx.params.gids.split(",").map((v) => parseBigInt(v)).filter((v) =>
+                !isNumNaN(v)
             ),
         );
         const m = get_task_manager();
-        const re: Record<number, JSONResult<GMeta>> = {};
+        const re: Record<string, JSONResult<GMeta>> = {};
         for (const gid of gids) {
             const meta = m.db.get_gmeta_by_gid(gid);
             if (meta) {
-                re[gid] = gen_data(meta);
+                re[gid.toString()] = gen_data(meta);
             } else {
-                re[gid] = gen_error(404, "Not found");
+                re[gid.toString()] = gen_error(404, "Not found");
             }
         }
         return return_data(re);

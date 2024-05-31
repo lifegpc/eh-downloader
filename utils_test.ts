@@ -6,6 +6,7 @@ import {
     asyncFilter,
     asyncForEach,
     calFileMd5,
+    compareNum,
     filterFilename,
     map,
     promiseState,
@@ -166,4 +167,16 @@ Deno.test("toJSON_test", () => {
         toJSON([1099511627776n, { a: 45n }]),
         '[1099511627776,{"a":45}]',
     );
+    assertEquals(toJSON([9007199254740992n]), '["9007199254740992"]');
+});
+
+Deno.test("compareNum_test", () => {
+    assertEquals([3, 4n, 1, 2n, 11n, 5n].sort(compareNum), [
+        1,
+        2n,
+        3,
+        4n,
+        5n,
+        11n,
+    ]);
 });

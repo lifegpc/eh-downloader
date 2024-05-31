@@ -4,6 +4,7 @@ import type { EhDb } from "../db.ts";
 import {
     addZero,
     asyncForEach,
+    compareNum,
     configureZipJs,
     filterFilename,
     limitFilename,
@@ -36,7 +37,7 @@ export async function export_zip(
         ? ecfg.jpn_title
         : cfg.export_zip_jpn_title;
     const progress: TaskExportZipProgress = {
-        total_page: g.filecount,
+        total_page: Number(g.filecount),
         added_page: 0,
     };
     const sendEvent = () => {
@@ -64,7 +65,7 @@ export async function export_zip(
         });
         const l = g.filecount.toString().length;
         await asyncForEach(
-            db.get_pmeta(gid).sort((a, b) => a.index - b.index),
+            db.get_pmeta(gid).sort((a, b) => compareNum(a.index, b.index)),
             async (p) => {
                 const f = db.get_files(p.token);
                 const t = db.get_filemeta(p.token);

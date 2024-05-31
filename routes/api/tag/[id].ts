@@ -8,6 +8,7 @@ import {
     return_data,
     return_error,
 } from "../../../server/utils.ts";
+import { isNumNaN, parseBigInt } from "../../../utils.ts";
 
 export const handler: Handlers = {
     GET(_req, ctx) {
@@ -18,10 +19,10 @@ export const handler: Handlers = {
         const ids = decodeURIComponent(ctx.params.id).split(",");
         const r: Record<string, JSONResult<Tag>> = {};
         for (const _id of ids) {
-            const id = parseInt(_id);
+            const id = parseBigInt(_id);
             let key: string | undefined;
             let tag: string | undefined;
-            if (isNaN(id)) {
+            if (isNumNaN(id)) {
                 tag = _id;
             }
             const m = get_task_manager();

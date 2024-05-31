@@ -6,7 +6,7 @@ import { load_mpv_page } from "./page/MPVPage.ts";
 import { load_single_page } from "./page/SinglePage.ts";
 import { RecoverableError, TimeoutError, toJSON } from "./utils.ts";
 
-export type GID = [number, string];
+export type GID = [number | bigint, string];
 
 export class Client {
     cfg;
@@ -189,7 +189,7 @@ export class Client {
      * @param page Page number
      * @returns
      */
-    async fetchGalleryPage(gid: number, token: string, page?: number) {
+    async fetchGalleryPage(gid: number | bigint, token: string, page?: number) {
         let url = `https://${this.host}/g/${gid}/${token}/`;
         if (page) url += `?p=${page}`;
         const re = await this.get(url);
@@ -206,7 +206,7 @@ export class Client {
      * @param token Token
      * @returns
      */
-    async fetchMPVPage(gid: number, token: string) {
+    async fetchMPVPage(gid: number | bigint, token: string) {
         const url = `https://${this.host}/mpv/${gid}/${token}/`;
         const re = await this.get(url);
         if (re.status != 200) {

@@ -68,9 +68,9 @@ export const handler: Handlers = {
                 );
                 for (const [k, v] of metas.map) {
                     if (typeof v === "string") {
-                        data[k] = gen_error(2, v);
+                        data[k.toString()] = gen_error(2, v);
                     } else {
-                        data[k] = gen_data(v);
+                        data[k.toString()] = gen_data(v);
                         m.db.add_ehmeta(v);
                     }
                 }

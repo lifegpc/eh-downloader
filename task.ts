@@ -6,11 +6,11 @@ export enum TaskType {
 }
 
 export type Task<T extends TaskType = TaskType> = {
-    id: number;
+    id: number | bigint;
     type: T;
-    gid: number;
+    gid: number | bigint;
     token: string;
-    pid: number;
+    pid: number | bigint;
     details: string | null;
 };
 
@@ -43,12 +43,12 @@ export type TaskExportZipProgress = {
 };
 
 export type TaskUpdateMeiliSearchDataProgress = {
-    total_gallery: number;
+    total_gallery: number | bigint;
     updated_gallery: number;
 };
 
 export type TaskFixGalleryPageProgress = {
-    total_gallery: number;
+    total_gallery: number | bigint;
     checked_gallery: number;
 };
 
@@ -61,7 +61,7 @@ export type TaskProgressBasicType = {
 
 export type TaskProgress<T extends TaskType = TaskType> = {
     type: T;
-    task_id: number;
+    task_id: number | bigint;
     detail: TaskProgressBasicType[T];
 };
 

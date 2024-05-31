@@ -10,14 +10,18 @@ export type TaskServerSocketData =
     | {
         type: "tasks";
         tasks: Task[];
-        running: number[];
+        running: (number | bigint)[];
     }
     | { type: "ping" }
     | { type: "pong" };
 
 type EventMap = {
-    new_download_task: { gid: number; token: string; cfg?: DownloadConfig };
-    new_export_zip_task: { gid: number; cfg?: ExportZipConfig };
+    new_download_task: {
+        gid: number | bigint;
+        token: string;
+        cfg?: DownloadConfig;
+    };
+    new_export_zip_task: { gid: number | bigint; cfg?: ExportZipConfig };
 };
 
 export type TaskClientSocketData =

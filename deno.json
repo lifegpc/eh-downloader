@@ -33,7 +33,7 @@
         "rules": {
             "tags": ["fresh", "recommended"]
         },
-        "exclude": ["_fresh"]
+        "exclude": ["_fresh", "static/sw.js"]
     },
     "unstable": ["ffi", "fs"]
 }

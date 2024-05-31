@@ -1,3 +1,5 @@
+import { isNumNaN, parseBigInt } from "../utils.ts";
+
 export async function get_string(value: FormDataEntryValue | null) {
     if (value === null) return null;
     return typeof value === "string" ? value : await value.text();
@@ -26,5 +28,16 @@ export async function parse_int<T extends number | null>(
     const v = typeof value === "string" ? value : await value.text();
     const n = parseInt(v);
     if (isNaN(n)) return def;
+    return n;
+}
+
+export async function parse_big_int<T extends number | bigint | null>(
+    value: FormDataEntryValue | null,
+    def: T,
+): Promise<number | bigint | T> {
+    if (value === null) return def;
+    const v = typeof value === "string" ? value : await value.text();
+    const n = parseBigInt(v);
+    if (isNumNaN(n)) return def;
     return n;
 }

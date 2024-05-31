@@ -21,8 +21,9 @@ async function check_ffmpeg_api() {
 export const handler: Handlers = {
     async GET(req, ctx) {
         const m = get_task_manager();
+        const c = m.db.get_user_count();
         const is_authed = ctx.state.user !== undefined ||
-            m.db.get_user_count() === 0;
+            c === 0 || c === 0n;
         const ffmpeg_binary_enabled = await check_ffmpeg_binary(
             m.cfg.ffmpeg_path,
         );
@@ -50,7 +51,7 @@ export const handler: Handlers = {
                 key: m.cfg.meili_search_api_key || m.cfg.meili_update_api_key,
             };
         }
-        const no_user = m.db.get_user_count() === 0;
+        const no_user = c === 0 || c === 0n;
         const is_docker = isDocker();
         return return_data<StatusData>({
             ffmpeg_api_enabled,

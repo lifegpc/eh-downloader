@@ -1,6 +1,6 @@
 import { exists } from "@std/fs/exists";
 
-export async function check_running(pid: number) {
+export async function check_running(pid: number | bigint) {
     if (Deno.build.os == "windows") {
         const cmd = new Deno.Command("tasklist.exe", {
             args: ["/NH", "/FI", `pid eq ${pid}`],

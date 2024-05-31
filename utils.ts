@@ -120,7 +120,7 @@ export async function asyncForEach<T, V>(
     }
 }
 
-export function addZero(n: string | number, len: number) {
+export function addZero(n: string | number | bigint, len: number) {
     let s = n.toString();
     while (s.length < len) s = "0" + s;
     return s;
@@ -285,7 +285,28 @@ export function isDocker() {
 export function toJSON(obj: unknown) {
     return JSON.stringify(
         obj,
-        (_, value) =>
-            typeof value === "bigint" ? parseInt(value.toString()) : value,
+        (_, value) => {
+            if (typeof value === "bigint") {
+                const s = value.toString();
+                const t = parseInt(s);
+                if (Number.isSafeInteger(t)) return t;
+                return s;
+            }
+            return value;
+        },
     );
+}
+
+export function parseBigInt(str: string) {
+    const t = parseInt(str);
+    if (isNaN(t)) return t;
+    return Number.isSafeInteger(t) ? BigInt(str) : t;
+}
+
+export function isNumNaN(num: number | bigint) {
+    return typeof num === "number" ? isNaN(num) : false;
+}
+
+export function compareNum(num1: number | bigint, num2: number | bigint) {
+    return num1 == num2 ? 0 : num1 < num2 ? -1 : 1;
 }

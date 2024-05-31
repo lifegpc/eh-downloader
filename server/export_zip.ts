@@ -1,16 +1,23 @@
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import type { EhDb, PMeta } from "../db.ts";
 import type { ExportZipConfig } from "../tasks/export_zip.ts";
-import { addZero, configureZipJs, limitFilename } from "../utils.ts";
+import {
+    addZero,
+    compareNum,
+    configureZipJs,
+    limitFilename,
+} from "../utils.ts";
 
 export function get_export_zip_response(
-    gid: number,
+    gid: number | bigint,
     db: EhDb,
     cfg: ExportZipConfig,
 ) {
     const gmeta = db.get_gmeta_by_gid(gid);
     if (!gmeta) return new Response("Gallery not found.", { status: 404 });
-    const pmetas = db.get_pmeta(gid).sort((a, b) => a.index - b.index);
+    const pmetas = db.get_pmeta(gid).sort((a, b) =>
+        compareNum(a.index, b.index)
+    );
     const p = pmetas.length;
     const l = gmeta.filecount.toString().length;
     let c = 0;

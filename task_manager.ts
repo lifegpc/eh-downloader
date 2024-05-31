@@ -55,7 +55,7 @@ export class TaskManager extends EventTarget {
     cfg;
     client;
     db;
-    running_tasks: Map<number, RunningTask>;
+    running_tasks: Map<number | bigint, RunningTask>;
     max_task_count;
     meilisearch?: MeiliSearchServer;
     #abort;
@@ -108,7 +108,7 @@ export class TaskManager extends EventTarget {
         return this.#abort.signal;
     }
     async add_download_task(
-        gid: number,
+        gid: number | bigint,
         token: string,
         cfg?: DownloadConfig,
         mark_already = false,
@@ -129,7 +129,7 @@ export class TaskManager extends EventTarget {
         };
         return await this.#add_task(task);
     }
-    async add_export_zip_task(gid: number, cfg?: ExportZipConfig) {
+    async add_export_zip_task(gid: number | bigint, cfg?: ExportZipConfig) {
         const task: Task = {
             gid,
             token: "",
@@ -180,7 +180,7 @@ export class TaskManager extends EventTarget {
         const ut = (await this.db.check_onetime_task()).map((t) => t.id);
         if (ut.length && !ut.includes(task.id)) return;
         let t = task;
-        if (task.pid !== Deno.pid) {
+        if (task.pid != Deno.pid) {
             const p = await this.db.set_task_pid(t);
             if (p == null) return;
             t = p;
@@ -198,8 +198,8 @@ export class TaskManager extends EventTarget {
     }
     async check_running_tasks() {
         this.#check_closed();
-        const removed_task: number[] = [];
-        const fataled_task: number[] = [];
+        const removed_task: (number | bigint)[] = [];
+        const fataled_task: (number | bigint)[] = [];
         for (const [id, task] of this.running_tasks) {
             const status = await promiseState(task.task);
             if (status.status == PromiseStatus.Fulfilled && status.value) {
@@ -241,7 +241,7 @@ export class TaskManager extends EventTarget {
     }
     dispatchTaskProgressEvent<T extends TaskType>(
         type: T,
-        task_id: number,
+        task_id: number | bigint,
         detail: TaskProgressBasicType[T],
     ) {
         return this.dispatchEvent("task_progress", { type, task_id, detail });
