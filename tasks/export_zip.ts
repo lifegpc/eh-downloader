@@ -1,4 +1,4 @@
-import { join } from "std/path/mod.ts";
+import { join } from "@std/path";
 import { Uint8ArrayReader, ZipWriter } from "zipjs/index.js";
 import type { EhDb } from "../db.ts";
 import {

@@ -1,4 +1,4 @@
-import { assertEquals } from "std/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 import { SortableURLSearchParams } from "./SortableURLSearchParams.ts";
 
 Deno.test("SortableURLSearchParams_test", () => {

@@ -1,4 +1,4 @@
-import { join } from "std/path/mod.ts";
+import { join } from "@std/path";
 import { filterFilename } from "../utils.ts";
 import type { EhFile } from "../db.ts";
 

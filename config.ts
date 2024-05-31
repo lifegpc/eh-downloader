@@ -1,5 +1,5 @@
-import { exists } from "std/fs/exists.ts";
-import { JsonValue, parse } from "std/jsonc/mod.ts";
+import { exists } from "@std/fs/exists";
+import { JsonValue, parse } from "@std/jsonc";
 import { isDocker } from "./utils.ts";
 
 export type ConfigType = {

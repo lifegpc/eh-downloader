@@ -5,7 +5,7 @@ import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams
 import { get_host } from "../../../server/utils.ts";
 import { User, UserPermission } from "../../../db.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { encodeBase64 as encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "@std/encoding/base64";
 import { return_data } from "../../../server/utils.ts";
 
 export const handler: Handlers = {

@@ -1,4 +1,4 @@
-import { unescape } from "std/html/mod.ts";
+import { unescape } from "@std/html";
 import type { GMeta } from "../db.ts";
 
 export type GalleryMetadataTorrentInfo = {

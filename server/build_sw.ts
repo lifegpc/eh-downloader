@@ -1,5 +1,5 @@
 import { build } from "esbuild/mod.js";
-import { join, resolve } from "std/path/mod.ts";
+import { join, resolve } from "@std/path";
 import { asyncForEach, calFileMd5, checkMapFile } from "../utils.ts";
 
 export async function build_sw() {

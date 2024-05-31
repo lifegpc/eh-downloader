@@ -6,7 +6,7 @@ import {
 } from "../../../server/get_file_response.ts";
 import { parse_bool } from "../../../server/parse_form.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { encodeBase64 as encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "@std/encoding/base64";
 import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
 import { User, UserPermission } from "../../../db.ts";

@@ -3,9 +3,9 @@ import {
     compare as compare_ver,
     format as format_ver,
     parse as parse_ver,
-} from "std/semver/mod.ts";
-import { unescape } from "std/html/mod.ts";
-import { join, resolve } from "std/path/mod.ts";
+} from "@std/semver";
+import { unescape } from "@std/html";
+import { join, resolve } from "@std/path";
 import { SqliteError } from "sqlite/mod.ts";
 import { SqliteError as Sqlite3Error } from "sqlite3/mod.ts";
 import { Status } from "sqlite/src/constants.ts";

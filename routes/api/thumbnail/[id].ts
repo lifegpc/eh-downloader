@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 import { get_task_manager } from "../../../server.ts";
 import { parse_bool, parse_int } from "../../../server/parse_form.ts";
 import {
@@ -19,7 +19,7 @@ import {
 } from "../../../server/get_file_response.ts";
 import { get_host } from "../../../server/utils.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { encodeBase64 as encode } from "std/encoding/base64.ts";
+import { encodeBase64 as encode } from "@std/encoding/base64";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import type * as FFMPEG_API from "../../../thumbnail/ffmpeg_api.ts";
 import { User, UserPermission } from "../../../db.ts";

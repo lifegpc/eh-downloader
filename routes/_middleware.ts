@@ -1,10 +1,10 @@
 import { FreshContext } from "$fresh/server.ts";
-import { join } from "std/path/mod.ts";
+import { join } from "@std/path";
 import {
     get_file_response,
     GetFileResponseOptions,
 } from "../server/get_file_response.ts";
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 import { get_task_manager } from "../server.ts";
 import { build_sw } from "../server/build_sw.ts";
 import { i18n_get_lang } from "../server/i18ns.ts";

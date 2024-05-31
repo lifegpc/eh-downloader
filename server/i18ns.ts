@@ -1,6 +1,6 @@
-import { exists } from "std/fs/exists.ts";
-import { parse } from "std/jsonc/mod.ts";
-import { join } from "std/path/mod.ts";
+import { exists } from "@std/fs/exists";
+import { parse } from "@std/jsonc";
+import { join } from "@std/path";
 import type { I18NMap } from "./i18n.ts";
 import { pick } from "accept-language-parser/";
 import { get_host } from "./utils.ts";

@@ -1,4 +1,4 @@
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 
 export const API_PERMISSION: Deno.PermissionOptions = {
     read: ["./config.json"],

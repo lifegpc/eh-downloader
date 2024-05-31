@@ -1,4 +1,4 @@
-import { dirname } from "std/path/mod.ts";
+import { dirname } from "@std/path";
 import { sure_dir } from "../utils.ts";
 
 const map = JSON.parse(await Deno.readTextFile("./import_map.json")).imports;

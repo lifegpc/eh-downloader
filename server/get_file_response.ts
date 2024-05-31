@@ -1,4 +1,4 @@
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 import mime from "mime";
 import { parse_range } from "./range_parser.ts";
 

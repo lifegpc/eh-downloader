@@ -6,7 +6,7 @@ import { get_string, parse_bool } from "../../../server/parse_form.ts";
 import { fb_get_size } from "../../../thumbnail/ffmpeg_binary.ts";
 import { sure_dir } from "../../../utils.ts";
 import mime from "mime";
-import { extname, join, resolve } from "std/path/mod.ts";
+import { extname, join, resolve } from "@std/path";
 import { UserPermission } from "../../../db.ts";
 
 export const handler: Handlers = {

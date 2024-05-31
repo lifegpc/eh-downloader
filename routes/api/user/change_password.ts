@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import isEqual from "lodash/isEqual";
 import pbkdf2Hmac from "pbkdf2-hmac";
-import { decodeBase64 } from "std/encoding/base64.ts";
+import { decodeBase64 } from "@std/encoding/base64";
 import { User } from "../../../db.ts";
 import { get_task_manager } from "../../../server.ts";
 import { get_string, parse_int } from "../../../server/parse_form.ts";

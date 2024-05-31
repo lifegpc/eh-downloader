@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { get_task_manager } from "../server.ts";
 import { get_host } from "../server/utils.ts";
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 
 export const handler: Handlers = {
     async GET(req, _ctx) {

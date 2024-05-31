@@ -1,4 +1,4 @@
-import { exists } from "std/fs/exists.ts";
+import { exists } from "@std/fs/exists";
 
 export async function check_running(pid: number) {
     if (Deno.build.os == "windows") {

@@ -1,6 +1,13 @@
 {
     "imports": {
-        "std/": "https://deno.land/std@0.213.0/",
+        "@std/assert": "jsr:/@std/assert@0.225.3",
+        "@std/cli/": "jsr:/@std/cli@0.224.4/",
+        "@std/encoding/": "jsr:/@std/encoding@0.224.3/",
+        "@std/fs/": "jsr:/@std/fs@0.229.1/",
+        "@std/html": "jsr:/@std/html@0.224.1",
+        "@std/jsonc": "jsr:/@std/jsonc@0.224.0",
+        "@std/path": "jsr:/@std/path@0.225.1",
+        "@std/semver": "jsr:/@std/semver@0.224.1",
         "deno_dom/": "https://deno.land/x/deno_dom@v0.1.43/",
         "sqlite/": "https://deno.land/x/sqlite@v3.8/",
         "zipjs/": "https://deno.land/x/zipjs@v2.7.33/",

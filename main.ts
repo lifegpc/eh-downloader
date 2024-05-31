@@ -1,4 +1,4 @@
-import { parseArgs as parse } from "std/cli/parse_args.ts";
+import { parseArgs as parse } from "@std/cli/parse-args";
 import { load_settings } from "./config.ts";
 import { check_file_permissions } from "./permissons.ts";
 import { AlreadyClosedError, TaskManager } from "./task_manager.ts";

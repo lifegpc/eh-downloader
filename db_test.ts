@@ -1,4 +1,4 @@
-import { assertEquals } from "std/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 import { EhDb, EhFile, GMeta, PMeta } from "./db.ts";
 import { TaskType } from "./task.ts";
 import { DB_PERMISSION, remove_if_exists } from "./test_base.ts";

@@ -1,4 +1,4 @@
-import { assert } from "std/assert/mod.ts";
+import { assert } from "@std/assert";
 import { Client } from "../client.ts";
 import type { Config } from "../config.ts";
 import type { EhDb, EhFile, PMeta } from "../db.ts";
@@ -20,8 +20,8 @@ import {
     sure_dir,
     TimeoutError,
 } from "../utils.ts";
-import { join, resolve } from "std/path/mod.ts";
-import { exists } from "std/fs/exists.ts";
+import { join, resolve } from "@std/path";
+import { exists } from "@std/fs/exists";
 import { ProgressReadable } from "../utils/progress_readable.ts";
 
 export type DownloadConfig = {

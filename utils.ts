@@ -1,5 +1,5 @@
-import { exists, existsSync } from "std/fs/exists.ts";
-import { extname } from "std/path/mod.ts";
+import { exists, existsSync } from "@std/fs/exists";
+import { extname } from "@std/path";
 import { initParser } from "deno_dom/deno-dom-wasm-noinit.ts";
 import { configure } from "zipjs/index.js";
 import { MD5 } from "lifegpc-md5";

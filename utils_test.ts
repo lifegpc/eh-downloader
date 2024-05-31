@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "std/assert/mod.ts";
+import { assert, assertEquals } from "@std/assert";
 import { check_running } from "./pid_check.ts";
 import {
     add_suffix_to_path,
