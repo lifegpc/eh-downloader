@@ -11,7 +11,7 @@ Deno.test({
     const client = new Client(cfg);
     const re = await client.fetchGalleryMetadataByAPI([1389215, "b5e43bd12d"]);
     console.log(re.obj);
-    const gdata = re.map.get(1389215);
+    const gdata = re.map.get(1389215n);
     assert(gdata !== undefined && typeof gdata !== "string");
     assertEquals(
         gdata.title,
