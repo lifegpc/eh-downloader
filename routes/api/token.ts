@@ -67,7 +67,11 @@ export const handler: Handlers = {
         if (is_from_auth && is_from_cookie) {
             headers["Set-Cookie"] = `token=${token.token}; Max-Age=0${
                 token.http_only ? "; HttpOnly" : ""
-            }${token.secure ? "; SameSite=None; Secure" : ""}; Path=/api`;
+            }${
+                token.secure
+                    ? "; SameSite=None; Secure; Partitioned"
+                    : ""
+            }; Path=/api`;
         }
         return return_data(true, 200, headers);
     },
@@ -151,7 +155,11 @@ export const handler: Handlers = {
             headers["Set-Cookie"] =
                 `token=${token.token}; Expires=${token.expired.toUTCString()}${
                     http_only ? "; HttpOnly" : ""
-                }${secure ? "; SameSite=None; Secure" : ""}; Path=/api`;
+                }${
+                    secure
+                        ? "; SameSite=None; Secure; Partitioned"
+                        : ""
+                }; Path=/api`;
         }
         return return_data(token, 201, headers);
     },

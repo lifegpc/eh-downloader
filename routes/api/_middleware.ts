@@ -98,7 +98,7 @@ export async function handler(req: Request, ctx: FreshContext) {
                             t.http_only ? "; HttpOnly" : ""
                         }${
                             t.secure
-                                ? "; SameSite=None; Secure"
+                                ? "; SameSite=None; Secure; Partitioned"
                                 : ""
                         }; Path=/api`,
                     );
