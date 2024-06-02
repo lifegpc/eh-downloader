@@ -167,6 +167,11 @@ export const handler: Handlers = {
                 );
                 const b = new URLSearchParams(bs.toString());
                 b.append("verify", tverify);
+                if (m.cfg.use_path_based_img_url) {
+                    return Response.redirect(
+                        `${get_host(req)}/thumbnail/${b}/${f.id}.jpg`,
+                    );
+                }
                 return Response.redirect(
                     `${get_host(req)}/thumbnail/${f.id}?${b}`,
                 );

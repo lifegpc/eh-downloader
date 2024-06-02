@@ -300,7 +300,10 @@ export function toJSON(obj: unknown) {
 export function parseBigInt(str: string) {
     const t = parseInt(str);
     if (isNaN(t)) return t;
-    return !Number.isSafeInteger(t) ? BigInt(str) : t;
+    if (Number.isSafeInteger(t)) return t;
+    const m = str.match(/^(\+|-)?\d+/);
+    if (!m) return NaN;
+    return BigInt(m[0]);
 }
 
 export function isNumNaN(num: number | bigint) {

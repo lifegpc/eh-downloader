@@ -38,6 +38,7 @@ import * as $file_verify_id_ from "./routes/file/[verify]/[id].ts";
 import * as $file_middleware from "./routes/file/_middleware.ts";
 import * as $index from "./routes/index.ts";
 import * as $thumbnail_id_ from "./routes/thumbnail/[id].ts";
+import * as $thumbnail_verify_id_ from "./routes/thumbnail/[verify]/[id].ts";
 import * as $thumbnail_middleware from "./routes/thumbnail/_middleware.ts";
 import * as $upload from "./routes/upload.tsx";
 import * as $Upload from "./islands/Upload.tsx";
@@ -82,6 +83,7 @@ const manifest = {
         "./routes/file/_middleware.ts": $file_middleware,
         "./routes/index.ts": $index,
         "./routes/thumbnail/[id].ts": $thumbnail_id_,
+        "./routes/thumbnail/[verify]/[id].ts": $thumbnail_verify_id_,
         "./routes/thumbnail/_middleware.ts": $thumbnail_middleware,
         "./routes/upload.tsx": $upload,
     },

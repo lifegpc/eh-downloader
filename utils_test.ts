@@ -9,6 +9,7 @@ import {
     compareNum,
     filterFilename,
     map,
+    parseBigInt,
     promiseState,
     PromiseStatus,
     sleep,
@@ -37,7 +38,7 @@ Deno.test("promiseState_test", async () => {
 });
 
 Deno.test("Pid_Test", async () => {
-    if (Deno.build.os == "windows") {
+    if (Deno.build.os == "windows" || Deno.build.os == "linux") {
         assertEquals(await check_running(Deno.pid), true);
     }
 });
@@ -179,4 +180,14 @@ Deno.test("compareNum_test", () => {
         5n,
         11n,
     ]);
+});
+
+Deno.test("parseBigInt_test", () => {
+    assertEquals(parseBigInt("1.jpg"), 1);
+    assertEquals(parseBigInt("9007199254740992.png"), 9007199254740992n);
+    assertEquals(parseBigInt("+3_3"), 3);
+    assertEquals(parseBigInt("+9007199254740992"), 9007199254740992n);
+    assertEquals(parseBigInt("-9007199254740992.3"), -9007199254740992n);
+    assertEquals(parseBigInt("--9007199254740992"), NaN);
+    assertEquals(parseBigInt("--3"), NaN);
 });

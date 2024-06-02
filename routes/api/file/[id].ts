@@ -12,6 +12,7 @@ import type { EhFileExtend } from "../../../server/files.ts";
 import { User, UserPermission } from "../../../db.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import { isNumNaN, parseBigInt } from "../../../utils.ts";
+import { extname } from "@std/path";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -77,6 +78,12 @@ export const handler: Handlers = {
                 ),
             );
             if (verify === null) {
+                if (m.cfg.use_path_based_img_url) {
+                    const ext = extname(f.path);
+                    return Response.redirect(
+                        `${get_host(req)}/file/${tverify}/${f.id}${ext}`,
+                    );
+                }
                 const b = new URLSearchParams();
                 b.append("verify", tverify);
                 return Response.redirect(

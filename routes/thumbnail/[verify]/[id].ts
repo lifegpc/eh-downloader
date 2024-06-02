@@ -1,16 +1,16 @@
 import { Handlers } from "$fresh/server.ts";
 import { exists } from "@std/fs/exists";
-import { get_task_manager } from "../../server.ts";
-import { parse_int } from "../../server/parse_form.ts";
-import { generate_filename, ThumbnailConfig } from "../../thumbnail/base.ts";
-import { isNumNaN, parseBigInt, sure_dir } from "../../utils.ts";
+import { get_task_manager } from "../../../server.ts";
+import { parse_int } from "../../../server/parse_form.ts";
+import { generate_filename, ThumbnailConfig } from "../../../thumbnail/base.ts";
+import { isNumNaN, parseBigInt, sure_dir } from "../../../utils.ts";
 import {
     get_file_response,
     GetFileResponseOptions,
-} from "../../server/get_file_response.ts";
+} from "../../../server/get_file_response.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
-import { SortableURLSearchParams } from "../../server/SortableURLSearchParams.ts";
+import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -21,13 +21,15 @@ export const handler: Handlers = {
         const m = get_task_manager();
         const b = m.cfg.thumbnail_dir;
         await sure_dir(b);
-        const u = new URL(req.url);
         if (!m.cfg.img_verify_secret) {
             return new Response("Can not verify.", { status: 400 });
         }
-        const verify = u.searchParams.get("verify");
+        // U2 存在将 & 错误的编码为 &amp; 的BUG
+        const tmp = ctx.params.verify.replaceAll("&amp;", "&");
+        const search = new URLSearchParams(tmp);
+        const verify = search.get("verify");
         if (!verify) return new Response("Verify is needed.", { status: 400 });
-        const bs = new SortableURLSearchParams(u.search, ["verify"]);
+        const bs = new SortableURLSearchParams(tmp, ["verify"]);
         const tverify = encode(
             new Uint8Array(
                 await pbkdf2Hmac(
@@ -42,11 +44,11 @@ export const handler: Handlers = {
         if (verify !== tverify) {
             return new Response("verify is invalid.", { status: 400 });
         }
-        const width = await parse_int(u.searchParams.get("width"), null);
-        const height = await parse_int(u.searchParams.get("height"), null);
-        const quality = await parse_int(u.searchParams.get("quality"), null);
-        const method = await parse_int(u.searchParams.get("method"), null);
-        const align = await parse_int(u.searchParams.get("align"), null);
+        const width = await parse_int(search.get("width"), null);
+        const height = await parse_int(search.get("height"), null);
+        const quality = await parse_int(search.get("quality"), null);
+        const method = await parse_int(search.get("method"), null);
+        const align = await parse_int(search.get("align"), null);
         if (
             width === null || height === null || quality === null ||
             method === null || align === null
