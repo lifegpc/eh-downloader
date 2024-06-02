@@ -120,9 +120,15 @@ export const handler: Handlers = {
                     ),
                 ),
             );
-            const b = new URLSearchParams();
-            b.append("verify", verify);
-            url = `${get_host(req)}/file/${f.id}?${b}`;
+            if (m.cfg.use_path_based_img_url) {
+                url = `${get_host(req)}/file/${
+                    encodeURIComponent(verify)
+                }/${f.id}`;
+            } else {
+                const b = new URLSearchParams();
+                b.append("verify", verify);
+                url = `${get_host(req)}/file/${f.id}?${b}`;
+            }
         } else {
             const t = thumb ? "thumbnail" : "file";
             if (m.cfg.random_file_secret) {
