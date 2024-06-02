@@ -81,7 +81,9 @@ export const handler: Handlers = {
                 if (m.cfg.use_path_based_img_url) {
                     const ext = extname(f.path);
                     return Response.redirect(
-                        `${get_host(req)}/file/${tverify}/${f.id}${ext}`,
+                        `${get_host(req)}/file/${
+                            encodeURIComponent(tverify)
+                        }/${f.id}${ext}`,
                     );
                 }
                 const b = new URLSearchParams();
