@@ -7,6 +7,7 @@ import { User, UserPermission } from "../../../db.ts";
 import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
 import { return_data } from "../../../server/utils.ts";
+import { extname } from "@std/path";
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -121,9 +122,10 @@ export const handler: Handlers = {
                 ),
             );
             if (m.cfg.use_path_based_img_url) {
+                const ext = extname(f.path);
                 url = `${get_host(req)}/file/${
                     encodeURIComponent(verify)
-                }/${f.id}`;
+                }/${f.id}${ext}`;
             } else {
                 const b = new URLSearchParams();
                 b.append("verify", verify);
