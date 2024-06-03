@@ -15,6 +15,7 @@ export async function handler(req: Request, ctx: FreshContext) {
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
             headers.set("Access-Control-Allow-Headers", "Content-Type, Range");
             if (c) headers.set("Access-Control-Allow-Credentials", "true");
+            headers.set("Access-Control-Allow-Private-Network", "true");
         }
         return new Response(null, { status: 204, headers });
     } else {
