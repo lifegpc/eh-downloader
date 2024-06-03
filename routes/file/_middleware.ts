@@ -26,6 +26,7 @@ export async function handler(req: Request, ctx: FreshContext) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers.set("Access-Control-Allow-Origin", origin);
             if (c) headers.set("Access-Control-Allow-Credentials", "true");
+            headers.append("Vary", "Origin");
         }
         return new Response(res.body, {
             status: res.status,
