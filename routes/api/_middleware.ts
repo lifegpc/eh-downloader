@@ -93,10 +93,9 @@ export async function handler(req: Request, ctx: FreshContext) {
             if (ot.expired.getTime() - 2505600000 < now) {
                 try {
                     const t = m.db.update_token(ot.token, now);
-                    const host = t.secure ? "__Host-" : "";
                     headers.append(
                         "Set-Cookie",
-                        `${host}token=${t.token}; Expires=${t.expired.toUTCString()}${
+                        `token=${t.token}; Expires=${t.expired.toUTCString()}${
                             t.http_only ? "; HttpOnly" : ""
                         }${
                             t.secure

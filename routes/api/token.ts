@@ -65,8 +65,7 @@ export const handler: Handlers = {
         m.db.delete_token(t);
         const headers: HeadersInit = {};
         if (is_from_auth && is_from_cookie) {
-            const host = token.secure ? "__Host-" : "";
-            headers["Set-Cookie"] = `${host}token=${token.token}; Max-Age=0${
+            headers["Set-Cookie"] = `token=${token.token}; Max-Age=0${
                 token.http_only ? "; HttpOnly" : ""
             }${
                 token.secure
@@ -153,9 +152,8 @@ export const handler: Handlers = {
         );
         const headers: HeadersInit = {};
         if (set_cookie) {
-            const host = token.secure ? "__Host-" : "";
             headers["Set-Cookie"] =
-                `${host}token=${token.token}; Expires=${token.expired.toUTCString()}${
+                `token=${token.token}; Expires=${token.expired.toUTCString()}${
                     http_only ? "; HttpOnly" : ""
                 }${
                     secure
