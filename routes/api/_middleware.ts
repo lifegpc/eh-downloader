@@ -58,7 +58,7 @@ export async function handler(req: Request, ctx: FreshContext) {
         if (origin) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers["Access-Control-Allow-Origin"] = origin;
-            if (c) headers["Access-Control-Allow-Credentials"] = "true";
+            headers["Access-Control-Allow-Credentials"] = c ? "true" : "false";
         }
         return return_error(401, "Unauthorized", 401, headers);
     }
@@ -72,8 +72,14 @@ export async function handler(req: Request, ctx: FreshContext) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers.set("Access-Control-Allow-Origin", origin);
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
-            headers.set("Access-Control-Allow-Headers", "Content-Type, Range, X-TOKEN");
-            if (c) headers.set("Access-Control-Allow-Credentials", "true");
+            headers.set(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Range, X-TOKEN",
+            );
+            headers.set(
+                "Access-Control-Allow-Credentials",
+                c ? "true" : "false",
+            );
             headers.set("Access-Control-Allow-Private-Network", "true");
         }
         return new Response(null, { status: 204, headers });
@@ -84,7 +90,10 @@ export async function handler(req: Request, ctx: FreshContext) {
         if (origin) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers.set("Access-Control-Allow-Origin", origin);
-            if (c) headers.set("Access-Control-Allow-Credentials", "true");
+            headers.set(
+                "Access-Control-Allow-Credentials",
+                c ? "true" : "false",
+            );
         }
         if (ctx.state.is_from_cookie && ctx.state.token) {
             const m = get_task_manager();
