@@ -32,6 +32,13 @@ function handle_auth(req: Request, ctx: FreshContext) {
         ) {
             return true;
         }
+        // 适配 U2 将 & 编码为 &amp;
+        if (
+            m.cfg.random_file_secret && u.pathname == "/api/file/random" &&
+            req.method == "GET" && u.searchParams.get("amp;token")
+        ) {
+            return true;
+        }
         return false;
     };
     if (!token) return check();
