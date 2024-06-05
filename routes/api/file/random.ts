@@ -19,11 +19,13 @@ export const handler: Handlers = {
             return new Response("Permission denied", { status: 403 });
         }
         const m = get_task_manager();
-        const u = new URL(req.url);
-        const token = u.searchParams.get("token");
-        const action = u.searchParams.get("action");
+        // U2 会错误的将 & 编码为 &amp;
+        const search = new URL(req.url).search.replaceAll("&amp;", "&");
+        const params = new URLSearchParams(search);
+        const token = params.get("token");
+        const action = params.get("action");
         if (token && m.cfg.random_file_secret) {
-            const s = new SortableURLSearchParams(u.search, ["token"]);
+            const s = new SortableURLSearchParams(search, ["token"]);
             const r = encode(
                 new Uint8Array(
                     await pbkdf2Hmac(
@@ -45,7 +47,7 @@ export const handler: Handlers = {
                     status: 400,
                 });
             }
-            const s = new SortableURLSearchParams(u.search, [
+            const s = new SortableURLSearchParams(search, [
                 "token",
                 "action",
             ]);
@@ -60,20 +62,17 @@ export const handler: Handlers = {
                     ),
                 ),
             );
-            const b = new URLSearchParams(u.search);
+            const b = new URLSearchParams(search);
             b.delete("action");
             b.set("token", token);
             return return_data(`${get_host(req)}/api/file/random?${b}`);
         }
-        const is_nsfw = await parse_bool(u.searchParams.get("is_nsfw"), null);
-        const is_ad = await parse_bool(u.searchParams.get("is_ad"), null);
-        const thumb = await parse_bool(u.searchParams.get("thumb"), false);
-        const svg = await parse_bool(u.searchParams.get("svg"), false);
-        const jpn_title = await parse_bool(
-            u.searchParams.get("jpn_title"),
-            false,
-        );
-        const tgids = u.searchParams.get("gids");
+        const is_nsfw = await parse_bool(params.get("is_nsfw"), null);
+        const is_ad = await parse_bool(params.get("is_ad"), null);
+        const thumb = await parse_bool(params.get("thumb"), false);
+        const svg = await parse_bool(params.get("svg"), false);
+        const jpn_title = await parse_bool(params.get("jpn_title"), false);
+        const tgids = params.get("gids");
         let gids = tgids
             ? new Set(
                 tgids.split(",").map((x) => parseInt(x)).filter((v) =>
@@ -81,8 +80,8 @@ export const handler: Handlers = {
                 ),
             )
             : null;
-        const meili_query = u.searchParams.get("meili_query");
-        const meili_filter = u.searchParams.get("meili_filter");
+        const meili_query = params.get("meili_query");
+        const meili_filter = params.get("meili_filter");
         if (meili_query || meili_filter) {
             if (!m.meilisearch) {
                 return new Response("Meilisearch is not enabled.", {
