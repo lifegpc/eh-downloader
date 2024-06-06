@@ -372,9 +372,6 @@ export async function download_task(
                         pr.addEventListener("progress", (e) => {
                             m.set_details_downloaded(i.index, e.detail);
                         });
-                        pr.addEventListener("finished", () => {
-                            m.remove_details(i.index);
-                        });
                         try {
                             const f = await Deno.open(path, {
                                 create: true,
@@ -426,6 +423,7 @@ export async function download_task(
                                 }
                             }
                         }
+                        m.remove_details(i.index);
                     }
                     const errors: unknown[] = [];
                     function try_download(a: number) {
