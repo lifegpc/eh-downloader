@@ -17,6 +17,7 @@ import * as $api_file_upload from "./routes/api/file/upload.ts";
 import * as $api_filemeta from "./routes/api/filemeta.ts";
 import * as $api_filemeta_token_ from "./routes/api/filemeta/[token].ts";
 import * as $api_files_token_ from "./routes/api/files/[token].ts";
+import * as $api_fs_list from "./routes/api/fs/list.ts";
 import * as $api_gallery_gid_ from "./routes/api/gallery/[gid].ts";
 import * as $api_gallery_list from "./routes/api/gallery/list.ts";
 import * as $api_gallery_meta_gids_ from "./routes/api/gallery/meta/[gids].ts";
@@ -62,6 +63,7 @@ const manifest = {
         "./routes/api/filemeta.ts": $api_filemeta,
         "./routes/api/filemeta/[token].ts": $api_filemeta_token_,
         "./routes/api/files/[token].ts": $api_files_token_,
+        "./routes/api/fs/list.ts": $api_fs_list,
         "./routes/api/gallery/[gid].ts": $api_gallery_gid_,
         "./routes/api/gallery/list.ts": $api_gallery_list,
         "./routes/api/gallery/meta/[gids].ts": $api_gallery_meta_gids_,
