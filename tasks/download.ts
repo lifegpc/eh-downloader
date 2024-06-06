@@ -9,7 +9,7 @@ import {
     TaskType,
 } from "../task.ts";
 import { TaskManager } from "../task_manager.ts";
-import { RecoverableError } from "../utils.ts";
+import { calFileSha1, getHashFromUrl, RecoverableError } from "../utils.ts";
 import {
     add_suffix_to_path,
     asyncEvery,
@@ -178,6 +178,12 @@ class DownloadManager {
     set_total_page(page: number) {
         this.#progress.total_page = page;
         this.#sendEvent();
+    }
+}
+
+class HashError extends RecoverableError {
+    constructor() {
+        super("Hash error");
     }
 }
 
@@ -402,6 +408,17 @@ export async function download_task(
                                 null;
                             }
                         }
+                        if (manager.cfg.check_file_hash) {
+                            const url = re.url;
+                            const hash = getHashFromUrl(url);
+                            const fhash = await calFileSha1(path);
+                            if (hash != fhash) {
+                                console.warn(
+                                    `Hash not matched: file hash ${fhash}, original hash ${hash}, url ${url}`,
+                                );
+                                throw new HashError();
+                            }
+                        }
                     }
                     const errors: unknown[] = [];
                     function try_download(a: number) {
@@ -426,7 +443,10 @@ export async function download_task(
                                     return;
                                 }
                             }
-                            if (e instanceof TimeoutError) {
+                            if (
+                                e instanceof TimeoutError ||
+                                e instanceof HashError
+                            ) {
                                 m.remove_details(i.index);
                                 reject(e);
                                 return;

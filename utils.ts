@@ -3,6 +3,7 @@ import { extname } from "@std/path";
 import { initParser } from "deno_dom/wasm-noinit";
 import { configure } from "zipjs/index.js";
 import { MD5 } from "lifegpc-md5";
+import { SHA1 } from "@lifegpc/sha1";
 
 export function sleep(time: number): Promise<undefined> {
     return new Promise((r) => {
@@ -191,7 +192,25 @@ export async function calFileMd5(p: string | URL) {
         do {
             readed = await f.read(buf);
             if (readed) {
-                h.update(buf.slice(0, readed));
+                h.update(buf, readed);
+            }
+        } while (readed !== null);
+        return h.digest_hex();
+    } finally {
+        f.close();
+    }
+}
+
+export async function calFileSha1(p: string | URL) {
+    const h = new SHA1();
+    const f = await Deno.open(p);
+    try {
+        const buf = new Uint8Array(4096);
+        let readed: number | null = null;
+        do {
+            readed = await f.read(buf);
+            if (readed) {
+                h.update(buf, readed);
             }
         } while (readed !== null);
         return h.digest_hex();
@@ -312,4 +331,13 @@ export function isNumNaN(num: number | bigint) {
 
 export function compareNum(num1: number | bigint, num2: number | bigint) {
     return num1 == num2 ? 0 : num1 < num2 ? -1 : 1;
+}
+
+const HASH_PATTERN = /^\/h\/([0-9a-f]+)/;
+
+export function getHashFromUrl(url: string | URL) {
+    const u = typeof url === "string" ? new URL(url) : url;
+    const m = u.pathname.match(HASH_PATTERN);
+    if (m) return m[1];
+    throw Error(`URL ${url} not contains hash info.`);
 }

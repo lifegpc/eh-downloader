@@ -1,11 +1,11 @@
 import { assert, assertEquals } from "@std/assert";
 import { Client } from "../client.ts";
 import { load_settings } from "../config.ts";
-import { API_PERMISSION } from "../test_base.ts";
+import { SHA1 } from "@lifegpc/sha1";
+import { getHashFromUrl } from "../utils.ts";
 
 Deno.test({
     name: "SinglePage_test",
-    permissions: API_PERMISSION,
 }, async () => {
     const cfg = await load_settings("./config.json");
     const client = new Client(cfg);
@@ -38,4 +38,10 @@ Deno.test({
     assertEquals(re2.origin_xres, 4893);
     assertEquals(re2.origin_yres, 3446);
     console.log(np.nl, re.nl, re2.nl);
+    console.log(re2.img_url);
+    const res = await client.request(re2.img_url, "GET");
+    const data = await res.arrayBuffer();
+    const h = (new SHA1()).update(new Uint8Array(data)).digest_hex();
+    const oh = getHashFromUrl(re2.img_url);
+    assertEquals(h, oh);
 });

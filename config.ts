@@ -36,6 +36,7 @@ export type ConfigType = {
     eh_metadata_cache_time: number;
     random_file_secret?: string;
     use_path_based_img_url: boolean;
+    check_file_hash: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -208,6 +209,9 @@ export class Config {
     get use_path_based_img_url() {
         return this._return_bool("use_path_based_img_url") ?? true;
     }
+    get check_file_hash() {
+        return this._return_bool("check_file_hash") ?? true;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -243,6 +247,7 @@ export class Config {
             eh_metadata_cache_time: this.eh_metadata_cache_time,
             random_file_secret: this.random_file_secret,
             use_path_based_img_url: this.use_path_based_img_url,
+            check_file_hash: this.check_file_hash,
         };
     }
 }

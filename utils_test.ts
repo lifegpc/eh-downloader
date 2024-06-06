@@ -6,6 +6,7 @@ import {
     asyncFilter,
     asyncForEach,
     calFileMd5,
+    calFileSha1,
     compareNum,
     filterFilename,
     map,
@@ -17,6 +18,7 @@ import {
     toJSON,
 } from "./utils.ts";
 import { md5 } from "lifegpc-md5";
+import { sha1 } from "@lifegpc/sha1";
 
 Deno.test("promiseState_test", async () => {
     const p1 = new Promise((res) => setTimeout(() => res(100), 100));
@@ -102,6 +104,13 @@ Deno.test("calFileMd5_test", async () => {
     const text = `Hello World.te${Math.random()}`;
     await Deno.writeTextFile("./test/test.txt", text);
     assertEquals(await calFileMd5("./test/test.txt"), md5(text));
+});
+
+Deno.test("calFileSha1_test", async () => {
+    await sure_dir();
+    const text = `Hello World.te${Math.random()}dsadasd`;
+    await Deno.writeTextFile("./test/testsha1.txt", text);
+    assertEquals(await calFileSha1("./test/testsha1.txt"), sha1(text));
 });
 
 Deno.test("asyncEvery_test", async () => {
