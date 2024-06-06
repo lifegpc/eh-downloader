@@ -410,13 +410,20 @@ export async function download_task(
                         }
                         if (manager.cfg.check_file_hash) {
                             const url = re.url;
-                            const hash = getHashFromUrl(url);
-                            const fhash = await calFileSha1(path);
-                            if (hash != fhash) {
-                                console.warn(
-                                    `Hash not matched: file hash ${fhash}, original hash ${hash}, url ${url}`,
-                                );
-                                throw new HashError();
+                            let hash: string | null = null;
+                            try {
+                                hash = getHashFromUrl(url);
+                            } catch (e) {
+                                console.warn(e);
+                            }
+                            if (hash) {
+                                const fhash = await calFileSha1(path);
+                                if (hash != fhash) {
+                                    console.warn(
+                                        `Hash not matched: file hash ${fhash}, original hash ${hash}, url ${url}`,
+                                    );
+                                    throw new HashError();
+                                }
                             }
                         }
                     }
