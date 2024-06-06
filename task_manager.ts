@@ -157,7 +157,7 @@ export class TaskManager extends EventTarget {
         };
         return await this.#add_task(task);
     }
-    async add_update_meili_search_data_task(gid?: number) {
+    async add_update_meili_search_data_task(gid?: number | bigint) {
         this.#check_closed();
         const otask = await this.db.check_update_meili_search_data_task(gid);
         if (otask !== undefined) {

@@ -157,6 +157,14 @@ export const handler: Handlers = {
             } catch (e) {
                 return return_error(500, e.message);
             }
+        } else if (typ == "update_meili_search_data") {
+            const gid = await parse_big_int(form.get("gid"), 0);
+            try {
+                const task = await t.add_update_meili_search_data_task(gid);
+                return return_data(task, 201);
+            } catch (e) {
+                return return_error(500, e.message);
+            }
         } else {
             return return_error(5, "unknown type");
         }

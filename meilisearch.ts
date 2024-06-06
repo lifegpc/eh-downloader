@@ -4,7 +4,7 @@ import {
     MeiliSearch,
     MeiliSearchApiError,
 } from "meilisearch";
-import { sleep } from "./utils.ts";
+import { sleep, toJSON } from "./utils.ts";
 import type { EhDb } from "./db.ts";
 import isEqual from "lodash/isEqual";
 
@@ -141,7 +141,8 @@ export class MeiliSearchServer {
             e.tags = this.db.get_gtags_full(gid);
             return e;
         });
-        await this.waitTask(gmeta.updateDocuments(datas));
+        const d = JSON.parse(toJSON(datas));
+        await this.waitTask(gmeta.updateDocuments(d));
     }
     async waitTask(task: EnqueuedTask | Promise<EnqueuedTask>) {
         if (task instanceof Promise) {
