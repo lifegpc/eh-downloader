@@ -9,6 +9,7 @@ import {
     calFileSha1,
     compareNum,
     filterFilename,
+    getHashFromUrl,
     map,
     parseBigInt,
     promiseState,
@@ -199,4 +200,31 @@ Deno.test("parseBigInt_test", () => {
     assertEquals(parseBigInt("-9007199254740992.3"), -9007199254740992n);
     assertEquals(parseBigInt("--9007199254740992"), NaN);
     assertEquals(parseBigInt("--3"), NaN);
+});
+
+Deno.test("getHashFromUrl_test", () => {
+    assertEquals(
+        getHashFromUrl(
+            "https://tgozcdr.gmhufzljgpgr.hath.network/h/5ad98a65fedb4bbe374200127bf59122d790b01a-561706-2400-3455-jpg/keystamp=1717653000-d7f10a5a37;fileindex=148307765;xres=2400/3.jpg",
+        ),
+        "5ad98a65fedb4bbe374200127bf59122d790b01a",
+    );
+    assertEquals(
+        getHashFromUrl(
+            "https://shioxowwjqzzmcmcjtcc.hath.network/om/148307800/fdf168f74a048b4d8ac00fd8679ebd37495d4225-12779336-5709-4063-png/eda2e519f8a8d08af91c9e69aca958bad4287fc7-442362-2400-1708-jpg/2400/jxd25rgrogit4j1d6bp/13_14.jpg",
+        ),
+        "eda2e519f8a8d08af91c9e69aca958bad4287fc7",
+    );
+    assertEquals(
+        getHashFromUrl(
+            "https://wodmrfmkcovmstjztpdj.hath.network/om/148307765/b17d7a49b90ec7f8e586dd9847d22027b0d56d6b-5720430-2822-4063-png/x/0/erpgfojcsyhu9v1d6b2/3.png",
+        ),
+        "b17d7a49b90ec7f8e586dd9847d22027b0d56d6b",
+    );
+    assertEquals(
+        getHashFromUrl(
+            "https://asmrsqqftvbbqqaocggo.hath.network/om/98603353/1f48eb617ea10c4b48ef0485d43f339985119d7f-13101261-4893-3446-png/4038f0c078b59736aeaa5b1ce38a44b701238363-330283-2400-1690-jpg/2400/g101vh47s3q5al1d6ax/18.jpg",
+        ),
+        "4038f0c078b59736aeaa5b1ce38a44b701238363",
+    );
 });

@@ -334,10 +334,26 @@ export function compareNum(num1: number | bigint, num2: number | bigint) {
 }
 
 const HASH_PATTERN = /^\/h\/([0-9a-f]+)/;
+const FHASH_PATTERN = /([0-9a-f]{40})-(\d+)-(\d+)-(\d+)-([^\/]+)/g;
 
 export function getHashFromUrl(url: string | URL) {
     const u = typeof url === "string" ? new URL(url) : url;
     const m = u.pathname.match(HASH_PATTERN);
     if (m) return m[1];
+    if (u.pathname.startsWith("/om/")) {
+        const ma = Array.from(u.pathname.matchAll(FHASH_PATTERN));
+        const comps = u.pathname.split("/");
+        if (ma.length && comps.length > 3) {
+            const width = comps[comps.length - 3];
+            if (width == "0") {
+                return ma[0][1];
+            }
+            for (const f of ma) {
+                if (f[3] == width) {
+                    return f[1];
+                }
+            }
+        }
+    }
     throw Error(`URL ${url} not contains hash info.`);
 }
