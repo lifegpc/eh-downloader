@@ -187,7 +187,7 @@ export async function calFileMd5(p: string | URL) {
     const h = new MD5();
     const f = await Deno.open(p);
     try {
-        const buf = new Uint8Array(4096);
+        const buf = new Uint8Array(65536);
         let readed: number | null = null;
         do {
             readed = await f.read(buf);
@@ -205,7 +205,7 @@ export async function calFileSha1(p: string | URL) {
     const h = new SHA1();
     const f = await Deno.open(p);
     try {
-        const buf = new Uint8Array(4096);
+        const buf = new Uint8Array(65536);
         let readed: number | null = null;
         do {
             readed = await f.read(buf);
