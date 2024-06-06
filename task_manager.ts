@@ -177,8 +177,8 @@ export class TaskManager extends EventTarget {
     async check_task(task: Task) {
         this.#check_closed();
         if (await this.check_task_is_running(task)) return;
-        const ut = (await this.db.check_onetime_task()).map((t) => t.id);
-        if (ut.length && !ut.includes(task.id)) return;
+        const ut = (await this.db.check_onetime_task()).map((t) => BigInt(t.id));
+        if (ut.length && !ut.includes(BigInt(task.id))) return;
         let t = task;
         if (task.pid != Deno.pid) {
             const p = await this.db.set_task_pid(t);
@@ -342,13 +342,13 @@ export class TaskManager extends EventTarget {
                     base: task,
                 },
             );
-        } else if (task.type === TaskType.UpdateMeiliSearchData) {
+        } else if (task.type == TaskType.UpdateMeiliSearchData) {
             await this.waiting_unfinished_task();
             this.running_tasks.set(BigInt(task.id), {
                 task: update_meili_search_data(task, this),
                 base: task,
             });
-        } else if (task.type === TaskType.FixGalleryPage) {
+        } else if (task.type == TaskType.FixGalleryPage) {
             await this.waiting_unfinished_task();
             this.running_tasks.set(BigInt(task.id), {
                 task: fix_gallery_page(task, this),
