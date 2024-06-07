@@ -4,14 +4,12 @@ import {
     add_suffix_to_path,
     asyncEvery,
     asyncFilter,
-    configureZipJs,
     promiseState,
     PromiseStatus,
     RecoverableError,
     sleep,
     sure_dir,
 } from "../utils.ts";
-import { FS, ZipFileEntry } from "zipjs/index.js";
 import { exists } from "@std/fs/exists";
 import { walk } from "@std/fs/walk";
 import { extname, join, relative } from "@std/path";
@@ -139,7 +137,6 @@ class ImportManager {
 }
 
 class FileLoader {
-    #zip?: FS;
     #path;
     #files: string[] = [];
     #inited = false;
@@ -157,11 +154,8 @@ class FileLoader {
             return join(this.#path, name);
         }
     }
-    #get_zip(name: string) {
-        const ext = this.#zip!.getChildByName(name);
-        if (ext && ext instanceof ZipFileEntry) {
-            return ext;
-        }
+    #get_zip(_name: string) {
+        return null;
     }
     get_file(name: string) {
         let t = this.#get_file(name);
@@ -190,22 +184,6 @@ class FileLoader {
                     this.#files.push(relative(this.#path, i.path));
                 }
             }
-        } else {
-            configureZipJs();
-            const r = await Deno.open(this.#path, { read: true });
-            try {
-                this.#zip = new FS();
-                const ent = await this.#zip.importReadable(r.readable);
-                for (const e of ent) {
-                    this.#files.push(e.getFullname());
-                }
-            } finally {
-                try {
-                    r.close();
-                } catch (_) {
-                    null;
-                }
-            }
         }
         let has_prefix = true;
         const re = new RegExp(`^\\d{${this.#filecount.toString().length}}_`);
@@ -221,7 +199,7 @@ class FileLoader {
     }
     get is_zip() {
         this.#check();
-        return this.#zip !== undefined;
+        return false;
     }
 }
 
