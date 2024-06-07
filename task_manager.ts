@@ -16,7 +16,7 @@ import {
     ExportZipConfig,
 } from "./tasks/export_zip.ts";
 import { fix_gallery_page } from "./tasks/fix_gallery_page.ts";
-import { ImportConfig } from "./tasks/import.ts";
+import { import_task, ImportConfig } from "./tasks/import.ts";
 import { update_meili_search_data } from "./tasks/update_meili_search_data.ts";
 import {
     DiscriminatedUnion,
@@ -377,6 +377,11 @@ export class TaskManager extends EventTarget {
             await this.waiting_unfinished_task();
             this.running_tasks.set(BigInt(task.id), {
                 task: fix_gallery_page(task, this),
+                base: task,
+            });
+        } else if (task.type == TaskType.Import) {
+            this.running_tasks.set(BigInt(task.id), {
+                task: import_task(task, this),
                 base: task,
             });
         }
