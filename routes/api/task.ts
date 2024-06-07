@@ -12,6 +12,7 @@ import type { DownloadConfig } from "../../tasks/download.ts";
 import type { ExportZipConfig } from "../../tasks/export_zip.ts";
 import { User, UserPermission } from "../../db.ts";
 import { toJSON } from "../../utils.ts";
+import { ImportConfig } from "../../tasks/import.ts";
 
 export const handler: Handlers = {
     GET(req, ctx) {
@@ -161,6 +162,37 @@ export const handler: Handlers = {
             const gid = await parse_big_int(form.get("gid"), 0);
             try {
                 const task = await t.add_update_meili_search_data_task(gid);
+                return return_data(task, 201);
+            } catch (e) {
+                return return_error(500, e.message);
+            }
+        } else if (typ == "import") {
+            const gid = await parse_big_int(form.get("gid"), null);
+            const token = await get_string(form.get("token"));
+            if (gid === null) {
+                return return_error(2, "gid is required");
+            }
+            if (!token) {
+                return return_error(3, "token is required");
+            }
+            const cfg = await get_string(form.get("cfg"));
+            if (!cfg) {
+                return return_error(4, "cfg is required");
+            }
+            let icfg: ImportConfig | undefined = undefined;
+            try {
+                icfg = JSON.parse(cfg);
+            } catch (_) {
+                return return_error(4, "cfg is invalid");
+            }
+            if (!icfg) {
+                return return_error(4, "cfg is required");
+            }
+            try {
+                const task = await t.add_import_task(gid, token, icfg, true);
+                if (task === null) {
+                    return return_error(6, "task is already in the list");
+                }
                 return return_data(task, 201);
             } catch (e) {
                 return return_error(500, e.message);

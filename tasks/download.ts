@@ -231,9 +231,8 @@ export async function download_task(
     }
     const base_path = join(cfg.base, task.gid.toString());
     await sure_dir(base_path);
-    const max_download_img_count = dcfg.max_download_img_count !== undefined
-        ? dcfg.max_download_img_count
-        : cfg.max_download_img_count;
+    const max_download_img_count = dcfg.max_download_img_count ??
+        cfg.max_download_img_count;
     const m = new DownloadManager(
         max_download_img_count,
         abort,
@@ -241,16 +240,12 @@ export async function download_task(
         task,
         manager,
     );
-    const mpv_enabled = dcfg.mpv !== undefined ? dcfg.mpv : cfg.mpv;
-    const download_original_img = dcfg.download_original_img !== undefined
-        ? dcfg.download_original_img
-        : cfg.download_original_img;
-    const max_retry_count = dcfg.max_retry_count !== undefined
-        ? dcfg.max_retry_count
-        : cfg.max_retry_count;
-    const remove_previous_gallery = dcfg.remove_previous_gallery !== undefined
-        ? dcfg.remove_previous_gallery
-        : cfg.remove_previous_gallery;
+    const mpv_enabled = dcfg.mpv ?? cfg.mpv;
+    const download_original_img = dcfg.download_original_img ??
+        cfg.download_original_img;
+    const max_retry_count = dcfg.max_retry_count ?? cfg.max_retry_count;
+    const remove_previous_gallery = dcfg.remove_previous_gallery ??
+        cfg.remove_previous_gallery;
     const g = await client.fetchGalleryPage(task.gid, task.token);
     async function download_task(names: Record<string, number>, i: Image) {
         const ofiles = db.get_files(i.page_token);

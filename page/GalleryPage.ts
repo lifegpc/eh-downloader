@@ -88,6 +88,9 @@ class Image {
     get src() {
         return this.data?.img_url;
     }
+    get token() {
+        return this.base.token;
+    }
     get xres() {
         return this.data?.xres;
     }

@@ -136,6 +136,9 @@ class MPVImage {
     get thumbnail() {
         return this.base.t;
     }
+    get token() {
+        return this.base.k;
+    }
     get xres() {
         const xres = this.data?.xres;
         if (!xres) return undefined;

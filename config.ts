@@ -37,11 +37,30 @@ export type ConfigType = {
     random_file_secret?: string;
     use_path_based_img_url: boolean;
     check_file_hash: boolean;
+    import_method: ImportMethod;
+    max_import_img_count: number;
 };
 
 export enum ThumbnailMethod {
     FFMPEG_BINARY,
     FFMPEG_API,
+}
+
+export enum ImportMethod {
+    Copy,
+    CopyThenDelete,
+    Move,
+    Keep,
+}
+
+export enum ImportSize {
+    Original,
+    X780 = 780,
+    X980 = 980,
+    X1280 = 1280,
+    Resampled = X1280,
+    X1600 = 1600,
+    X2400 = 2400,
 }
 
 export class Config {
@@ -212,6 +231,14 @@ export class Config {
     get check_file_hash() {
         return this._return_bool("check_file_hash") ?? true;
     }
+    get import_method() {
+        const n = this._return_number("input_method") ?? 1;
+        if (n < 0 || n > 3) return ImportMethod.CopyThenDelete;
+        return n as ImportMethod;
+    }
+    get max_import_img_count() {
+        return this._return_number("max_import_img_count") || 3;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -248,6 +275,8 @@ export class Config {
             random_file_secret: this.random_file_secret,
             use_path_based_img_url: this.use_path_based_img_url,
             check_file_hash: this.check_file_hash,
+            import_method: this.import_method,
+            max_import_img_count: this.max_import_img_count,
         };
     }
 }

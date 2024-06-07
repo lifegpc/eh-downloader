@@ -16,6 +16,7 @@ import {
     ExportZipConfig,
 } from "./tasks/export_zip.ts";
 import { fix_gallery_page } from "./tasks/fix_gallery_page.ts";
+import { ImportConfig } from "./tasks/import.ts";
 import { update_meili_search_data } from "./tasks/update_meili_search_data.ts";
 import {
     DiscriminatedUnion,
@@ -157,6 +158,28 @@ export class TaskManager extends EventTarget {
         };
         return await this.#add_task(task);
     }
+    async add_import_task(
+        gid: number | bigint,
+        token: string,
+        cfg: ImportConfig,
+        mark_already = false,
+    ) {
+        this.#check_closed();
+        const otask = await this.db.check_download_task(gid, token);
+        if (otask !== undefined) {
+            console.log("The task is already in list.");
+            return mark_already ? null : otask;
+        }
+        const task: Task = {
+            gid,
+            token,
+            id: 0,
+            pid: Deno.pid,
+            type: TaskType.Import,
+            details: toJSON(cfg),
+        };
+        return await this.#add_task(task);
+    }
     async add_update_meili_search_data_task(gid?: number | bigint) {
         this.#check_closed();
         const otask = await this.db.check_update_meili_search_data_task(gid);
@@ -177,7 +200,9 @@ export class TaskManager extends EventTarget {
     async check_task(task: Task) {
         this.#check_closed();
         if (await this.check_task_is_running(task)) return;
-        const ut = (await this.db.check_onetime_task()).map((t) => BigInt(t.id));
+        const ut = (await this.db.check_onetime_task()).map((t) =>
+            BigInt(t.id)
+        );
         if (ut.length && !ut.includes(BigInt(task.id))) return;
         let t = task;
         if (task.pid != Deno.pid) {

@@ -33,9 +33,7 @@ export async function export_zip(
     const gid = task.gid;
     const g = db.get_gmeta_by_gid(gid);
     if (!g) throw Error("Gallery not found in database.");
-    const jpn_title = ecfg.jpn_title !== undefined
-        ? ecfg.jpn_title
-        : cfg.export_zip_jpn_title;
+    const jpn_title = ecfg.jpn_title ?? cfg.export_zip_jpn_title;
     const progress: TaskExportZipProgress = {
         total_page: Number(g.filecount),
         added_page: 0,

@@ -814,8 +814,8 @@ export class EhDb {
     check_download_task(gid: number | bigint, token: string) {
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ? AND gid = ? AND token = ?;",
-                [TaskType.Download, gid, token],
+                "SELECT * FROM task WHERE (type = ? OR type = ?) AND gid = ? AND token = ?;",
+                [TaskType.Download, TaskType.Import, gid, token],
             );
             return r.length ? r[0] : undefined;
         });
