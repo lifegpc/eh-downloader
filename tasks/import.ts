@@ -34,6 +34,8 @@ interface Page {
     sampled_name: string;
 }
 
+const VALID_EXTS = [".jpg", ".png", ".gif"];
+
 const PROGRESS_UPDATE_INTERVAL = 200;
 
 class ImportManager {
@@ -161,9 +163,10 @@ class FileLoader {
         if (this.#has_prefix) {
             name = `${index.toString().padStart(3, "0")}_${name}`;
         }
+        console.log(name);
         let t = this.#get_file(name);
         if (t) return t;
-        const ext = extname(name);
+        const ext = extname(name).toLowerCase();
         if (ext != ".jpg") {
             const n = name.slice(0, name.length - 4) + ".jpg";
             t = this.#get_file(n);
@@ -173,7 +176,7 @@ class FileLoader {
     get_zip(name: string) {
         let t = this.#get_zip(name);
         if (t) return t;
-        const ext = extname(name);
+        const ext = extname(name).toLowerCase();
         if (ext != ".jpg") {
             const n = name.slice(0, name.length - 4) + ".jpg";
             t = this.#get_zip(n);
@@ -191,6 +194,10 @@ class FileLoader {
         let has_prefix = true;
         const re = new RegExp(`^\\d{${this.#filecount.toString().length}}_`);
         for (const f of this.#files) {
+            const ext = extname(f).toLowerCase();
+            if (!VALID_EXTS.includes(ext)) {
+                continue;
+            }
             if (!f.match(re)) {
                 has_prefix = false;
                 break;
@@ -331,8 +338,8 @@ export async function import_task(task: Task, manager: TaskManager) {
             token: i.token,
         };
         db.add_pmeta(pmeta);
-        const oriext = extname(i.name);
-        const nowext = extname(opath);
+        const oriext = extname(i.name).toLowerCase();
+        const nowext = extname(opath).toLowerCase();
         const is_original = icfg.size == ImportSize.Original ||
             (oriext != ".jpg" && oriext == nowext) ||
             (oriext == nowext && size.width < icfg.size);
