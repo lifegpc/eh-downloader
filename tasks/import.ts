@@ -157,7 +157,10 @@ class FileLoader {
     #get_zip(_name: string) {
         return null;
     }
-    get_file(name: string) {
+    get_file(name: string, index: number) {
+        if (this.#has_prefix) {
+            name = `${index.toString().padStart(3, "0")}_${name}`;
+        }
         let t = this.#get_file(name);
         if (t) return t;
         const ext = extname(name);
@@ -271,7 +274,7 @@ export async function import_task(task: Task, manager: TaskManager) {
     );
 
     async function import_img(i: Page) {
-        const opath = f.get_file(i.name);
+        const opath = f.get_file(i.name, i.index);
         if (!opath) {
             console.log("File not found");
             return;
