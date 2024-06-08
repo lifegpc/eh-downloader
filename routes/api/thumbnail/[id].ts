@@ -66,7 +66,7 @@ export const handler: Handlers = {
         if (!f) {
             return new Response("File not found.", { status: 404 });
         }
-        const max = await parse_int(u.searchParams.get("max"), 1200);
+        const max = await parse_int(u.searchParams.get("max"), 400);
         const width = await parse_int(u.searchParams.get("width"), null);
         const height = await parse_int(u.searchParams.get("height"), null);
         const quality = await parse_int(u.searchParams.get("quality"), 1);
