@@ -2,6 +2,7 @@
 #include "cfileop.h"
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
+#include "libavutil/opt.h"
 #include "libswscale/swscale.h"
 #include <string.h>
 
@@ -15,6 +16,18 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
     int re = 0;
     struct SwsContext* sws = NULL;
     AVFrame* fr = NULL, * fr2 = NULL;
+    enum AVPixelFormat fmt = (enum AVPixelFormat)ifr->format;
+    if (fmt == AV_PIX_FMT_YUVJ411P) {
+        fmt = AV_PIX_FMT_YUV411P;
+    } else if (fmt == AV_PIX_FMT_YUVJ420P) {
+        fmt = AV_PIX_FMT_YUV420P;
+    } else if (fmt == AV_PIX_FMT_YUVJ422P) {
+        fmt = AV_PIX_FMT_YUV422P;
+    } else if (fmt == AV_PIX_FMT_YUVJ440P) {
+        fmt = AV_PIX_FMT_YUV440P;
+    } else if (fmt == AV_PIX_FMT_YUVJ444P) {
+        fmt = AV_PIX_FMT_YUV444P;
+    }
     if (!(fr = av_frame_alloc())) {
         err->e = THUMBNAIL_OOM;
         re = 1;
@@ -56,7 +69,7 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
         av_log(NULL, AV_LOG_ERROR, "Failed to make writeable for output frame: %s\n", av_err2str(err->fferr));
         goto end;
     }
-    if (!(sws = sws_getContext(ifr->width, ifr->height, (enum AVPixelFormat)ifr->format, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
+    if (!(sws = sws_getContext(ifr->width, ifr->height, fmt, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
         err->e = THUMBNAIL_UNABLE_SCALE;
         re = 1;
         goto end;
@@ -224,10 +237,7 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
         goto end;
     }
     if (fileop_exists(dest)) {
-        if (!fileop_remove(dest)) {
-            re.e = THUMBNAIL_REMOVE_OUTPUT_FILE_FAILED;
-            goto end;
-        }
+        goto end;
     }
     if ((re.fferr = avformat_open_input(&ic, src, NULL, NULL)) < 0) {
         re.e = THUMBNAIL_FFMPEG_ERROR;
@@ -255,6 +265,7 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
         re.e = THUMBNAIL_FFMPEG_ERROR;
         goto end;
     }
+    av_opt_set_int(oc, "update", 1, AV_OPT_SEARCH_CHILDREN);
     if (!(input_codec = avcodec_find_decoder(is->codecpar->codec_id))) {
         re.e = THUMBNAIL_NO_DECODER;
         goto end;
@@ -284,7 +295,8 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
     }
     occ->width = width;
     occ->height = height;
-    occ->pix_fmt = AV_PIX_FMT_YUVJ420P;
+    occ->pix_fmt = AV_PIX_FMT_YUV420P;
+    occ->color_range = AVCOL_RANGE_JPEG;
     occ->sample_aspect_ratio = icc->sample_aspect_ratio;
     occ->time_base = AV_TIME_BASE_Q;
     occ->color_range = AVCOL_RANGE_JPEG;
