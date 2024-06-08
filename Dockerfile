@@ -67,6 +67,13 @@ RUN cd ~ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf sqlite-snapshot-202401231504 sqlite-snapshot-202401231504.tar.gz
 
+COPY ./extensions /root/extensions
+
+RUN cd /root/extensions && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/clib -DCMAKE_INSTALL_PREFIX=/clib ../ && \
+    make -j$(grep -c ^processor /proc/cpuinfo) && make install
+
 FROM denoland/deno:latest as prod
 
 ARG DENO_DEPLOYMENT_ID
