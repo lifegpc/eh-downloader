@@ -65,9 +65,11 @@ export async function gen_thumbnail(
     quality: number,
 ) {
     const t = new TextEncoder();
+    const s = t.encode(`${src}\0`);
+    const d = t.encode(`${dest}\0`);
     const ore = await lib.symbols.gen_thumbnail(
-        t.encode(`${src}\0`),
-        t.encode(`${dest}\0`),
+        s,
+        d,
         width,
         height,
         method,
@@ -75,6 +77,8 @@ export async function gen_thumbnail(
         quality,
     );
     const re = _Result.unpack(ore);
+    s;
+    d;
     if (re.e) return get_error(ore);
     return;
 }
