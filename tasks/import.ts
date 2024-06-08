@@ -4,6 +4,7 @@ import {
     add_suffix_to_path,
     asyncEvery,
     asyncFilter,
+    calFileSha1,
     promiseState,
     PromiseStatus,
     RecoverableError,
@@ -352,11 +353,20 @@ export async function import_task(task: Task, manager: TaskManager) {
             await Deno.rename(opath, path);
         } else if (import_method != ImportMethod.Keep) {
             await Deno.copyFile(opath, path);
-            if (import_method == ImportMethod.CopyThenDelete) {
-                await Deno.remove(opath);
-            }
         } else {
             path = opath;
+        }
+        if (cfg.check_file_hash && is_original) {
+            const sha = await calFileSha1(path);
+            if (sha.slice(0, i.token.length) != i.token) {
+                console.warn(
+                    `Hash not matched: file hash ${sha}, token ${i.token}`,
+                );
+                return;
+            }
+        }
+        if (import_method == ImportMethod.CopyThenDelete) {
+            await Deno.remove(opath);
         }
         const file: EhFile = {
             height: size.height,
