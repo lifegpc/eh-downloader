@@ -250,7 +250,7 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
         re.e = THUMBNAIL_NO_VIDEO_STREAM;
         goto end;
     }
-    if ((re.fferr = avformat_alloc_output_context2(&oc, NULL, "mjpeg", dest)) < 0) {
+    if ((re.fferr = avformat_alloc_output_context2(&oc, NULL, "image2", dest)) < 0) {
         av_log(NULL, AV_LOG_ERROR, "Failed to allocate output context: %s\n", av_err2str(re.fferr));
         re.e = THUMBNAIL_FFMPEG_ERROR;
         goto end;
