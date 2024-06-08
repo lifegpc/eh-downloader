@@ -232,7 +232,7 @@ export class Config {
         return this._return_bool("check_file_hash") ?? true;
     }
     get import_method() {
-        const n = this._return_number("input_method") ?? 1;
+        const n = this._return_number("import_method") ?? 1;
         if (n < 0 || n > 3) return ImportMethod.CopyThenDelete;
         return n as ImportMethod;
     }
