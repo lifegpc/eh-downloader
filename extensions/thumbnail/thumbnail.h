@@ -1,7 +1,13 @@
 #pragma once
 
 #include <stddef.h>
+#if _WIN32
 #define PUBLIC_API __declspec(dllexport)
+#elif defined(__GNUC__)
+#define PUBLIC_API __attribute__((visibility("default")))
+#else
+#define PUBLIC_API 
+#endif
 
 typedef enum THUMBNAIL_ERROR_E {
     THUMBNAIL_OK,
