@@ -6,6 +6,24 @@
 #include "libswscale/swscale.h"
 #include <string.h>
 
+static int hooked_ffmpeg_log = 0;
+
+void ffmpeg_log(void* avcl, int level, const char* fmt, va_list vl) {
+    if (level == AV_LOG_WARNING) {
+        if (!strcmp(fmt, "deprecated pixel format used, make sure you did set range correctly\n")) {
+            return;
+        }
+    }
+    av_log_default_callback(avcl, level, fmt, vl);
+}
+
+void hook_ffmpeg_log() {
+    if (!hooked_ffmpeg_log) {
+        hooked_ffmpeg_log = 1;
+        av_log_set_callback(ffmpeg_log);
+    }
+}
+
 void thumbnail_fferror(int e, char* buf, size_t bufsize) {
     if (!buf) return;
     av_make_error_string(buf, bufsize, e);
@@ -16,18 +34,6 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
     int re = 0;
     struct SwsContext* sws = NULL;
     AVFrame* fr = NULL, * fr2 = NULL;
-    enum AVPixelFormat fmt = (enum AVPixelFormat)ifr->format;
-    if (fmt == AV_PIX_FMT_YUVJ411P) {
-        fmt = AV_PIX_FMT_YUV411P;
-    } else if (fmt == AV_PIX_FMT_YUVJ420P) {
-        fmt = AV_PIX_FMT_YUV420P;
-    } else if (fmt == AV_PIX_FMT_YUVJ422P) {
-        fmt = AV_PIX_FMT_YUV422P;
-    } else if (fmt == AV_PIX_FMT_YUVJ440P) {
-        fmt = AV_PIX_FMT_YUV440P;
-    } else if (fmt == AV_PIX_FMT_YUVJ444P) {
-        fmt = AV_PIX_FMT_YUV444P;
-    }
     if (!(fr = av_frame_alloc())) {
         err->e = THUMBNAIL_OOM;
         re = 1;
@@ -69,7 +75,7 @@ int thumbnail_convert_frame(THUMBNAIL_ERROR* err, AVFrame* ifr, AVFrame** ofr, A
         av_log(NULL, AV_LOG_ERROR, "Failed to make writeable for output frame: %s\n", av_err2str(err->fferr));
         goto end;
     }
-    if (!(sws = sws_getContext(ifr->width, ifr->height, fmt, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
+    if (!(sws = sws_getContext(ifr->width, ifr->height, (enum AVPixelFormat)ifr->format, fr->width, fr->height, (enum AVPixelFormat)fr->format, SWS_BILINEAR, NULL, NULL, NULL))) {
         err->e = THUMBNAIL_UNABLE_SCALE;
         re = 1;
         goto end;
@@ -217,6 +223,7 @@ end:
 }
 
 THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int height, THUMBNAIL_METHOD method, ALIGN_METHOD align, int quality) {
+    hook_ffmpeg_log();
     THUMBNAIL_ERROR re = { THUMBNAIL_OK, 0 };
     AVFormatContext* ic = NULL, * oc = NULL;
     AVStream* is = NULL, * os = NULL;
@@ -295,8 +302,7 @@ THUMBNAIL_ERROR gen_thumbnail(const char* src, const char* dest, int width, int 
     }
     occ->width = width;
     occ->height = height;
-    occ->pix_fmt = AV_PIX_FMT_YUV420P;
-    occ->color_range = AVCOL_RANGE_JPEG;
+    occ->pix_fmt = AV_PIX_FMT_YUVJ420P;
     occ->sample_aspect_ratio = icc->sample_aspect_ratio;
     occ->time_base = AV_TIME_BASE_Q;
     occ->color_range = AVCOL_RANGE_JPEG;
