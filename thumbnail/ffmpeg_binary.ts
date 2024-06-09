@@ -98,7 +98,6 @@ export async function fb_generate_thumbnail(
         `${cfg.quality}`,
         o,
     ];
-    console.log(args);
     const cmd = new Deno.Command(p, { args, stdout: "null", stderr: "piped" });
     const c = cmd.spawn();
     const s = await c.output();

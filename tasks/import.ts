@@ -164,7 +164,6 @@ class FileLoader {
         if (this.#has_prefix) {
             name = `${index.toString().padStart(3, "0")}_${name}`;
         }
-        console.log(name);
         let t = this.#get_file(name);
         if (t) return t;
         const ext = extname(name).toLowerCase();
