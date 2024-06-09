@@ -1,4 +1,5 @@
-import type { ThumbnailConfig } from "./base.ts";
+import { ThumbnailAlign } from "./base.ts";
+import { type ThumbnailConfig, ThumbnailGenMethod } from "./base.ts";
 
 export async function check_ffmpeg_binary(p: string) {
     const cmd = new Deno.Command(p, {
@@ -45,18 +46,59 @@ export async function fb_generate_thumbnail(
     o: string,
     cfg: ThumbnailConfig,
 ) {
+    let add = "";
+    if (cfg.method == ThumbnailGenMethod.Cover) {
+        const size = cfg.input ?? await fb_get_size(i);
+        if (!size) return false;
+        const twidth = Math.floor(size.width * cfg.height / size.height);
+        const frwidth = Math.floor(twidth > cfg.width ? twidth : cfg.width);
+        const frheight = Math.floor(
+            twidth > cfg.width
+                ? cfg.height
+                : size.height * cfg.width / size.width,
+        );
+        const xy = cfg.align == ThumbnailAlign.Center
+            ? ""
+            : cfg.align == ThumbnailAlign.Left
+            ? ":x=0:y=0"
+            : `:x=${frwidth - cfg.width}:y=${frheight - cfg.height}`;
+        add =
+            `scale=${frwidth}x${frheight},crop=${cfg.width}:${cfg.height}${xy}`;
+    } else if (cfg.method == ThumbnailGenMethod.Contain) {
+        const size = cfg.input ?? await fb_get_size(i);
+        if (!size) return false;
+        const twidth = Math.floor(size.width * cfg.height / size.height);
+        const frwidth = Math.floor(twidth > cfg.width ? cfg.width : twidth);
+        const frheight = Math.floor(
+            twidth > cfg.width
+                ? size.height * cfg.width / size.width
+                : cfg.height,
+        );
+        const xy = cfg.align == ThumbnailAlign.Center
+            ? `:x=${Math.floor((cfg.width - frwidth) / 2)}:y=${
+                Math.floor((cfg.height - frheight) / 2)
+            }`
+            : cfg.align == ThumbnailAlign.Left
+            ? ""
+            : `:x=${cfg.width - frwidth}:y=${cfg.height - frheight}`;
+        add =
+            `scale=${frwidth}x${frheight},pad=${cfg.width}:${cfg.height}${xy}:color=white`;
+    } else {
+        add = `scale=${cfg.width}:${cfg.height}`;
+    }
     const args = [
         "-n",
         "-i",
         i,
         "-vf",
-        `scale=${cfg.width}:${cfg.height}`,
+        add,
         "-qmin",
         `${cfg.quality}`,
         "-qmax",
         `${cfg.quality}`,
         o,
     ];
+    console.log(args);
     const cmd = new Deno.Command(p, { args, stdout: "null", stderr: "piped" });
     const c = cmd.spawn();
     const s = await c.output();

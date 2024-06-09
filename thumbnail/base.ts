@@ -23,6 +23,7 @@ export type ThumbnailConfig = {
     quality: number;
     method: ThumbnailGenMethod;
     align: ThumbnailAlign;
+    input?: { width: number; height: number };
 };
 
 export function gen_thumbnail_config_params(cfg: ThumbnailConfig) {

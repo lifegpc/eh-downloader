@@ -111,12 +111,13 @@ export const handler: Handlers = {
                 return Response.redirect(`${get_host(req)}/api/file/${f.id}`);
             }
         }
-        if (method === ThumbnailMethod.FFMPEG_BINARY) {
-            cfg.method = ThumbnailGenMethod.Unknown;
-        }
         const output = generate_filename(b, f, cfg);
         if (!(await exists(output))) {
             if (method === ThumbnailMethod.FFMPEG_BINARY) {
+                cfg.input = {
+                    width: Number(f.width),
+                    height: Number(f.height),
+                };
                 const re = await fb_generate_thumbnail(
                     m.cfg.ffmpeg_path,
                     f.path,

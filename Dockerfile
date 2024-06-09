@@ -34,7 +34,7 @@ RUN cd ~ && \
     --disable-parsers --enable-parser=h264,png,gif \
     --disable-bsfs --enable-bsf=dts2pts,null \
     --disable-protocols --enable-protocol=async,concat,concatf,data,fd,file,md5,pipe,subfile \
-    --disable-devices --disable-filters --enable-filter=scale && \
+    --disable-devices --disable-filters --enable-filter=crop,pad,scale && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf FFmpeg-n7.0.1 ffmpeg.tar.gz
 
