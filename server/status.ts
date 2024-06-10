@@ -9,4 +9,5 @@ export type StatusData = {
     };
     no_user: boolean;
     is_docker: boolean;
+    libzip_enabled: boolean;
 };

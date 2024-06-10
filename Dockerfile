@@ -67,6 +67,15 @@ RUN cd ~ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
     cd ~ && rm -rf sqlite-snapshot-202401231504 sqlite-snapshot-202401231504.tar.gz
 
+RUN cd ~ && \
+    curl -L "https://libzip.org/download/libzip-1.10.1.tar.gz" -o libzip-1.10.1.tar.gz && \
+    tar -xzvf libzip-1.10.1.tar.gz && \
+    cd libzip-1.10.1 && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_REGRESS=OFF -DBUILD_OSSFUZZ=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF \
+    -DCMAKE_INSTALL_PREFIX=/clib -DCMAKE_PREFIX_PATH=/clib ../ && \
+    make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
+    cd ~ && rm -rf libzip-1.10.1 libzip-1.10.1.tar.gz
+
 COPY ./extensions /root/extensions
 
 RUN cd /root/extensions && \

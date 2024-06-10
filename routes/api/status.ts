@@ -5,13 +5,25 @@ import { get_host, return_data } from "../../server/utils.ts";
 import { check_ffmpeg_binary } from "../../thumbnail/ffmpeg_binary.ts";
 import type * as FFMPEG_API from "../../thumbnail/ffmpeg_api.ts";
 import { isDocker } from "../../utils.ts";
+import type * as LIBZIP from "@lifegpc/libzip/raw";
 
 let ffmpeg_api: typeof FFMPEG_API | undefined;
+let libzip: typeof LIBZIP | undefined;
 
 async function check_ffmpeg_api() {
     if (ffmpeg_api) return true;
     try {
         ffmpeg_api = await import("../../thumbnail/ffmpeg_api.ts");
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+async function check_libzip() {
+    if (libzip) return true;
+    try {
+        libzip = await import("@lifegpc/libzip/raw");
         return true;
     } catch (_) {
         return false;
@@ -51,6 +63,7 @@ export const handler: Handlers = {
                 key: m.cfg.meili_search_api_key || m.cfg.meili_update_api_key,
             };
         }
+        const libzip_enabled = await check_libzip();
         const no_user = c === 0 || c === 0n;
         const is_docker = isDocker();
         return return_data<StatusData>({
@@ -61,6 +74,7 @@ export const handler: Handlers = {
             meilisearch,
             no_user,
             is_docker,
+            libzip_enabled,
         });
     },
 };
