@@ -117,6 +117,7 @@ ENV DOCKER=true
 ENV DB_USE_FFI=true
 ENV DENO_SQLITE_PATH=/app/lib/libsqlite3.so
 ENV DENO_LIBZIP_PATH=/app/lib/libzip.so
+ENV LC_ALL=C.utf8
 
 RUN deno task server-build && deno task prebuild && \
     deno task cache && rm -rf ~/.cache && \
