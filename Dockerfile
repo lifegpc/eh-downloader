@@ -70,7 +70,7 @@ RUN cd ~ && \
 RUN cd ~ && \
     curl -L "https://libzip.org/download/libzip-1.10.1.tar.gz" -o libzip-1.10.1.tar.gz && \
     tar -xzvf libzip-1.10.1.tar.gz && \
-    cd libzip-1.10.1 && \
+    cd libzip-1.10.1 && mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_REGRESS=OFF -DBUILD_OSSFUZZ=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF \
     -DCMAKE_INSTALL_PREFIX=/clib -DCMAKE_PREFIX_PATH=/clib ../ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
