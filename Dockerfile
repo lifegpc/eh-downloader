@@ -113,6 +113,7 @@ COPY ./*.ts ./
 COPY ./deno.json ./
 COPY ./import_map.json ./
 COPY ./LICENSE ./
+COPY ./docker_entrypoint.sh ./
 
 ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
@@ -127,10 +128,11 @@ RUN deno task server-build && deno task prebuild && \
     deno task cache && rm -rf ~/.cache && \
     mkdir -p ./thumbnails && chmod 777 ./thumbnails && \
     mkdir -p ./downloads && chmod 777 ./downloads && \
-    mkdir -p ./data && chmod 777 ./data && chmod 777 /deno-dir
+    mkdir -p ./data && chmod 777 ./data && chmod 777 /deno-dir && \
+    passwd -d root
 
 EXPOSE 8000
-ENTRYPOINT ["/tini", "--", "deno", "task", "server"]
+ENTRYPOINT ["/tini", "--", "/bin/bash", "/app/docker_entrypoint.sh"]
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
     CMD curl -Lk -fsS http://localhost:8000/api/health_check || exit 1
