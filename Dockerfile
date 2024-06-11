@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     file \
     perl \
+    libgnutls28-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libzstd-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
