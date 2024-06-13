@@ -287,6 +287,7 @@ export async function download_task(
             }
         }
         let load_times = 0;
+        let reload = false;
         function load() {
             return new Promise<void>((resolve, reject) => {
                 const errors: unknown[] = [];
@@ -343,10 +344,11 @@ export async function download_task(
                     async function download() {
                         const re = await (download_original
                             ? i.load_original_image()
-                            : i.load_image());
+                            : i.load_image(reload));
                         if (re === undefined) {
                             throw Error("Failed to fetch image.");
                         }
+                        reload = false;
                         m.set_details_started(i.index);
                         const len = re.headers.get("Content-Length");
                         if (len) {
@@ -440,6 +442,7 @@ export async function download_task(
                                 if (e.name == "AbortError") {
                                     m.remove_details(i.index);
                                     reject(new TimeoutError());
+                                    reload = true;
                                     return;
                                 }
                             }
@@ -449,6 +452,7 @@ export async function download_task(
                             ) {
                                 m.remove_details(i.index);
                                 reject(e);
+                                reload = true;
                                 return;
                             }
                             errors.push(e);

@@ -122,8 +122,7 @@ class Image {
         return re;
     }
     async load_image(reload = true) {
-        if (!reload) return;
-        await this.load();
+        if (reload || !this.data) await this.load();
         const src2 = this.src;
         if (src2) return await this.#load_image(src2);
     }
