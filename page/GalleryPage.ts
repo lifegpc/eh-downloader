@@ -122,11 +122,6 @@ class Image {
         return re;
     }
     async load_image(reload = true) {
-        const src = this.src;
-        if (src) {
-            const re = await this.#load_image(src);
-            if (re) return re;
-        }
         if (!reload) return;
         await this.load();
         const src2 = this.src;
