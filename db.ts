@@ -1076,7 +1076,8 @@ export class EhDb {
         fields = "*",
         sort_by_gid: boolean | null = null,
         uploader: string | null = null,
-        tag: string | null,
+        tag: string | null = null,
+        category: string | null = null,
     ) {
         const sort_sql = sort_by_gid !== null
             ? ` ORDER BY gmeta.gid ${sort_by_gid ? "ASC" : "DESC"}`
@@ -1099,6 +1100,10 @@ export class EhDb {
             where_sqls.push("uploader = ?");
             args.push(uploader);
         }
+        if (category) {
+            where_sqls.push("category = ?");
+            args.push(category);
+        }
         const where_sql = where_sqls.length
             ? ` WHERE ${where_sqls.join(" AND ")}`
             : "";
@@ -1118,6 +1123,7 @@ export class EhDb {
         sort_by_gid: boolean | null = null,
         uploader: string | null = null,
         tag: string | null = null,
+        category: string | null = null,
     ) {
         const sort_sql = sort_by_gid !== null
             ? ` ORDER BY gmeta.gid ${sort_by_gid ? "ASC" : "DESC"}`
@@ -1138,6 +1144,10 @@ export class EhDb {
         if (uploader) {
             where_sqls.push("uploader = ?");
             args.push(uploader);
+        }
+        if (category) {
+            where_sqls.push("category = ?");
+            args.push(category);
         }
         const where_sql = where_sqls.length
             ? ` WHERE ${where_sqls.join(" AND ")}`

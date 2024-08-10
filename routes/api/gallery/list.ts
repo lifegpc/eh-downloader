@@ -43,6 +43,7 @@ export const handler: Handlers = {
         );
         const uploader = u.searchParams.get("uploader");
         const tag = u.searchParams.get("tag");
+        const category = u.searchParams.get("category");
         if (fields !== "*") {
             const fs = fields.split(",");
             const ok = fs.every((d) => {
@@ -53,7 +54,13 @@ export const handler: Handlers = {
         }
         if (all) {
             return return_data(
-                t.db.get_gmetas_all(fields, sort_by_gid, uploader, tag),
+                t.db.get_gmetas_all(
+                    fields,
+                    sort_by_gid,
+                    uploader,
+                    tag,
+                    category,
+                ),
             );
         } else {
             return return_data(
@@ -64,6 +71,7 @@ export const handler: Handlers = {
                     sort_by_gid,
                     uploader,
                     tag,
+                    category,
                 ),
             );
         }
