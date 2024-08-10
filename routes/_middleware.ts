@@ -65,6 +65,29 @@ export async function handler(req: Request, ctx: FreshContext) {
         opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
         return await get_file_response(p, opts);
     }
+    if (url.pathname.startsWith("/canvaskit/")) {
+        const m = get_task_manager();
+        let flutter_base = import.meta.resolve("../static/flutter").slice(7);
+        if (Deno.build.os === "windows") {
+            flutter_base = flutter_base.slice(1);
+        }
+        if (!m.cfg.flutter_frontend) {
+            if (!await exists(flutter_base)) {
+                return new Response("Flutter frontend is not enabled", {
+                    status: 404,
+                });
+            }
+        } else {
+            flutter_base = m.cfg.flutter_frontend;
+        }
+        const u = new URL(req.url);
+        const p = join(flutter_base, "canvaskit", u.pathname.slice(11));
+        const opts: GetFileResponseOptions = {};
+        opts.range = req.headers.get("range");
+        opts.if_modified_since = req.headers.get("If-Modified-Since");
+        opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
+        return await get_file_response(p, opts);
+    }
     const res = await ctx.next();
     return res;
 }
