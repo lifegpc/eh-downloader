@@ -28,6 +28,7 @@ import * as $api_tag_rows from "./routes/api/tag/rows.ts";
 import * as $api_task from "./routes/api/task.ts";
 import * as $api_task_download_cfg from "./routes/api/task/download_cfg.ts";
 import * as $api_task_export_zip_cfg from "./routes/api/task/export_zip_cfg.ts";
+import * as $api_task_import_cfg from "./routes/api/task/import_cfg.ts";
 import * as $api_thumbnail_id_ from "./routes/api/thumbnail/[id].ts";
 import * as $api_token from "./routes/api/token.ts";
 import * as $api_user from "./routes/api/user.ts";
@@ -74,6 +75,7 @@ const manifest = {
         "./routes/api/task.ts": $api_task,
         "./routes/api/task/download_cfg.ts": $api_task_download_cfg,
         "./routes/api/task/export_zip_cfg.ts": $api_task_export_zip_cfg,
+        "./routes/api/task/import_cfg.ts": $api_task_import_cfg,
         "./routes/api/thumbnail/[id].ts": $api_thumbnail_id_,
         "./routes/api/token.ts": $api_token,
         "./routes/api/user.ts": $api_user,
