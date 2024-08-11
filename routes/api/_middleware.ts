@@ -59,6 +59,8 @@ function handle_auth(req: Request, ctx: FreshContext) {
 
 export async function handler(req: Request, ctx: FreshContext) {
     const m = get_task_manager();
+    const enable_server_timing = m.cfg.enable_server_timing;
+    const start = enable_server_timing ? Date.now() : 0;
     if (!(handle_auth(req, ctx))) {
         const headers: HeadersInit = {};
         const origin = req.headers.get("origin");
@@ -66,6 +68,10 @@ export async function handler(req: Request, ctx: FreshContext) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers["Access-Control-Allow-Origin"] = origin;
             if (c) headers["Access-Control-Allow-Credentials"] = "true";
+        }
+        if (enable_server_timing) {
+            const end = Date.now();
+            headers["Server-Timing"] = `api;dur=${end - start}`;
         }
         return return_error(401, "Unauthorized", 401, headers);
     }
@@ -85,6 +91,10 @@ export async function handler(req: Request, ctx: FreshContext) {
             );
             if (c) headers.set("Access-Control-Allow-Credentials", "true");
             headers.set("Access-Control-Allow-Private-Network", "true");
+        }
+        if (enable_server_timing) {
+            const end = Date.now();
+            headers.append("Server-Timing", `api;dur=${end - start}`);
         }
         return new Response(null, { status: 204, headers });
     } else {
@@ -117,6 +127,10 @@ export async function handler(req: Request, ctx: FreshContext) {
                     null;
                 }
             }
+        }
+        if (enable_server_timing) {
+            const end = Date.now();
+            headers.append("Server-Timing", `api;dur=${end - start}`);
         }
         return new Response(res.body, {
             status: res.status,

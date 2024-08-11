@@ -13,6 +13,9 @@ const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
 export async function handler(req: Request, ctx: FreshContext) {
     const url = new URL(req.url);
+    const m = get_task_manager();
+    const enable_server_timing = m.cfg.enable_server_timing;
+    const start = enable_server_timing ? Date.now() : 0;
     if (url.pathname == "/sw.js") {
         build_sw();
     }
@@ -31,7 +34,6 @@ export async function handler(req: Request, ctx: FreshContext) {
         return get_file_response(file, opts);
     }
     if (url.pathname == "/flutter" || url.pathname.startsWith("/flutter/")) {
-        const m = get_task_manager();
         let flutter_base = import.meta.resolve("../static/flutter").slice(7);
         if (Deno.build.os === "windows") {
             flutter_base = flutter_base.slice(1);
@@ -66,7 +68,6 @@ export async function handler(req: Request, ctx: FreshContext) {
         return await get_file_response(p, opts);
     }
     if (url.pathname.startsWith("/canvaskit/")) {
-        const m = get_task_manager();
         let flutter_base = import.meta.resolve("../static/flutter").slice(7);
         if (Deno.build.os === "windows") {
             flutter_base = flutter_base.slice(1);
@@ -89,5 +90,16 @@ export async function handler(req: Request, ctx: FreshContext) {
         return await get_file_response(p, opts);
     }
     const res = await ctx.next();
+    if (enable_server_timing) {
+        if (res.status === 101) return res;
+        const headers = new Headers(res.headers);
+        const now = Date.now();
+        headers.append("Server-Timing", `total;dur=${now - start}`);
+        return new Response(res.body, {
+            status: res.status,
+            headers: headers,
+            statusText: res.statusText,
+        });
+    }
     return res;
 }

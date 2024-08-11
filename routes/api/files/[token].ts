@@ -12,6 +12,9 @@ export const handler: Handlers = {
         }
         const tokens = ctx.params.token.split(",");
         const m = get_task_manager();
+        const enable_server_timing = m.cfg.enable_server_timing;
+        const start = enable_server_timing ? Date.now() : 0;
+        const headers: HeadersInit = {};
         const data: EhFiles = {};
         for (const token of tokens) {
             data[token] = m.db.get_files(token).map((d) => {
@@ -22,6 +25,10 @@ export const handler: Handlers = {
                 return d;
             });
         }
-        return return_data(data);
+        if (enable_server_timing) {
+            const end = Date.now();
+            headers["Server-Timing"] = `db;dur=${end - start}`;
+        }
+        return return_data(data, 200, headers);
     },
 };

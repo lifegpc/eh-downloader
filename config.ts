@@ -39,6 +39,7 @@ export type ConfigType = {
     check_file_hash: boolean;
     import_method: ImportMethod;
     max_import_img_count: number;
+    enable_server_timing: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -239,6 +240,9 @@ export class Config {
     get max_import_img_count() {
         return this._return_number("max_import_img_count") || 3;
     }
+    get enable_server_timing() {
+        return this._return_bool("enable_server_timing") ?? false;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -277,6 +281,7 @@ export class Config {
             check_file_hash: this.check_file_hash,
             import_method: this.import_method,
             max_import_img_count: this.max_import_img_count,
+            enable_server_timing: this.enable_server_timing,
         };
     }
 }
