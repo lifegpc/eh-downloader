@@ -22,6 +22,7 @@ import * as $api_gallery_gid_ from "./routes/api/gallery/[gid].ts";
 import * as $api_gallery_list from "./routes/api/gallery/list.ts";
 import * as $api_gallery_meta_gids_ from "./routes/api/gallery/meta/[gids].ts";
 import * as $api_health_check from "./routes/api/health_check.ts";
+import * as $api_shared_token from "./routes/api/shared_token.ts";
 import * as $api_status from "./routes/api/status.ts";
 import * as $api_tag_id_ from "./routes/api/tag/[id].ts";
 import * as $api_tag_rows from "./routes/api/tag/rows.ts";
@@ -69,6 +70,7 @@ const manifest = {
         "./routes/api/gallery/list.ts": $api_gallery_list,
         "./routes/api/gallery/meta/[gids].ts": $api_gallery_meta_gids_,
         "./routes/api/health_check.ts": $api_health_check,
+        "./routes/api/shared_token.ts": $api_shared_token,
         "./routes/api/status.ts": $api_status,
         "./routes/api/tag/[id].ts": $api_tag_id_,
         "./routes/api/tag/rows.ts": $api_tag_rows,

@@ -10,7 +10,7 @@ import {
     ThumbnailConfig,
     ThumbnailGenMethod,
 } from "../../../thumbnail/base.ts";
-import { isNumNaN, parseBigInt, sure_dir } from "../../../utils.ts";
+import { compareNum, isNumNaN, parseBigInt, sure_dir } from "../../../utils.ts";
 import { ThumbnailMethod } from "../../../config.ts";
 import { fb_generate_thumbnail } from "../../../thumbnail/ffmpeg_binary.ts";
 import {
@@ -22,7 +22,12 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
 import type * as FFMPEG_API from "../../../thumbnail/ffmpeg_api.ts";
-import { User, UserPermission } from "../../../db.ts";
+import {
+    SharedToken,
+    SharedTokenType,
+    User,
+    UserPermission,
+} from "../../../db.ts";
 
 let ffmpeg_api: typeof FFMPEG_API | undefined;
 
@@ -35,6 +40,7 @@ export const handler: Handlers = {
         ) {
             return new Response("Permission denied", { status: 403 });
         }
+        const st = <SharedToken | undefined> ctx.state.shared_token;
         const id = parseBigInt(ctx.params.id);
         const m = get_task_manager();
         const u = new URL(req.url);
@@ -64,7 +70,16 @@ export const handler: Handlers = {
         await sure_dir(b);
         const f = m.db.get_file(id);
         if (!f) {
+            if (st && st.type == SharedTokenType.Gallery) {
+                return new Response("Permission denied.", { status: 403 });
+            }
             return new Response("File not found.", { status: 404 });
+        }
+        if (st && st.type == SharedTokenType.Gallery) {
+            const pmetas = m.db.get_pmeta_by_token_only(f.token);
+            if (!pmetas.some((m) => !compareNum(m.gid, st.info.gid))) {
+                return new Response("Permission denied.", { status: 403 });
+            }
         }
         const max = await parse_int(u.searchParams.get("max"), 400);
         const width = await parse_int(u.searchParams.get("width"), null);

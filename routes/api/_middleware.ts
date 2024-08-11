@@ -2,7 +2,7 @@ import { FreshContext } from "$fresh/server.ts";
 import { get_task_manager } from "../../server.ts";
 import { parse_cookies } from "../../server/cookies.ts";
 import { return_error } from "../../server/utils.ts";
-import type { Token } from "../../db.ts";
+import { SharedTokenType, type Token } from "../../db.ts";
 
 function handle_auth(req: Request, ctx: FreshContext) {
     if (req.method === "OPTIONS") return true;
@@ -44,7 +44,45 @@ function handle_auth(req: Request, ctx: FreshContext) {
     if (!token) return check();
     const t = m.db.get_token(token);
     const now = (new Date()).getTime();
-    if (!t || t.expired.getTime() < now) return check();
+    if (!t) {
+        const st = m.db.get_shared_token(token);
+        if (!st || (st.expired !== null && st.expired.getTime() < now)) {
+            return check();
+        }
+        if (
+            u.pathname === "/api/shared_token" && req.method === "GET"
+        ) { /*Nothing to do*/ } else if (st.type == SharedTokenType.Gallery) {
+            const check_g = () => {
+                if (
+                    u.pathname === `/api/gallery/${st.info.gid}` &&
+                    req.method === "GET"
+                ) return true;
+                if (u.pathname === "/api/tag/rows" && req.method === "GET") {
+                    return true;
+                }
+                // Follow API need extra checks.
+                if (
+                    u.pathname.match(/^\/api\/file\/\d+$/) &&
+                    req.method === "GET"
+                ) return true;
+                if (
+                    u.pathname.match(/^\/api\/thumbnail\/\d+$/) &&
+                    req.method === "GET"
+                ) return true;
+                if (
+                    u.pathname.startsWith("/api/files/") && req.method === "GET"
+                ) return true;
+                return false;
+            };
+            if (!check_g()) return check();
+        } else {
+            return check();
+        }
+        ctx.state.is_from_cookie = false;
+        ctx.state.shared_token = st;
+        return true;
+    }
+    if (t.expired.getTime() < now) return check();
     const user = m.db.get_user(t.uid);
     if (!user) {
         m.db.delete_token(token);

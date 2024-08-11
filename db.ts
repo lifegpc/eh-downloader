@@ -141,7 +141,8 @@ export enum UserPermission {
     EditGallery = 1 << 1,
     DeleteGallery = 1 << 2,
     ManageTasks = 1 << 3,
-    All = ~(~0 << 4),
+    ShareGallery = 1 << 4,
+    All = ~(~0 << 5),
 }
 export type User = {
     id: number | bigint;
@@ -189,6 +190,29 @@ export type ClientConfig = {
     name: string;
     data: string;
 };
+export enum SharedTokenType {
+    Gallery,
+}
+export type GallerySharedTokenInfo = {
+    gid: number | bigint;
+};
+type SharedTokenTypeMap = {
+    [SharedTokenType.Gallery]: GallerySharedTokenInfo;
+};
+export type SharedToken<T extends SharedTokenType = SharedTokenType> = {
+    id: number | bigint;
+    token: string;
+    expired: Date | null;
+    type: T;
+    info: SharedTokenTypeMap[T];
+};
+type SharedTokenRaw = {
+    id: number | bigint;
+    token: string;
+    expired: Date | null;
+    type: SharedTokenType;
+    info: string;
+};
 const ALL_TABLES = [
     "version",
     "task",
@@ -202,6 +226,7 @@ const ALL_TABLES = [
     "token",
     "ehmeta",
     "client_config",
+    "shared_token",
 ];
 const VERSION_TABLE = `CREATE TABLE version (
     id TEXT,
@@ -302,6 +327,13 @@ const CLIENT_CONFIG_TABLE = `CREATE TABLE client_config (
     data TEXT,
     PRIMARY KEY (uid, client, name)
 );`;
+const SHARED_TOKEN_TABLE = `CREATE TABLE shared_token (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT,
+    expired TEXT,
+    type INT,
+    info TEXT
+);`;
 
 function escape_fields(fields: string, namespace: string) {
     const fs = fields.split(",");
@@ -323,7 +355,7 @@ export class EhDb {
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
-    readonly version = parse_ver("1.0.0-12");
+    readonly version = parse_ver("1.0.0-13");
     constructor(base_path: string) {
         this.#base_path = base_path;
         this.#db_path = join(base_path, "data.db");
@@ -531,6 +563,9 @@ export class EhDb {
         if (!this.#exist_table.has("client_config")) {
             this.db.execute(CLIENT_CONFIG_TABLE);
         }
+        if (!this.#exist_table.has("shared_token")) {
+            this.db.execute(SHARED_TOKEN_TABLE);
+        }
         this.#updateExistsTable();
     }
     #read_version() {
@@ -667,6 +702,23 @@ export class EhDb {
             UserPermission.All,
         ]);
     }
+    add_shared_token<T extends SharedTokenType = SharedTokenType>(
+        type: T,
+        info: SharedTokenTypeMap[T],
+        expired: Date | null = null,
+    ) {
+        let token = randomstring();
+        while (this.get_token(token) || this.get_shared_token(token)) {
+            token = randomstring();
+        }
+        this.db.query(
+            "INSERT INTO shared_token (token, expired, type, info) VALUES (?, ?, ?, ?);",
+            [token, expired, type, toJSON(info)],
+        );
+        const t = this.get_shared_token(token);
+        if (!t) throw Error("Failed to add shared token");
+        return t;
+    }
     add_task(task: Task) {
         return this.transaction(() => {
             this.db.query(
@@ -713,7 +765,7 @@ export class EhDb {
         client_platform: string | null,
     ): Token {
         let token = randomstring();
-        while (this.get_token(token)) {
+        while (this.get_token(token) || this.get_shared_token(token)) {
             token = randomstring();
         }
         this.db.query(
@@ -913,6 +965,15 @@ export class EhDb {
             const b = m.expunged != 0;
             const t = <GMeta> <unknown> m;
             t.expunged = b;
+            return t;
+        });
+    }
+    convert_shared_token(m: SharedTokenRaw[]) {
+        return m.map((m) => {
+            const e = m.expired ? new Date(m.expired) : null;
+            const t = <SharedToken> <unknown> m;
+            t.expired = e;
+            t.info = JSON.parse(m.info);
             return t;
         });
     }
@@ -1304,6 +1365,15 @@ export class EhDb {
                 Deno.pid,
             ])
         );
+    }
+    get_shared_token(token: string) {
+        const s = this.convert_shared_token(
+            this.db.queryEntries<SharedTokenRaw>(
+                "SELECT * FROM shared_token WHERE token = ?;",
+                [token],
+            ),
+        );
+        return s.length ? s[0] : undefined;
     }
     get_token(token: string) {
         const s = this.convert_token(

@@ -9,9 +9,14 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
 import { get_host, return_data, return_error } from "../../../server/utils.ts";
 import type { EhFileExtend } from "../../../server/files.ts";
-import { User, UserPermission } from "../../../db.ts";
+import {
+    SharedToken,
+    SharedTokenType,
+    User,
+    UserPermission,
+} from "../../../db.ts";
 import { SortableURLSearchParams } from "../../../server/SortableURLSearchParams.ts";
-import { isNumNaN, parseBigInt } from "../../../utils.ts";
+import { compareNum, isNumNaN, parseBigInt } from "../../../utils.ts";
 import { extname } from "@std/path";
 
 export const handler: Handlers = {
@@ -23,6 +28,7 @@ export const handler: Handlers = {
         ) {
             return return_error(403, "Permission denied.");
         }
+        const st = <SharedToken | undefined> ctx.state.shared_token;
         const u = new URL(req.url);
         const m = get_task_manager();
         const token = u.searchParams.get("token");
@@ -51,8 +57,19 @@ export const handler: Handlers = {
         }
         const f = m.db.get_file(id);
         if (!f) {
+            if (st && st.type == SharedTokenType.Gallery) {
+                if (data) return return_error(403, "Permission denied.");
+                return new Response("Permission denied.", { status: 403 });
+            }
             if (data) return return_error(404, "File not found.");
             return new Response("File not found.", { status: 404 });
+        }
+        if (st && st.type == SharedTokenType.Gallery) {
+            const pmetas = m.db.get_pmeta_by_token_only(f.token);
+            if (!pmetas.some((m) => !compareNum(m.gid, st.info.gid))) {
+                if (data) return return_error(403, "Permission denied.");
+                return new Response("Permission denied.", { status: 403 });
+            }
         }
         if (data) {
             return return_data<EhFileExtend>({
