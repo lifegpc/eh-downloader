@@ -52,10 +52,14 @@ export const handler: Handlers = {
                 flutter_base = m.cfg.flutter_frontend;
             }
             const existed = await exists(flutter_base);
-            const base = existed
-                ? `${get_host(req)}/flutter`
-                : "https://dev.ehf.lifegpc.com/#";
-            const url = `${base}/gallery/${gid}?share=${st.token}`;
+            const host = get_host(req);
+            const base = host + existed ? "/flutter" : "/api";
+            const token = encodeURIComponent(st.token);
+            const url = existed
+                ? `${base}/gallery/${gid}?share=${token}`
+                : `https://dev.ehf.lifegpc.com/#/gallery/${gid}?base=${
+                    encodeURIComponent(base)
+                }&share=${token}`;
             return return_data({ url, token: st }, 201);
         } else {
             return return_error(1, "Unknown type");
