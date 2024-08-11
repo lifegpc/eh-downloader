@@ -268,6 +268,7 @@ const PMETA_TABLE = `CREATE TABLE pmeta (
     height INT,
     PRIMARY KEY (gid, "index")
 );`;
+const PMETA_INDEX = `CREATE INDEX pmeta_token ON pmeta (token);`;
 const TAG_TABLE = `CREATE TABLE tag (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tag TEXT,
@@ -355,7 +356,7 @@ export class EhDb {
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
-    readonly version = parse_ver("1.0.0-13");
+    readonly version = parse_ver("1.0.0-14");
     constructor(base_path: string) {
         this.#base_path = base_path;
         this.#db_path = join(base_path, "data.db");
@@ -514,6 +515,9 @@ export class EhDb {
                 this.db.execute("ALTER TABLE token ADD device TEXT;");
                 this.db.execute("ALTER TABLE token ADD client_version TEXT;");
                 this.db.execute("ALTER TABLE token ADD client_platform TEXT;");
+            }
+            if (compare_ver(v, parse_ver("1.0.0-14")) === -1) {
+                this.db.execute(PMETA_INDEX);
             }
             this.#write_version();
             if (need_optimize) this.optimize();
