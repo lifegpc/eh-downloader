@@ -53,7 +53,7 @@ export const handler: Handlers = {
             }
             const existed = await exists(flutter_base);
             const host = get_host(req);
-            const base = host + existed ? "/flutter" : "/api";
+            const base = host + existed ? "/flutter" : "/api/";
             const token = encodeURIComponent(st.token);
             const url = existed
                 ? `${base}/gallery/${gid}?share=${token}`
