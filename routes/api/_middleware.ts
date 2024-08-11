@@ -60,6 +60,10 @@ function handle_auth(req: Request, ctx: FreshContext) {
                 if (u.pathname === "/api/tag/rows" && req.method === "GET") {
                     return true;
                 }
+                if (
+                    u.pathname === `/api/export/gallery/zip/${st.info.gid}` &&
+                    req.method === "GET"
+                ) return true;
                 // Follow API need extra checks.
                 if (
                     u.pathname.match(/^\/api\/file\/\d+$/) &&

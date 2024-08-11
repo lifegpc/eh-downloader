@@ -8,6 +8,9 @@ import { exists } from "@std/fs/exists";
 import { get_task_manager } from "../server.ts";
 import { build_sw } from "../server/build_sw.ts";
 import { i18n_get_lang } from "../server/i18ns.ts";
+import { SharedTokenType } from "../db.ts";
+import { initDOMParser } from "../utils.ts";
+import { DOMParser } from "deno_dom/wasm-noinit";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
@@ -58,6 +61,50 @@ export async function handler(req: Request, ctx: FreshContext) {
                 const tp = join(flutter_base, `/manifest.${lang}.json`);
                 if (await exists(tp)) {
                     p = tp;
+                }
+            }
+        }
+        if (
+            u.pathname.startsWith("/flutter/gallery/") &&
+            u.searchParams.has("share")
+        ) {
+            const token = u.searchParams.get("share")!;
+            const st = m.db.get_shared_token(token);
+            const now = Date.now();
+            if (
+                st && st.type == SharedTokenType.Gallery &&
+                (st.expired === null || st.expired.getTime() >= now)
+            ) {
+                const b = `/flutter/gallery/${st.info.gid}`;
+                const g = m.db.get_gmeta_by_gid(st.info.gid);
+                if ((u.pathname == b || u.pathname.startsWith(b + "/")) && g) {
+                    const html = await Deno.readTextFile(p);
+                    await initDOMParser();
+                    try {
+                        const dom = (new DOMParser()).parseFromString(
+                            html,
+                            "text/html",
+                        );
+                        const doc = dom.documentElement!;
+                        const title = g.title;
+                        const desc = g.title_jpn;
+                        doc.querySelector("head title")!.innerText = title;
+                        doc.querySelector(
+                            'meta[name="apple-mobile-web-app-title"]',
+                        )?.setAttribute("content", title);
+                        doc.querySelector('meta[name="description"]')
+                            ?.setAttribute("content", desc);
+                        return new Response(
+                            "<!DOCTYPE html>\n" + doc.outerHTML,
+                            {
+                                headers: {
+                                    "Content-Type": "text/html; charset=UTF-8",
+                                },
+                            },
+                        );
+                    } catch (_) {
+                        null;
+                    }
                 }
             }
         }
