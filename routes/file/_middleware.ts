@@ -13,7 +13,10 @@ export async function handler(req: Request, ctx: FreshContext) {
             const c = m.cfg.cors_credentials_hosts.includes(origin);
             headers.set("Access-Control-Allow-Origin", origin);
             if (allow) headers.set("Access-Control-Allow-Methods", allow);
-            headers.set("Access-Control-Allow-Headers", "Content-Type, Range");
+            headers.set(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Range, X-TOKEN",
+            );
             if (c) headers.set("Access-Control-Allow-Credentials", "true");
             headers.set("Access-Control-Allow-Private-Network", "true");
         }
