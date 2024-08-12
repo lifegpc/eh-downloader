@@ -140,7 +140,7 @@ export async function handler(req: Request, ctx: FreshContext) {
                                     me.setAttribute("name", "og:image");
                                     me.setAttribute("content", url);
                                     const ogty = dom.createElement("meta");
-                                    ogty.setAttribute("name", "og:type");
+                                    ogty.setAttribute("name", "twitter:card");
                                     ogty.setAttribute(
                                         "content",
                                         "summary_large_image",
