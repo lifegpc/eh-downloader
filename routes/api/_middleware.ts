@@ -17,6 +17,13 @@ function handle_auth(req: Request, ctx: FreshContext) {
         token = cookies.get("token");
         is_from_cookie = true;
     }
+    if (
+        u.pathname.startsWith("/api/export/gallery/zip/") &&
+        req.method === "GET"
+    ) {
+        token = u.searchParams.get("share");
+        is_from_cookie = false;
+    }
     const check = () => {
         if (u.pathname === "/api/token" && req.method === "PUT") return true;
         if (u.pathname === "/api/status" && req.method === "GET") return true;

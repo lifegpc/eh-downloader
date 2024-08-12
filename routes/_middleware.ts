@@ -98,6 +98,15 @@ export async function handler(req: Request, ctx: FreshContext) {
                         )?.setAttribute("content", title);
                         doc.querySelector('meta[name="description"]')
                             ?.setAttribute("content", desc);
+                        const head = doc.querySelector("head");
+                        const ogt = dom.createElement("meta");
+                        ogt.setAttribute("name", "og:title");
+                        ogt.setAttribute("content", title);
+                        const ogd = dom.createElement("meta");
+                        ogd.setAttribute("name", "og:description");
+                        ogd.setAttribute("content", desc);
+                        head?.append(ogt);
+                        head?.append(ogd);
                         if (m.cfg.img_verify_secret && doc) {
                             const p = m.db.get_pmeta_by_index(st.info.gid, 1);
                             if (p) {
@@ -130,7 +139,14 @@ export async function handler(req: Request, ctx: FreshContext) {
                                     const me = dom.createElement("meta");
                                     me.setAttribute("name", "og:image");
                                     me.setAttribute("content", url);
-                                    doc.querySelector("head")?.append(me);
+                                    const ogty = dom.createElement("meta");
+                                    ogty.setAttribute("name", "og:type");
+                                    ogty.setAttribute(
+                                        "content",
+                                        "summary_large_image",
+                                    );
+                                    head?.append(me);
+                                    head?.append(ogty);
                                 }
                             }
                         }
