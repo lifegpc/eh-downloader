@@ -18,7 +18,9 @@ function handle_auth(req: Request, ctx: FreshContext) {
         is_from_cookie = true;
     }
     if (
-        u.pathname.startsWith("/api/export/gallery/zip/") &&
+        (u.pathname.startsWith("/api/export/gallery/zip/") ||
+            u.pathname.match(/^\/api\/file\/\d+/) ||
+            u.pathname.match(/^\/api\/thumbnail\/\d+$/)) &&
         req.method === "GET"
     ) {
         token = u.searchParams.get("share");

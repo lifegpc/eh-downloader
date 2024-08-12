@@ -123,7 +123,11 @@ export const handler: Handlers = {
         }
         if (!force) {
             if (cfg.width > f.width || cfg.height > f.height) {
-                return Response.redirect(`${get_host(req)}/api/file/${f.id}`);
+                const share = u.searchParams.get("share");
+                const q = share ? `?share=${encodeURIComponent(share)}` : "";
+                return Response.redirect(
+                    `${get_host(req)}/api/file/${f.id}${q}`,
+                );
             }
         }
         const output = generate_filename(b, f, cfg);

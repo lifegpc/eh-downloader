@@ -11,9 +11,6 @@ import { i18n_get_lang } from "../server/i18ns.ts";
 import { SharedTokenType } from "../db.ts";
 import { initDOMParser } from "../utils.ts";
 import { DOMParser } from "deno_dom/wasm-noinit";
-import pbkdf2Hmac from "pbkdf2-hmac";
-import { encodeBase64 } from "@std/encoding/base64";
-import { extname } from "@std/path";
 import { get_host } from "../server/utils.ts";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
@@ -107,35 +104,16 @@ export async function handler(req: Request, ctx: FreshContext) {
                         ogd.setAttribute("content", desc);
                         head?.append(ogt);
                         head?.append(ogd);
-                        if (m.cfg.img_verify_secret && doc) {
+                        if (doc) {
                             const p = m.db.get_pmeta_by_index(st.info.gid, 1);
                             if (p) {
                                 const t = m.db.get_files(p.token);
                                 if (t.length) {
-                                    const tverify = encodeBase64(
-                                        new Uint8Array(
-                                            await pbkdf2Hmac(
-                                                `${t[0].id}`,
-                                                m.cfg.img_verify_secret,
-                                                1000,
-                                                64,
-                                                "SHA-512",
-                                            ),
-                                        ),
-                                    );
-                                    let url: string | undefined;
-                                    if (m.cfg.use_path_based_img_url) {
-                                        const ext = extname(t[0].path);
-                                        url = `${get_host(req)}/file/${
-                                            encodeURIComponent(tverify)
-                                        }/${t[0].id}${ext}`;
-                                    } else {
-                                        const b = new URLSearchParams();
-                                        b.append("verify", tverify);
-                                        url = `${get_host(req)}/file/${
-                                            t[0].id
-                                        }?${b}`;
-                                    }
+                                    const url = `${
+                                        get_host(req)
+                                    }/api/thumbnail/${t[0].id}?max=1920&share=${
+                                        encodeURIComponent(st.token)
+                                    }`;
                                     const me = dom.createElement("meta");
                                     me.setAttribute("name", "og:image");
                                     me.setAttribute("content", url);
