@@ -1432,6 +1432,22 @@ export class EhDb {
             [uid, client],
         );
     }
+    list_shared_tokens<T extends SharedTokenType = SharedTokenType>(
+        type: T,
+        info: SharedTokenTypeMap[T] | null = null,
+    ) {
+        const where_sql = info === null ? "" : " AND info = ?";
+        const args: QueryParameter[] = [type];
+        if (info !== null) {
+            args.push(toJSON(info));
+        }
+        return this.convert_shared_token(
+            this.db.queryEntries<SharedTokenRaw>(
+                `SELECT * FROM shared_token WHERE type = ?${where_sql};`,
+                args,
+            ),
+        );
+    }
     optimize() {
         this.db.execute("VACUUM;");
     }
@@ -1479,6 +1495,35 @@ export class EhDb {
             await this.funlock();
             throw e;
         }
+    }
+    update_shared_token<T extends SharedTokenType = SharedTokenType>(
+        token: string,
+        type: T,
+        expired: number | null | undefined = undefined,
+        info: SharedTokenTypeMap[T] | null = null,
+    ) {
+        if (expired === undefined && info === null) {
+            return this.get_shared_token(token);
+        }
+        const args: QueryParameter[] = [];
+        const set_sqls = [];
+        if (expired !== undefined) {
+            set_sqls.push("expired = ?");
+            args.push(expired ? new Date(expired) : null);
+        }
+        if (info !== null) {
+            set_sqls.push("info = ?");
+            args.push(toJSON(info));
+        }
+        args.push(token);
+        args.push(type);
+        this.db.query(
+            `UPDATE shared_token SET ${
+                set_sqls.join(", ")
+            } WHERE token = ? AND type = ?;`,
+            args,
+        );
+        return this.get_shared_token(token);
     }
     update_tags(tag: string, translated: string, intro: string) {
         const id = this.#tags.get(tag);

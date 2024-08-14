@@ -20,6 +20,57 @@ export const handler: Handlers = {
         if (!st) return return_error(1, "No token.");
         return return_data(st);
     },
+    async PATCH(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        let form: FormData | undefined;
+        try {
+            form = await req.formData();
+        } catch (_) {
+            return return_error(400, "Bad Request");
+        }
+        const typ = await get_string(form.get("type"));
+        const expired = await parse_int(form.get("expired"), null);
+        const token = await get_string(form.get("token"));
+        if (!token) {
+            return return_error(2, "token not specfied.");
+        }
+        if (typ == "gallery") {
+            if (
+                user && !user.is_admin &&
+                !(user.permissions & UserPermission.ShareGallery)
+            ) {
+                return return_error(403, "Permission denied.");
+            }
+            const m = get_task_manager();
+            const st = m.db.update_shared_token(
+                token,
+                SharedTokenType.Gallery,
+                expired === 0 ? undefined : expired,
+            );
+            if (!st) return return_error(404, "Not found");
+            let flutter_base = import.meta.resolve("../../static/flutter")
+                .slice(7);
+            if (Deno.build.os === "windows") {
+                flutter_base = flutter_base.slice(1);
+            }
+            if (m.cfg.flutter_frontend) {
+                flutter_base = m.cfg.flutter_frontend;
+            }
+            const existed = await exists(flutter_base);
+            const host = get_host(req);
+            const base = host + (existed ? "/flutter" : "/api/");
+            const token2 = encodeURIComponent(st.token);
+            const gid = st.info.gid;
+            const url = existed
+                ? `${base}/gallery/${gid}?share=${token2}`
+                : `https://dev.ehf.lifegpc.com/#/gallery/${gid}?base=${
+                    encodeURIComponent(base)
+                }&share=${token2}`;
+            return return_data({ url, token: st });
+        } else {
+            return return_error(1, "Unknown type");
+        }
+    },
     async PUT(req, ctx) {
         const user = <User | undefined> ctx.state.user;
         let form: FormData | undefined;
