@@ -40,14 +40,16 @@ export class HomeOverviewPage {
             if (!panel) {
                 throw Error('Failed to find panel "Image Limits".');
             }
-            const limits = panel.querySelectorAll("p:nth-child(1) > strong");
-            if (!limits.length) {
+            const limits = panel.querySelectorAll("strong");
+            if (limits.length < 2) {
                 throw Error("Failed to find limits.");
             }
             const current = limits[0] as Element;
             const max = limits[1] as Element;
-            const current_image_limit = parseInt(current.innerText);
-            const max_image_limit = parseInt(max.innerText);
+            const current_image_limit = parseInt(
+                current.innerText.replace(",", ""),
+            );
+            const max_image_limit = parseInt(max.innerText.replace(",", ""));
             if (isNaN(current_image_limit) || isNaN(max_image_limit)) {
                 throw Error("Failed to parse limits.");
             }
