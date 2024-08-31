@@ -17,7 +17,10 @@ import { ImportConfig } from "../../tasks/import.ts";
 export const handler: Handlers = {
     GET(req, ctx) {
         const u = <User | undefined> ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.ManageTasks)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.ManageTasks)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const t = get_task_manager();
@@ -97,7 +100,10 @@ export const handler: Handlers = {
     },
     async PUT(req, ctx) {
         const u = <User | undefined> ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.ManageTasks)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.ManageTasks)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const t = get_task_manager();

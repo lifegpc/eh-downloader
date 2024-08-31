@@ -6,7 +6,10 @@ import { User, UserPermission } from "../../../db.ts";
 export const handler: Handlers = {
     GET(_req, _ctx) {
         const u = <User | undefined> _ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.ReadGallery)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.ReadGallery)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const m = get_task_manager();

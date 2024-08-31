@@ -54,7 +54,7 @@ export const handler: Handlers = {
         const user = <User | undefined> ctx.state.user;
         if (
             user && !user.is_admin &&
-            !(user.permissions & UserPermission.ReadGallery)
+            !(Number(user.permissions) & UserPermission.ReadGallery)
         ) {
             return return_error(403, "Permission denied.");
         }
@@ -65,7 +65,10 @@ export const handler: Handlers = {
     },
     async POST(req, ctx) {
         const u = <User | undefined> ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.EditGallery)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.EditGallery)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";
@@ -223,7 +226,10 @@ export const handler: Handlers = {
     },
     async PUT(req, ctx) {
         const u = <User | undefined> ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.EditGallery)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.EditGallery)
+        ) {
             return return_error(403, "Permission denied.");
         }
         const ct = req.headers.get("Content-Type")?.split(";")[0].trim() || "";

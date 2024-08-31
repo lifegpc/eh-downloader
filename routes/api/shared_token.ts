@@ -37,7 +37,7 @@ export const handler: Handlers = {
         if (typ == "gallery") {
             if (
                 user && !user.is_admin &&
-                !(user.permissions & UserPermission.ShareGallery)
+                !(Number(user.permissions) & UserPermission.ShareGallery)
             ) {
                 return return_error(403, "Permission denied.");
             }
@@ -84,7 +84,7 @@ export const handler: Handlers = {
         if (typ == "gallery") {
             if (
                 user && !user.is_admin &&
-                !(user.permissions & UserPermission.ShareGallery)
+                !(Number(user.permissions) & UserPermission.ShareGallery)
             ) {
                 return return_error(403, "Permission denied.");
             }

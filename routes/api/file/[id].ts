@@ -24,7 +24,7 @@ export const handler: Handlers = {
         const user = <User | undefined> ctx.state.user;
         if (
             user && !user.is_admin &&
-            !(user.permissions & UserPermission.ReadGallery)
+            !(Number(user.permissions) & UserPermission.ReadGallery)
         ) {
             return return_error(403, "Permission denied.");
         }

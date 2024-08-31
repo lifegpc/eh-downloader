@@ -9,7 +9,10 @@ import { isNumNaN, parseBigInt } from "../../../../../utils.ts";
 export const handler: Handlers = {
     async GET(req, ctx) {
         const u = <User | undefined> ctx.state.user;
-        if (u && !u.is_admin && !(u.permissions & UserPermission.ReadGallery)) {
+        if (
+            u && !u.is_admin &&
+            !(Number(u.permissions) & UserPermission.ReadGallery)
+        ) {
             return new Response("Permission denied", { status: 403 });
         }
         const gid = parseBigInt(ctx.params.gid);
