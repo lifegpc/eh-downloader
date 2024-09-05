@@ -63,7 +63,7 @@ export const handler: Handlers = {
             const gid = st.info.gid;
             const url = existed
                 ? `${base}/gallery/${gid}?share=${token2}`
-                : `https://dev.ehf.lifegpc.com/#/gallery/${gid}?base=${
+                : `https://dev.ehf.lifegpc.com/gallery/${gid}?base=${
                     encodeURIComponent(base)
                 }&share=${token2}`;
             return return_data({ url, token: st });
@@ -108,7 +108,7 @@ export const handler: Handlers = {
             const token = encodeURIComponent(st.token);
             const url = existed
                 ? `${base}/gallery/${gid}?share=${token}`
-                : `https://dev.ehf.lifegpc.com/#/gallery/${gid}?base=${
+                : `https://dev.ehf.lifegpc.com/gallery/${gid}?base=${
                     encodeURIComponent(base)
                 }&share=${token}`;
             return return_data({ url, token: st }, 201);

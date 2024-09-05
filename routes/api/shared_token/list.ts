@@ -38,7 +38,7 @@ export const handler: Handlers = {
                 const gid = st.info.gid;
                 const url = existed
                     ? `${base}/gallery/${gid}?share=${token2}`
-                    : `https://dev.ehf.lifegpc.com/#/gallery/${gid}?base=${
+                    : `https://dev.ehf.lifegpc.com/gallery/${gid}?base=${
                         encodeURIComponent(base)
                     }&share=${token2}`;
                 return { url, token: st };
