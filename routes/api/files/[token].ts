@@ -20,7 +20,7 @@ export const handler: Handlers = {
             return return_error(403, "Permission denied.");
         }
         const st = <SharedToken | undefined> ctx.state.shared_token;
-        const tokens = ctx.params.token.split(",");
+        const tokens = decodeURIComponent(ctx.params.token).split(",");
         const m = get_task_manager();
         const enable_server_timing = m.cfg.enable_server_timing;
         const start = enable_server_timing ? Date.now() : 0;

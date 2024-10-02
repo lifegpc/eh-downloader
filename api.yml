@@ -1,0 +1,324 @@
+openapi: "3.0.3"
+info:
+  title: EH Downloader API
+  version: "1.0"
+  description: EH Downloader API
+servers:
+  - url: "{host}{base}"
+    variables:
+      host:
+        default: https://eh.lifegpc.com
+        description: Hostname
+      base:
+        default: /api
+        description: Base URL
+    description: Example Server
+components:
+  schemas:
+    ApiResponse:
+      description: Api response
+      type: object
+      required: [ok, status]
+      properties:
+        ok:
+          type: boolean
+        status:
+          type: integer
+    ApiResponseError:
+      description: Api response with a error
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [error]
+          properties:
+            error:
+              type: string
+    EhFileBasic:
+      description: Basic data for file
+      type: object
+      required: [id, width, height, is_original]
+      properties:
+        id:
+          type: integer
+          description: File ID
+        width:
+          type: integer
+          description: Image width
+        height:
+          type: integer
+          description: Image height
+        is_original:
+          type: boolean
+          description: True if image is original
+    EhFiles:
+      description: List of files for tokens
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: "#/components/schemas/EhFileBasic"
+    EhFilesApiResult:
+      description: Api response for getFiles
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/EhFiles"
+    ExtendedPMeta:
+      description: Page metadata with extended information
+      type: object
+      required: [gid, index, token, name, width, height, is_nsfw, is_ad]
+      properties:
+        gid:
+          type: integer
+          format: int64
+          description: Gallery id
+        index:
+          type: integer
+          description: Page number in gallery
+        token:
+          type: string
+          description: Token for image
+        name:
+          type: string
+          description: Page name
+        width:
+          type: integer
+          description: Original image width
+        height:
+          type: integer
+          description: Original image height
+        is_nsfw:
+          type: boolean
+          description: True if image is NSFW
+        is_ad:
+          type: boolean
+          description: True if image is advertisement
+    GalleryData:
+      description: Gallery data
+      type: object
+      required: [meta, tags, pages]
+      properties:
+        meta:
+          $ref: "#/components/schemas/GMeta"
+        tags:
+          type: array
+          description: Gallery tags
+          items:
+            $ref: "#/components/schemas/Tag"
+        pages:
+          type: array
+          description: Gallery pages
+          items:
+            $ref: "#/components/schemas/ExtendedPMeta"
+    GalleryDataApiResult:
+      description: Api response for getGallery
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/GalleryData"
+    GMeta:
+      description: Gallery metadata
+      type: object
+      required:
+        [
+          gid,
+          token,
+          title,
+          title_jpn,
+          category,
+          uploader,
+          posted,
+          filecount,
+          filesize,
+          expunged,
+          rating,
+        ]
+      properties:
+        gid:
+          type: integer
+          format: int64
+          description: Gallery id
+        token:
+          type: string
+          description: Gallery token
+        title:
+          type: string
+          description: Title
+        title_jpn:
+          type: string
+          description: Japanese title
+        category:
+          type: string
+          description: Category
+        uploader:
+          type: string
+          description: Uploader's name
+        posted:
+          type: integer
+          format: int64
+          description: Posted epoch time in milliseconds
+        filecount:
+          type: integer
+          description: File count in gallery
+        filesize:
+          type: integer
+          format: int64
+          description: Total size of files
+        expunged:
+          type: boolean
+          description: True if gallery is not visible
+        rating:
+          type: number
+          description: Rating
+        parent_gid:
+          type: integer
+          format: int64
+          description: Parent gallery id
+        parent_token:
+          type: string
+          description: Parent gallery token
+        first_gid:
+          type: integer
+          format: int64
+          description: First gallery id
+        first_token:
+          type: string
+          description: First gallery token
+    Tag:
+      description: Gallery Tag
+      type: object
+      required: [id, tag]
+      properties:
+        id:
+          type: integer
+          description: Tag id in database
+        tag:
+          type: string
+          description: Original tag name on E-Hentai
+        translated:
+          type: string
+          description: Chinese translation of tag
+        intro:
+          type: string
+          description: Chinese introduction of tag
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      name: X-TOKEN
+      in: header
+    TokenAuth2:
+      type: apiKey
+      name: token
+      in: cookie
+security:
+  - TokenAuth: []
+  - TokenAuth2: []
+paths:
+  /files/{token}:
+    parameters:
+      - name: token
+        in: path
+        description: List of image tokens.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    get:
+      operationId: getFiles
+      summary: Get files from tokens
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EhFilesApiResult"
+              example:
+                {
+                  "ok": true,
+                  "status": 0,
+                  "data":
+                    {
+                      "e6681787c3":
+                        [
+                          {
+                            "id": 27401,
+                            "width": 1280,
+                            "height": 720,
+                            "is_original": true,
+                          },
+                        ],
+                    },
+                }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /gallery/{gid}:
+    parameters:
+      - name: gid
+        in: path
+        description: Gallery id
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      operationId: getGallery
+      summary: Get gallery information
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryDataApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 400, "error": "Failed to parse gid." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Gallery not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "Gallery not found." }

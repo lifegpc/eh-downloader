@@ -11,6 +11,13 @@ name: Deno
 on:
   push:
     branches: ["master"]
+    paths-ignore:
+      - '.github/workflows/docker.yaml'
+      - Dockerfile
+      - api.yml
+      - docker_entrypoint.sh
+      - docker-compose.yml
+      - '**.md'
 
 permissions:
   contents: read
