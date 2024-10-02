@@ -446,7 +446,7 @@ components:
       description: A list of galleries
       type: array
       items:
-        oneOf: 
+        anyOf: 
           - $ref: "#/components/schemas/GMeta"
           - $ref: "#/components/schemas/GMetaOptional"
     GalleryListApiResult:
