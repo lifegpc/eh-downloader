@@ -216,6 +216,25 @@ components:
           type: boolean
           description: True if some modification of configuration only works after server restart
       required: [is_unsafe]
+    EhFile:
+      description: Full data for File
+      allOf: 
+        - $ref: '#/components/schemas/EhFileExtend'
+        - type: object
+          properties:
+            path:
+              type: string
+              description: Path to image file on server
+          required: [path]
+    EhFileApiResult:
+      description: Api response for uploadFile
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/EhFile"
     EhFileBasic:
       description: Basic data for file
       type: object
@@ -252,6 +271,34 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/EhFileExtend"
+    EhFileMeta:
+      description: Metadata for a image
+      allOf: 
+        - $ref: '#/components/schemas/EhFileMetaOptinal'
+        - required: [token, is_nsfw, is_ad]
+    EhFileMetaApiResult:
+      description: Api response for getFilemeta
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/EhFileMeta"
+    EhFileMetaOptinal:
+      description: Metadata for a image
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: Image(page) token
+        is_nsfw:
+          type: boolean
+          description: True if image is NSFW
+        is_ad:
+          type: boolean
+          description: True if image is advertisement
     EhFiles:
       description: List of files for tokens
       type: object
@@ -1136,6 +1183,7 @@ paths:
               type: integer
               format: int64
             default: null
+          explode: false
         - name: meili_query
           in: query
           description: Query used to search via meilisearch.
@@ -1188,6 +1236,363 @@ paths:
           content:
             text/plain:
               example: File not found.
+  /file/upload:
+    post: 
+      operationId: uploadFile
+      summary: Upload image file
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, token]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Image file to upload
+                filename:
+                  type: string
+                  description: File name of image
+                  default: ''
+                dir:
+                  type: string
+                  description: The directory to store image
+                  default: ''
+                is_original:
+                  type: boolean
+                  description: True if the image is original
+                  default: false
+                token:
+                  type: string
+                  description: Image Token
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EhFileApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 4, "error": "Failed to get file size." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 500, "error": "Internal Server Error." }
+  /filemeta:
+    get: 
+      operationId: getFilemeta
+      summary: Get metadata for images
+      parameters: 
+        - name: token
+          in: query
+          description: Image(page) token
+          required: true
+          schema: 
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EhFileMetaApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 400, "error": "token is needed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "file not found." }
+    post:
+      operationId: updateFilemeta
+      summary: Update metadata for images
+      requestBody: 
+        content:
+          application/json:
+            schema: 
+              oneOf: 
+                - type: object
+                  required: [token]
+                  properties:
+                    token:
+                      type: string
+                      description: Image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: object
+                  required: [gid]
+                  properties:
+                    gid:
+                      type: integer
+                      format: int64
+                      description: Gallery id
+                    excludes:
+                      type: array
+                      items:
+                        type: string
+                      description: List of excluded image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: object
+                  required: [tokens]
+                  properties:
+                    tokens:
+                      type: array
+                      items:
+                        type: string
+                      description: List of image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/EhFileMetaOptinal'
+                  description: List of images
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Image(page) token
+                  default: ''
+                is_nsfw:
+                  type: boolean
+                  description: True if image is NSFW
+                  default: null
+                is_ad:
+                  type: boolean
+                  description: True if image is advertisement
+                  default: null
+                gid:
+                  type: integer
+                  format: int64
+                  description: Gallery id, only works when token is empty.
+                  default: ''
+                excludes:
+                  type: array
+                  items:
+                    type: string
+                  description: List of excluded image(page) token, only works when gid is not empty.
+                  default: []
+                tokens:
+                  type: array
+                  items:
+                    type: string
+                  description: List of image(page) tokens, only works when token and gid is empty.
+                  default: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 2, "error": "Invaild JSON file." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+    put:
+      operationId: setFilemeta
+      summary: Set metadata for images
+      requestBody: 
+        content:
+          application/json:
+            schema: 
+              oneOf: 
+                - type: object
+                  required: [token, is_nsfw, is_ad]
+                  properties:
+                    token:
+                      type: string
+                      description: Image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: object
+                  required: [gid, is_nsfw, is_ad]
+                  properties:
+                    gid:
+                      type: integer
+                      format: int64
+                      description: Gallery id
+                    excludes:
+                      type: array
+                      items:
+                        type: string
+                      description: List of excluded image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: object
+                  required: [tokens, is_nsfw, is_ad]
+                  properties:
+                    tokens:
+                      type: array
+                      items:
+                        type: string
+                      description: List of image(page) token
+                    is_nsfw:
+                      type: boolean
+                      description: True if image is NSFW
+                    is_ad:
+                      type: boolean
+                      description: True if image is advertisement
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/EhFileMeta'
+                  description: List of images
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [is_nsfw, is_ad]
+              properties:
+                token:
+                  type: string
+                  description: Image(page) token
+                  default: ''
+                is_nsfw:
+                  type: boolean
+                  description: True if image is NSFW
+                  default: null
+                is_ad:
+                  type: boolean
+                  description: True if image is advertisement
+                  default: null
+                gid:
+                  type: integer
+                  format: int64
+                  description: Gallery id, only works when token is empty.
+                  default: ''
+                excludes:
+                  type: array
+                  items:
+                    type: string
+                  description: List of excluded image(page) token, only works when gid is not empty.
+                  default: []
+                tokens:
+                  type: array
+                  items:
+                    type: string
+                  description: List of image(page) tokens, only works when token and gid is empty.
+                  default: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 2, "error": "Invaild JSON file." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
   /files/{token}:
     parameters:
       - name: token
