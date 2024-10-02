@@ -54,6 +54,7 @@ components:
             data:
               oneOf:
                 - type: array
+                  title: ClientConfigNameList
                   description: The list of configuration's name
                   items:
                     type: string
@@ -550,7 +551,7 @@ components:
         - tags
       properties:
         gid:
-          type: number
+          type: integer
           format: int64
           description: Gallery id
         token:
@@ -1415,6 +1416,7 @@ paths:
             schema: 
               oneOf: 
                 - type: object
+                  title: updateFilemetaWithToken
                   required: [token]
                   properties:
                     token:
@@ -1427,6 +1429,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: object
+                  title: updateFilemetaWithGid
                   required: [gid]
                   properties:
                     gid:
@@ -1445,6 +1448,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: object
+                  title: updateFilemetaWithTokens
                   required: [tokens]
                   properties:
                     tokens:
@@ -1459,6 +1463,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: array
+                  title: updateFilemetaWithList
                   items:
                     $ref: '#/components/schemas/EhFileMetaOptinal'
                   description: List of images
@@ -1534,6 +1539,7 @@ paths:
             schema: 
               oneOf: 
                 - type: object
+                  title: setFilemetaWithToken
                   required: [token, is_nsfw, is_ad]
                   properties:
                     token:
@@ -1546,6 +1552,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: object
+                  title: setFilemetaWithGid
                   required: [gid, is_nsfw, is_ad]
                   properties:
                     gid:
@@ -1564,6 +1571,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: object
+                  title: setFilemetaWithTokens
                   required: [tokens, is_nsfw, is_ad]
                   properties:
                     tokens:
@@ -1578,6 +1586,7 @@ paths:
                       type: boolean
                       description: True if image is advertisement
                 - type: array
+                  title: setFilemetaWithList
                   items:
                     $ref: '#/components/schemas/EhFileMeta'
                   description: List of images
