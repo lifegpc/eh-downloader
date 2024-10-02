@@ -233,6 +233,25 @@ components:
         is_original:
           type: boolean
           description: True if image is original
+    EhFileExtend:
+      description: Extended data for file
+      allOf: 
+        - $ref: '#/components/schemas/EhFileBasic'
+        - type: object
+          properties:
+            token:
+              type: string
+              description: Page token
+          required: [token]
+    EhFileExtendApiResult:
+      description: Api response for getFile
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/EhFileExtend"
     EhFiles:
       description: List of files for tokens
       type: object
@@ -561,6 +580,14 @@ components:
       type: apiKey
       name: token
       in: cookie
+    SharedToken:
+      type: apiKey
+      name: share
+      in: query
+    OtherToken:
+      type: apiKey
+      name: token
+      in: query
 security:
   - TokenAuth: []
   - TokenAuth2: []
@@ -932,6 +959,10 @@ paths:
     get:
       operationId: exportGalleryZip
       summary: Export gallery as Zip file
+      security:
+        - TokenAuth: []
+        - TokenAuth2: []
+        - SharedToken: []
       parameters: 
         - name: jpn_title
           in: query
@@ -973,6 +1004,190 @@ paths:
           content:
             text/plain:
               example: Permission denied
+  /file/{id}:
+    parameters: 
+      - name: id
+        in: path
+        description: File id
+        required: true
+        schema: 
+          type: integer
+    get: 
+      operationId: getFile
+      summary: Get file data/information
+      security:
+        - TokenAuth: []
+        - TokenAuth2: []
+        - SharedToken: []
+        - OtherToken: []
+      parameters: 
+        - name: data
+          in: query
+          description: Get file information
+          schema: 
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EhFileExtendApiResult"
+            image/jpeg: {}
+            image/png: {}
+            image/gif: {}
+        "206":
+          description: Partial Content
+          content:
+            image/jpeg: {}
+            image/png: {}
+            image/gif: {}
+        "302":
+          description: Redirect to image URL which don't need authorization
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 400, "error": "Bad Request" }
+            text/plain:
+              example: Bad Request
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+            text/plain:
+              example: Permission denied
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "File not found." }
+            text/plain:
+              example: File not found.
+  /file/random:
+    get: 
+      operationId: getRandomFile
+      summary: Get random file
+      security:
+        - TokenAuth: []
+        - TokenAuth2: []
+        - OtherToken: []
+      parameters: 
+        - name: action
+          in: query
+          description: Action. gentoken will generate a link which don't need extra authorization.
+          schema: 
+            type: string
+            enum: ['gentoken']
+            default: null
+        - name: is_nsfw
+          in: query
+          description: Whether to return image which is NSFW
+          schema: 
+            type: boolean
+            default: null
+        - name: is_ad
+          in: query
+          description: Whether to return image which is advertisement
+          schema: 
+            type: boolean
+            default: null
+        - name: thumb
+          in: query
+          description: Whether to return image as thumbnail
+          schema: 
+            type: boolean
+            default: false
+        - name: svg
+          in: query
+          description: Whether to return image as a SVG file
+          schema: 
+            type: boolean
+            default: false
+        - name: jpn_title
+          in: query
+          description: Use japanese title in SVG file
+          schema: 
+            type: boolean
+            default: false
+        - name: gids
+          in: query
+          description: Additional gallery added to search result.
+          schema: 
+            type: array
+            items:
+              type: integer
+              format: int64
+            default: null
+        - name: meili_query
+          in: query
+          description: Query used to search via meilisearch.
+          schema: 
+            type: string
+            default: null
+        - name: meili_filter
+          in: query
+          description: Filter used to search via meilisearch.
+          schema: 
+            type: string
+            default: null
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: Api response with a empty data
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    required: [data]
+                    properties:
+                      data:
+                        type: string
+                        description: Authorizated URL
+            image/svg+xml: {}
+        "302":
+          description: Redirect to image URL.
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              example: Meilisearch is not enabled.
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            text/plain:
+              example: Permission denied
+        "404":
+          description: Not found
+          content:
+            text/plain:
+              example: File not found.
   /files/{token}:
     parameters:
       - name: token
