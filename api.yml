@@ -24,6 +24,16 @@ components:
           type: boolean
         status:
           type: integer
+    ApiResponseEmpty:
+      description: Api response with a empty data
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+      example: {ok: true, status: 0, data: {}}
     ApiResponseError:
       description: Api response with a error
       allOf:
@@ -33,6 +43,22 @@ components:
           properties:
             error:
               type: string
+    ClientConfigApiResult:
+      description: Api result for getClientConfig
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              oneOf:
+                - type: array
+                  description: The list of configuration's name
+                  items:
+                    type: string
+                - type: string
+                  description: The data of configuration
     EhFileBasic:
       description: Basic data for file
       type: object
@@ -220,6 +246,152 @@ security:
   - TokenAuth: []
   - TokenAuth2: []
 paths:
+  /client/config:
+    delete:
+      operationId: deleteClientConfig
+      summary: Delete client configuration
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client:
+                  type: string
+                  description: Client's name
+                name:
+                  type: string
+                  description: Configuration's name
+              required: [client, name]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpty'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 2, "error": "client is needed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Token from users is needed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+    get:
+      operationId: getClientConfig
+      summary: Get client configuration
+      parameters:
+        - name: client
+          in: query
+          schema:
+            type: string
+          required: true
+          description: Client's name
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Configuration's name
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientConfigApiResult'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 2, "error": "client is needed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Token from users is needed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "Not found" }
+    put:
+      operationId: putClientConfig
+      summary: Create/Update client configuration
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client:
+                  type: string
+                  description: Client's name
+                name:
+                  type: string
+                  description: Configuration's name
+                data:
+                  type: string
+                  description: Configuration's data
+              required: [client, name, data]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmpty'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 2, "error": "client is needed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Token from users is needed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
   /files/{token}:
     parameters:
       - name: token
