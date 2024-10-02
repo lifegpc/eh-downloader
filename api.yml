@@ -384,6 +384,38 @@ components:
         is_ad:
           type: boolean
           description: True if image is advertisement
+    FsFile:
+      description: Present a file/directory
+      type: object
+      required: [name, dir]
+      properties:
+        name:
+          type: string
+          description: File name
+        dir:
+          type: boolean
+          description: True if is a directory
+    FsFileList:
+      description: Present the list of file in a directory
+      type: object
+      properties:
+        current:
+          type: string
+          description: The path of the directory
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/FsFile'
+          description: File list
+    FsFileListApiResult:
+      description: Api response for getFSList
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/FsFileList"
     GalleryData:
       description: Gallery data
       type: object
@@ -410,21 +442,41 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/GalleryData"
+    GalleryList:
+      description: A list of galleries
+      type: array
+      items:
+        oneOf: 
+          - $ref: "#/components/schemas/GMeta"
+          - $ref: "#/components/schemas/GMetaOptional"
+    GalleryListApiResult:
+      description: Api response for listGalleries
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/GalleryList"
     GMeta:
       description: Gallery metadata
+      allOf: 
+        - $ref: "#/components/schemas/GMetaOptional"
+        - required:
+            - gid
+            - token
+            - title
+            - title_jpn
+            - category
+            - uploader
+            - posted
+            - filecount
+            - filesize
+            - expunged
+            - rating
+    GMetaOptional:
+      description: Gallery metadata
       type: object
-      required:
-        - gid
-        - token
-        - title
-        - title_jpn
-        - category
-        - uploader
-        - posted
-        - filecount
-        - filesize
-        - expunged
-        - rating
       properties:
         gid:
           type: integer
@@ -1308,7 +1360,7 @@ paths:
   /filemeta:
     get: 
       operationId: getFilemeta
-      summary: Get metadata for images
+      summary: Get metadata for a image
       parameters: 
         - name: token
           in: query
@@ -1593,6 +1645,55 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
+  /filemeta/{token}:
+    parameters: 
+      - name: token
+        in: path
+        description: Image(page) token
+        required: true
+        schema: 
+          type: string
+    get:
+      operationId: getFilemeta2
+      summary: Get metedata for a image
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EhFileMetaApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 400, "error": "token is needed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "file not found." }
   /files/{token}:
     parameters:
       - name: token
@@ -1630,6 +1731,50 @@ paths:
                         ],
                     },
                 }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /fs/list:
+    get:
+      operationId: getFSList
+      summary: Get file list of a directory on server
+      parameters: 
+        - name: path
+          in: query
+          schema: 
+            type: string
+          description: Path to directory. If empty, download directory will used.
+        - name: dir
+          in: query
+          schema: 
+            type: boolean
+            default: true
+          description: Pass true to include directory
+        - name: file
+          in: query
+          schema: 
+            type: boolean
+            default: True
+          description: Pass true to include file
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FsFileListApiResult"
         "401":
           description: Authorization information is missing or invalid
           content:
@@ -1695,3 +1840,101 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 404, "error": "Gallery not found." }
+  /gallery/list:
+    get: 
+      operationId: listGalleries
+      summary: Get a list of galleries
+      parameters: 
+        - name: all
+          in: query
+          schema: 
+            type: boolean
+            default: false
+          description: Whether to list all galleries on server
+        - name: offset
+          in: query
+          schema: 
+            type: integer
+            format: int64
+            default: 0
+          description: Page offset
+        - name: limit
+          in: query
+          schema: 
+            type: integer
+            default: 20
+          description: Page size
+        - name: fields
+          in: query
+          schema: 
+            type: array
+            items:
+              type: string
+              enum:
+                - gid
+                - token
+                - title
+                - title_jpn
+                - category
+                - uploader
+                - posted
+                - filecount
+                - filesize
+                - expunged
+                - rating
+                - parent_gid
+                - parent_key
+                - first_gid
+                - first_key
+          explode: false
+          description: Filelds of gallery metadata.
+        - name: sort_by_gid
+          in: query
+          schema: 
+            type: boolean
+          description: Whether to sort galleries by gallery id
+        - name: uploader
+          in: query
+          schema: 
+            type: string
+          description: Filter galleries by uploader
+        - name: tag
+          in: query
+          schema: 
+            type: string
+          description: Filter galleries by tag
+        - name: category
+          in: query
+          schema: 
+            type: string
+          description: Filter galleries by category
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryListApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "Some fields not allowed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
