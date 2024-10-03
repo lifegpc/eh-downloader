@@ -20,8 +20,9 @@ export const handler: Handlers = {
         ) {
             return return_error(403, "Permission denied.");
         }
+        const gid = decodeURIComponent(ctx.params.gids);
         const gids = new Set(
-            ctx.params.gids.split(",").map((v) => parseBigInt(v)).filter((v) =>
+            gid.split(",").map((v) => parseBigInt(v)).filter((v) =>
                 !isNumNaN(v)
             ).map((v) => BigInt(v)),
         );

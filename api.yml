@@ -43,6 +43,17 @@ components:
           properties:
             error:
               type: string
+    ApiResponseTrue:
+      description: Api response with true
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: boolean
+              enum: [true]
+      example: { ok: true, status: 0, data: true }
     ClientConfigApiResult:
       description: Api result for getClientConfig
       type: object
@@ -339,13 +350,15 @@ components:
       description: E-Hentai metadata information map
       type: object
       additionalProperties:
-        allOf:
-        - $ref: "#/components/schemas/ApiResponse"
-        - type: object
-          required: [data]
-          properties:
-            data:
-              $ref: "#/components/schemas/GalleryMetadataSingle"
+        oneOf:
+          - allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GalleryMetadataSingle"
+          - $ref: "#/components/schemas/ApiResponseError"
     EHMetaInfoApiResult:
       description: Api response for getEhMetadata
       allOf:
@@ -475,6 +488,27 @@ components:
             - filesize
             - expunged
             - rating
+    GMetaInfos:
+      description: Galleries' metadata
+      additionalProperties:
+        oneOf:
+          - allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/GMeta"
+          - $ref: "#/components/schemas/ApiResponseError"
+    GMetaInfosApiResult:
+      description: Api response for getGalleriesMeta
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/GMetaInfos'
     GMetaOptional:
       description: Gallery metadata
       type: object
@@ -632,6 +666,15 @@ components:
           type: string
         fsize:
           type: string
+    GallerySharedTokenInfo:
+      description: Shared token extra information for gallery
+      type: object
+      required: [gid]
+      properties:
+        gid:
+          type: integer
+          format: int64
+          description: Gallery id
     ImportMethod:
       description: import method
       type: integer
@@ -644,6 +687,74 @@ components:
           const: 2
         - title: Keep
           const: 3
+    SharedToken:
+      description: Shared token
+      type: object
+      required: [id, token, type, info]
+      properties:
+        id:
+          type: integer
+          description: Shared token id
+        token:
+          type: string
+          description: Token
+        expired:
+          type: string
+          format: date-time
+        type:
+          $ref: "#/components/schemas/SharedTokenType"
+        info:
+          description: Extra informations
+          oneOf: 
+            - $ref: "#/components/schemas/GallerySharedTokenInfo"
+    SharedTokenApiResult:
+      description: Api response for getSharedToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/SharedToken'
+    SharedTokenList:
+      description: A list of shared token
+      items:
+        oneOf: 
+          - $ref: "#/components/schemas/SharedTokenWithUrl"
+    SharedTokenListApiResult:
+      description: Api response for listSharedToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/SharedTokenList'
+    SharedTokenType:
+      description: Shared token type
+      type: integer
+      oneOf: 
+        - title: Gallery
+          const: 0
+    SharedTokenWithUrl:
+      description: Shared token with shareable URL
+      type: object
+      required: [url, token]
+      properties:
+        url:
+          type: string
+          description: Shareable URL
+        token:
+          $ref: "#/components/schemas/SharedToken"
+    SharedTokenWithUrlApiResult:
+      description: Api response for updateSharedToken/createSharedToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/SharedTokenWithUrl'
     Tag:
       description: Gallery Tag
       type: object
@@ -1932,6 +2043,276 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 1, "error": "Some fields not allowed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /gallery/meta/{gids}:
+    parameters: 
+      - name: gids
+        in: path
+        schema: 
+          type: array
+          items:
+            type: integer
+            format: int64
+        required: true
+        description: List of gallery ids
+    get:
+      operationId: getGalleriesMeta
+      summary: Get galleries' metadata
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GMetaInfosApiResult"
+              example: {
+                "ok": true,
+                "status": 0,
+                "data": {
+                  "1": {
+                    "ok": false,
+                    "status": 404,
+                    "error": "Not found"
+                  },
+                  "1467583": {
+                    "ok": true,
+                    "status": 0,
+                    "data": {
+                      "gid": 1467583,
+                      "token": "fb8be3ee60",
+                      "title": "(C96) [CANVAS+GARDEN (Miyasaka Miyu, Miyasaka Naco)] Bouquet vol.28",
+                      "title_jpn": "(C96) [CANVAS+GARDEN (宮坂みゆ、宮坂なこ)] Bouquet vol.28",
+                      "category": "Non-H",
+                      "uploader": "RICO740",
+                      "posted": 1566228248,
+                      "filecount": 15,
+                      "filesize": 99875154,
+                      "expunged": false,
+                      "rating": 4.73,
+                      "parent_gid": null,
+                      "parent_key": null,
+                      "first_gid": null,
+                      "first_key": null
+                    }
+                  }
+                }
+              }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /health_check:
+    get:
+      operationId: checkHealth
+      security: []
+      summary: Check server's health
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+  /shared_token:
+    get: 
+      operationId: getSharedToken
+      summary: Get information for shared token
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedTokenApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "No token." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+    patch: 
+      operationId: updateSharedToken
+      summary: Update shared token
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [type, token]
+              properties:
+                type:
+                  type: string
+                  enum: [gallery]
+                  description: Shared token type
+                expired:
+                  type: integer
+                  format: int64
+                  description: New expired time in unix epoch (miliseconds)
+                  default: ''
+                token:
+                  type: string
+                  description: Token
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedTokenWithUrlApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "Unknown type" }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "Not found" }
+    put: 
+      operationId: createSharedToken
+      summary: Create shared token
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [type]
+              properties:
+                type:
+                  type: string
+                  enum: [gallery]
+                  description: Shared token type
+                expired:
+                  type: integer
+                  format: int64
+                  description: Expired time in unix epoch (miliseconds)
+                  default: ''
+                gid:
+                  type: integer
+                  format: int64
+                  description: Id of shared gallery
+                  default: ''
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedTokenWithUrlApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "Unknown type" }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /shared_token/list:
+    get: 
+      operationId: listSharedToken
+      summary: Get a list of shared token
+      parameters: 
+        - name: type
+          in: query
+          schema: 
+            type: string
+            enum: [gallery]
+          description: Shared token type
+          required: true
+        - name: gid
+          in: query
+          schema: 
+            type: integer
+            format: int64
+            default: null
+          description: Filter shared token by id of shared gallery.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedTokenListApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "Unknown type" }
         "401":
           description: Authorization information is missing or invalid
           content:

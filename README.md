@@ -7,6 +7,8 @@ curl -L "https://github.com/lifegpc/eh-downloader/raw/master/docker-compose.yml"
 docker compose up -d
 ```
 
+API Document is available [here](https://ehapi.lifegpc.com/).
+
 ## Official Frontend
 
 - [Flutter frontend](https://github.com/lifegpc/eh_downloader_flutter)
