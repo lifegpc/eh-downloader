@@ -999,6 +999,8 @@ components:
           const: 3
         - title: Import
           const: 4
+        - title: UpdateTagTranslation
+          const: 5
     ThumbnailMethod:
       description: Thumbnail method
       type: integer
@@ -2703,7 +2705,12 @@ paths:
               properties:
                 type:
                   type: string
-                  enum: [download, export_zip, update_meili_search_data, import]
+                  enum:
+                    - download
+                    - export_zip
+                    - update_meili_search_data
+                    - import
+                    - update_tag_translation
                   description: Task type
                 gid:
                   type: integer

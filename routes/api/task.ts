@@ -13,6 +13,7 @@ import type { ExportZipConfig } from "../../tasks/export_zip.ts";
 import { User, UserPermission } from "../../db.ts";
 import { toJSON } from "../../utils.ts";
 import { ImportConfig } from "../../tasks/import.ts";
+import { UpdateTagTranslationConfig } from "../../tasks/update_tag_translation.ts";
 
 export const handler: Handlers = {
     GET(req, ctx) {
@@ -72,6 +73,8 @@ export const handler: Handlers = {
                     t.add_download_task(d.gid, d.token, d.cfg);
                 } else if (d.type == "new_export_zip_task") {
                     t.add_export_zip_task(d.gid, d.cfg);
+                } else if (d.type == "new_update_tag_translation_task") {
+                    t.add_update_tag_translation_task(d.cfg);
                 } else if (d.type == "task_list") {
                     t.get_task_list().then((tasks) => {
                         sendMessage({
@@ -196,6 +199,28 @@ export const handler: Handlers = {
             }
             try {
                 const task = await t.add_import_task(gid, token, icfg, true);
+                if (task === null) {
+                    return return_error(6, "task is already in the list");
+                }
+                return return_data(task, 201);
+            } catch (e) {
+                return return_error(500, e.message);
+            }
+        } else if (typ == "update_tag_translation") {
+            const cfg = await get_string(form.get("cfg"));
+            let dcfg: UpdateTagTranslationConfig | undefined = undefined;
+            if (cfg) {
+                try {
+                    dcfg = JSON.parse(cfg);
+                } catch (_) {
+                    return return_error(4, "cfg is invalid");
+                }
+            }
+            try {
+                const task = await t.add_update_tag_translation_task(
+                    dcfg,
+                    true,
+                );
                 if (task === null) {
                     return return_error(6, "task is already in the list");
                 }

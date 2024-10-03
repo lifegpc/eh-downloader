@@ -888,8 +888,12 @@ export class EhDb {
     check_onetime_task() {
         return this.transaction(() => {
             const r = this.db.queryEntries<Task>(
-                "SELECT * FROM task WHERE type = ? OR type = ?;",
-                [TaskType.UpdateMeiliSearchData, TaskType.FixGalleryPage],
+                "SELECT * FROM task WHERE type = ? OR type = ? OR type = ?;",
+                [
+                    TaskType.UpdateMeiliSearchData,
+                    TaskType.FixGalleryPage,
+                    TaskType.UpdateTagTranslation,
+                ],
             );
             return r;
         });
@@ -905,6 +909,15 @@ export class EhDb {
             const r = this.db.queryEntries<Task>(
                 `SELECT * FROM task WHERE type = ?${wsql};`,
                 args,
+            );
+            return r.length ? r[0] : undefined;
+        });
+    }
+    check_update_tag_translation_task() {
+        return this.transaction(() => {
+            const r = this.db.queryEntries<Task>(
+                "SELECT * FROM task WHERE type = ?;",
+                [TaskType.UpdateTagTranslation],
             );
             return r.length ? r[0] : undefined;
         });

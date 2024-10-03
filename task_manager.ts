@@ -19,6 +19,11 @@ import { fix_gallery_page } from "./tasks/fix_gallery_page.ts";
 import { import_task, ImportConfig } from "./tasks/import.ts";
 import { update_meili_search_data } from "./tasks/update_meili_search_data.ts";
 import {
+    DEFAULT_UTT_CONFIG,
+    update_tag_translation,
+    UpdateTagTranslationConfig,
+} from "./tasks/update_tag_translation.ts";
+import {
     DiscriminatedUnion,
     promiseState,
     PromiseStatus,
@@ -194,6 +199,26 @@ export class TaskManager extends EventTarget {
             pid: Deno.pid,
             type: TaskType.UpdateMeiliSearchData,
             details: null,
+        };
+        return await this.#add_task(task);
+    }
+    async add_update_tag_translation_task(
+        cfg?: UpdateTagTranslationConfig,
+        mark_already = false,
+    ) {
+        this.#check_closed();
+        const otask = await this.db.check_update_tag_translation_task();
+        if (otask !== undefined) {
+            console.log("The task is already in list.");
+            return mark_already ? null : otask;
+        }
+        const task: Task = {
+            gid: 0,
+            token: "",
+            id: 0,
+            pid: Deno.pid,
+            type: TaskType.UpdateTagTranslation,
+            details: toJSON(cfg || DEFAULT_UTT_CONFIG),
         };
         return await this.#add_task(task);
     }
@@ -382,6 +407,15 @@ export class TaskManager extends EventTarget {
         } else if (task.type == TaskType.Import) {
             this.running_tasks.set(BigInt(task.id), {
                 task: import_task(task, this),
+                base: task,
+            });
+        } else if (task.type == TaskType.UpdateTagTranslation) {
+            await this.waiting_unfinished_task();
+            const cfg: UpdateTagTranslationConfig = task.details
+                ? JSON.parse(task.details)
+                : DEFAULT_UTT_CONFIG;
+            this.running_tasks.set(BigInt(task.id), {
+                task: update_tag_translation(task, this, cfg),
                 base: task,
             });
         }
