@@ -228,6 +228,72 @@ components:
           type: boolean
           description: True if some modification of configuration only works after server restart
       required: [is_unsafe]
+    DefaultImportConfig:
+      description: Default configuration for import task
+      type: object
+      properties:
+        max_import_img_count:
+          type: integer
+          description: Maximum number of images to be imported in parallel
+        mpv:
+          type: boolean
+          description: Fetch page data from Multi-Page Viewer
+        method:
+          $ref: "#/components/schemas/ImportMethod"
+        remove_previous_gallery:
+          type: boolean
+          description: Whether to remove old galleries which replaced by new ones
+    DefaultImportConfigApiResult:
+      description: Api response for getDefaultImportConfig
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/DefaultImportConfig"
+    DownloadConfig:
+      description: Configuration for download task
+      type: object
+      properties:
+        max_download_img_count:
+          type: integer
+          description: Maximum number of parallel downloads of images
+        mpv:
+          type: boolean
+          description: Fetch page data from Multi-Page Viewer
+        download_original_img:
+          type: boolean
+          description: Whether to download original images
+        max_retry_count:
+          type: integer
+          description: Maximum retry count
+        remove_previous_gallery:
+          type: boolean
+          description: Whether to remove old galleries which replaced by new ones
+        replaced_gallery:
+          description: A list of old galleries which should be replaced by new one
+          type: array
+          items:
+            type: object
+            required: [gid, token]
+            properties:
+              gid:
+                type: integer
+                format: int64
+                description: Gallery id
+              token:
+                type: string
+                description: Gallery token
+    DownloadConfigApiResult:
+      description: Api response for getDefaultDownloadConfig
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/DownloadConfig"
     EhFile:
       description: Full data for File
       allOf: 
@@ -368,6 +434,31 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/EHMetaInfo"
+    ExportZipConfig:
+      description: Configuration for export as zip file task
+      type: object
+      properties:
+        output:
+          type: string
+          description: The path to output zip file
+        jpn_title:
+          type: boolean
+          description: Whether to use japanese title first
+        max_length:
+          type: integer
+          description: Maximum length of filenames in Zip files. 0 means disable
+        export_ad:
+          type: boolean
+          description: Export pages which marked as advertisements
+    ExportZipConfigApiResult:
+      description: Api response for getDefaultExportZipConfig
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/ExportZipConfig"
     ExtendedPMeta:
       description: Page metadata with extended information
       type: object
@@ -755,6 +846,59 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SharedTokenWithUrl'
+    StatusData:
+      description: Server's status
+      type: object
+      required: 
+        - ffmpeg_api_enabled
+        - ffmpeg_binary_enabled
+        - ffprobe_binary_enabled
+        - meilisearch_enabled
+        - no_user
+        - is_docker
+        - libzip_enabled
+      properties:
+        ffmpeg_api_enabled:
+          type: boolean
+          description: FFMPEG Api thumbnail generate method is available.
+        ffmpeg_binary_enabled:
+          type: boolean
+          description: ffmpeg binary was found. FFMPEG Binary thumbnail generate method is available.
+        ffprobe_binary_enabled:
+          type: boolean
+          description: ffprobe binary was found.
+        meilisearch_enabled:
+          type: boolean
+          description: Meilisearch server is enabled.
+        meilisearch:
+          type: object
+          description: Meilisearch server's configuration. Authorization is required to get this configuration.
+          required: [host, key]
+          properties:
+            host:
+              type: string
+              description: Meilisearch server's host
+            key:
+              type: string
+              description: Meilisearch api key which used to search
+        no_user:
+          type: boolean
+          description: True if no any users on server
+        is_docker:
+          type: boolean
+          description: True if server is running in docker
+        libzip_enabled:
+          type: boolean
+          description: True if libzip extension was enabled
+    StatusDataApiResult:
+      description: Api response for getStatus
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/StatusData'
     Tag:
       description: Gallery Tag
       type: object
@@ -772,6 +916,89 @@ components:
         intro:
           type: string
           description: Chinese introduction of tag
+    TagList:
+      description: A list of gallery tags
+      type: array
+      items:
+        $ref: "#/components/schemas/Tag"
+    TagListApiResult:
+      description: Api response for getRowTags
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TagList'
+    Tags:
+      description: Gallery tags
+      type: object
+      additionalProperties:
+        oneOf:
+          - allOf: 
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tag'
+          - $ref: "#/components/schemas/ApiResponseError"
+    TagsApiResult:
+      description: Api response for getTags
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/Tags'
+    Task:
+      description: Task
+      type: object
+      required: [id, type, gid, token, pid]
+      properties:
+        id:
+          type: integer
+          description: Task id
+        type:
+          $ref: '#/components/schemas/TaskType'
+        gid:
+          type: integer
+          format: int64
+          description: Gallery id
+        token:
+          type: string
+          description: Gallery token
+        pid:
+          type: integer
+          format: int64
+          description: Procress id
+        details:
+          type: string
+          description: Task configuration in JSON format
+    TaskApiResult:
+      description: Api response for createTask
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/Task'
+    TaskType:
+      description: Task type
+      type: integer
+      oneOf: 
+        - title: Download
+          const: 0
+        - title: ExportZip
+          const: 1
+        - title: UpdateMeiliSearchData
+          const: 2
+        - title: FixGalleryPage
+          const: 3
+        - title: Import
+          const: 4
     ThumbnailMethod:
       description: Thumbnail method
       type: integer
@@ -967,6 +1194,8 @@ paths:
             enum: ["ws"]
           description: Connection protocol
       responses:
+        "101":
+          description: Switching Protocols to websocket
         "200":
           description: OK
           content:
@@ -2313,6 +2542,301 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 1, "error": "Unknown type" }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /status:
+    get: 
+      operationId: getStatus
+      summary: Get server's status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusDataApiResult"
+  /tag/{id}:
+    parameters: 
+      - name: id
+        in: path
+        schema: 
+          type: array
+          items:
+            oneOf:
+              - type: string
+                description: Tag name
+              - type: integer
+                description: Tag id
+        required: true
+        description: List of tag ids/names
+    get: 
+      operationId: getTags
+      summary: Get information of tags
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagsApiResult"
+              example: {
+                "ok": true,
+                "status": 0,
+                "data": {
+                  "21509": {
+                    "ok": true,
+                    "status": 0,
+                    "data": {
+                      "id": 21509,
+                      "tag": "artist:korie riko",
+                      "translated": "梱枝莉子",
+                      "intro": "梱枝りこ，梱枝，梱妈，梱枝Riko，画风颇具特色。"
+                    }
+                  },
+                  "88888": {
+                    "ok": false,
+                    "status": 404,
+                    "error": "tag not found."
+                  },
+                  "artist:miyasaka miyu": {
+                    "ok": true,
+                    "status": 0,
+                    "data": {
+                      "id": 18948,
+                      "tag": "artist:miyasaka miyu",
+                      "translated": "宫坂みゆ",
+                      "intro": "宫坂なこ(miyasaka naco)的姐姐\n最喜欢吃东西和玩游戏的姐姐"
+                    }
+                  },
+                  "test": {
+                    "ok": false,
+                    "status": 404,
+                    "error": "tag not found."
+                  }
+                }
+              }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /tag/rows:
+    get: 
+      operationId: getRowTags
+      summary: Get a list of tags which namespace is row
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagListApiResult"
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /task:
+    get:
+      operationId: createTaskConnection
+      summary: Create a websocket connection to receive task event
+      responses: 
+        "101":
+          description: Switching Protocols to websocket
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+    put:
+      operationId: createTask
+      summary: Create a new task
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [type]
+              properties:
+                type:
+                  type: string
+                  enum: [download, export_zip, update_meili_search_data, import]
+                  description: Task type
+                gid:
+                  type: integer
+                  format: int64
+                  description: Gallery id
+                  default: ''
+                token:
+                  type: string
+                  description: Gallery token
+                  default: ''
+                cfg:
+                  type: string
+                  description: Task configuration in JSON format
+                  default: ''
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "unknown type" }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 500, "error": "Internal Server Error." }
+  /task/download_cfg:
+    get:
+      operationId: getDefaultDownloadConfig
+      summary: Get default configuration for download task
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadConfigApiResult"
+              example: {
+                "ok": true,
+                "status": 0,
+                "data": {
+                  "download_original_img": false,
+                  "max_download_img_count": 3,
+                  "max_retry_count": 3,
+                  "mpv": false,
+                  "remove_previous_gallery": true
+                }
+              }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /task/export_zip_cfg:
+    get: 
+      operationId: getDefaultExportZipConfig
+      summary: Get default configuration for export as zip file task
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportZipConfigApiResult"
+              example: {
+                "ok": true,
+                "status": 0,
+                "data": {
+                  "jpn_title": false
+                }
+              }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+  /task/import_cfg:
+    get: 
+      operationId: getDefaultImportConfig
+      summary: Get default configuration for import task
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultImportConfigApiResult"
         "401":
           description: Authorization information is missing or invalid
           content:
