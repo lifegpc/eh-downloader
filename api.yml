@@ -1106,7 +1106,7 @@ components:
           type: integer
           description: User permissions
     UserApiResult:
-      description: Api response for getUser
+      description: Api response for getUser/updateUser/changeUserName
       allOf: 
         - $ref: "#/components/schemas/ApiResponse"
         - type: object
@@ -1124,6 +1124,20 @@ components:
             data:
               type: integer
               description: User id
+    UserList:
+      description: A list of users
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    UserListApiResult:
+      description: Api response for getUsers
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/UserList"
   securitySchemes:
     TokenAuth:
       type: apiKey
@@ -3545,3 +3559,148 @@ paths:
                 root:
                   description: Requires root user.
                   value: { "ok": false, "status": 8, "error": "Only root user can add admin user." }
+  /user/change_name:
+    post:
+      operationId: changeUserName
+      summary: Change current user's name
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+                  description: User name
+                  default: ''
+      responses: 
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 3, "error": "Name not changed." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 403, "error": "Permission denied." }
+  /user/change_password:
+    post: 
+      operationId: changeUserPassword
+      summary: Change current user's password
+      externalDocs: 
+        url: https://github.com/lifegpc/eh-downloader/wiki/API-‐-用户&鉴权相关API#如何生成经过处理的密码
+        description: How to generate password
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [old, t, new]
+              properties:
+                old:
+                  type: string
+                  format: byte
+                  description: Base64-encoded of processed old password
+                  default: ''
+                t:
+                  type: integer
+                  format: int64
+                  description: Current unix timestamp in milliseconds
+                  default: ''
+                new:
+                  type: string
+                  format: password
+                  description: New password
+                  default: ''
+      responses: 
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 5, "error": "Incorrect password" }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 403, "error": "Permission denied." }
+  /user/list:
+    get: 
+      operationId: getUsers
+      summary: Get a list of users
+      parameters: 
+        - name: all
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: List all users
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int64
+            default: 0
+          description: Page offset
+        - name: limit
+          in: query
+          schema: 
+            type: integer
+            default: 20
+          description: Page size
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListApiResult"
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 403, "error": "Permission denied." }
