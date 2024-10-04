@@ -3,6 +3,9 @@ info:
   title: EH Downloader API
   version: "1.0"
   description: EH Downloader API
+  license: 
+    name: GPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
 servers:
   - url: "{host}{base}"
     variables:
@@ -12,7 +15,7 @@ servers:
       base:
         default: /api
         description: Base URL
-    description: Example Server
+    description: API Server
 components:
   schemas:
     ApiResponse:
@@ -1011,6 +1014,116 @@ components:
         - title: FFMPEG_BINARY
           const: 1
           description: ffmpeg BINARY
+    Token:
+      description: Token information
+      type: object
+      required: [id, uid, token, expired, http_only, secure, last_used]
+      properties:
+        id:
+          type: integer
+          description: Token id
+        uid:
+          type: integer
+          description: User id
+        token:
+          type: string
+          description: Token
+        expired:
+          type: string
+          format: date-time
+          description: Expired time
+        http_only:
+          type: boolean
+          description: HttpOnly flag in cookie
+        secure:
+          type: boolean
+          description: secure flag in cookie
+        last_used:
+          type: string
+          format: date-time
+          description: Last used time
+        client:
+          type: string
+          description: Client name
+        device:
+          type: string
+          description: Device name
+        client_version:
+          type: string
+          description: Client version
+        client_platform:
+          type: string
+          description: Client platform
+    TokenApiResult:
+      description: Api response for createToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/Token'
+    TokenWithUserInfo:
+      description: Token information with user information
+      type: object
+      required: [token, name, is_admin, permissions]
+      properties:
+        token:
+          $ref: "#/components/schemas/Token"
+        name:
+          type: string
+          description: User name
+        is_admin:
+          type: boolean
+          description: True if user is administrator
+        permissions:
+          type: integer
+          description: User permissions
+    TokenWithUserInfoApiResult:
+      description: Api response for getToken/createToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TokenWithUserInfo'
+    User:
+      description: User information
+      type: object
+      required: [id, name, is_admin, permissions]
+      properties:
+        id:
+          type: integer
+          description: User id
+        name:
+          type: string
+          description: User name
+        is_admin:
+          type: boolean
+          description: True if user is administrator
+        permissions:
+          type: integer
+          description: User permissions
+    UserApiResult:
+      description: Api response for getUser
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+    UserIdApiResult:
+      description: Api response for createUser
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: integer
+              description: User id
   securitySchemes:
     TokenAuth:
       type: apiKey
@@ -2859,3 +2972,576 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
+  /thumbnail/{id}:
+    parameters: 
+      - name: id
+        in: path
+        schema:
+          type: integer
+        required: true
+        description: File id
+    get:
+      operationId: getThumbnail
+      summary: Get thumbnail of file
+      parameters: 
+        - name: max
+          in: query
+          schema: 
+            type: integer
+            default: 400
+          description: Pixels size of largest side of thumbnail. Ignored when width or height is provided.
+        - name: width
+          in: query
+          schema: 
+            type: integer
+          description: Width of thumbnail
+        - name: height
+          in: query
+          schema: 
+            type: integer
+          description: Height of thumbnail
+        - name: quality
+          in: query
+          schema: 
+            type: integer
+            default: 1
+          description: Quality of thumbnail
+        - name: force
+          in: query
+          schema: 
+            type: boolean
+            default: false
+          description: Pass true force to generate thumbnail when original image size is smaller than thumbnail size, otherwise will redirect to original image.
+        - name: method
+          in: query
+          schema: 
+            type: string
+            enum: [cover, contain, fill]
+          description: 'Scale method. cover: Touch container from outside. contain: Touch container from inside. fill: Stretch to container. Only works when both width and height are provided.'
+        - name: align
+          in: query
+          schema: 
+            type: string
+            enum: [left, top, center, right, bottom]
+          description: Alignment. Only works when scale method is cover or contain.
+      responses:
+        "200":
+          description: OK
+          content:
+            image/jpeg: {}
+        "302":
+          description: Redirect to original image URL or image URL which don't need authorization
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              example: Bad Request
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            text/plain:
+              example: Permission denied
+        "404":
+          description: Not found
+          content:
+            text/plain:
+              example: File not found.
+        "500":
+          description: Internal Server Error
+          content:
+            text/plain:
+              example: Failed to generate thumbnail.
+  /token:
+    delete:
+      operationId: deleteToken
+      summary: Delete token (logout)
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Token. If empty, current authorization token will be used.
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "token not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "token not found." }
+    get:
+      operationId: getToken
+      summary: Get token information
+      parameters: 
+        - name: token
+          in: query
+          schema: 
+            type: string
+          description: Token. If empty, current authorization token will be used.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenWithUserInfoApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "token not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                token:
+                  value: { "ok": false, "status": 404, "error": "token not found." }
+                user:
+                  value:  { "ok": false, "status": 404, "error": "user not found." }
+    patch:
+      operationId: updateToken
+      summary: Update token information
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Token. If empty, current authorization token will be used.
+                  default: ''
+                client:
+                  type: string
+                  description: Client name
+                  default: ''
+                device:
+                  type: string
+                  description: Device name
+                  default: ''
+                client_version:
+                  type: string
+                  description: Client version
+                  default: ''
+                client_platform:
+                  type: string
+                  description: Client platform
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "token not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "token not found." }
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 500, "error": "Internal Server Error." }
+    put:
+      operationId: createToken
+      summary: Create token (login)
+      security: []
+      externalDocs: 
+        url: https://github.com/lifegpc/eh-downloader/wiki/API-‐-用户&鉴权相关API#如何生成经过处理的密码
+        description: How to generate password
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [username, password, t]
+              properties:
+                username:
+                  type: string
+                  description: User name
+                  default: ''
+                password:
+                  type: string
+                  format: byte
+                  description: Base64-encoded of processed password
+                  default: ''
+                t:
+                  type: integer
+                  format: int64
+                  description: Current unix timestamp in milliseconds
+                  default: ''
+                set_cookie:
+                  type: boolean
+                  default: false
+                  description: Add set-cookie header in response
+                http_only:
+                  type: boolean
+                  default: true
+                  description: Add HttpOnly flag in set-cookie
+                secure:
+                  type: boolean
+                  default: false
+                  description: Add secure flag in set-cookie
+                client:
+                  type: string
+                  description: Client name
+                  default: ''
+                device:
+                  type: string
+                  description: Device name
+                  default: ''
+                client_version:
+                  type: string
+                  description: Client version
+                  default: ''
+                client_platform:
+                  type: string
+                  description: Client platform
+                  default: ''
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 2, "error": "Failed to decode password with base64." }
+  /user:
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      description: If both user id and user name are provided, user id will be used
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: User id
+                  default: ''
+                username:
+                  type: string
+                  description: User name
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                user:
+                  value: { "ok": false, "status": 1, "error": "user not specified." }
+                root_user:
+                  value: { "ok": false, "status": 6, "error": "root user can not be deleted." }
+                delete_self:
+                  value: { "ok": false, "status": 8, "error": "User can not delete himself." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                admin:
+                  description: Requires administrator privileges.
+                  value: { "ok": false, "status": 403, "error": "Permission denied." }
+                root:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 7, "error": "Only root user can delete admin user." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "User not found." }
+    get:
+      operationId: getUser
+      summary: Get a user's information
+      description: If both user id and user name are provided, user id will be used. If both user id and user name are empty, current authorizated user will be used.
+      parameters: 
+        - name: id
+          in: query
+          schema:
+            type: integer
+          description: User Id
+        - name: username
+          in: query
+          schema:
+            type: integer
+          description: User name
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 1, "error": "user not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "User not found." }
+    patch:
+      operationId: updateUser
+      summary: Update a user's information
+      description: If both user id and user name are provided, user id will be used and provided user name will become user's new user name. If both user id and user name are empty, current authorizated user will be used.
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: User id
+                  default: ''
+                username:
+                  type: string
+                  description: User name
+                  default: ''
+                password:
+                  type: string
+                  format: password
+                  description: New password
+                  default: ''
+                is_admin:
+                  type: boolean
+                  description: Pass true to change a normal user to administrator user otherwise change an administrator user to a normal user. Not works for root user.
+                  default: ''
+                revoke_token:
+                  type: boolean
+                  description: Pass true to revoke user's all token. Current used token will not be revoked.
+                  default: false
+                permissions:
+                  type: integer
+                  description: New permissions for user
+                  default: ''
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 1, "error": "user not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                admin:
+                  description: Requires administrator privileges.
+                  value: { "ok": false, "status": 403, "error": "Permission denied." }
+                change_admin:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 4, "error": "Only root user can change other admin user's inforamtion." }
+                prompt_admin:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 5, "error": "Only root user can prompt non-admin user to admin user." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "User not found." }
+    put:
+      operationId: createUser
+      summary: Create user
+      requestBody: 
+        content:
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              required: [name, password]
+              properties:
+                name:
+                  type: string
+                  description: User name
+                  default: ''
+                password:
+                  type: string
+                  format: password
+                  description: Password
+                  default: ''
+                is_admin:
+                  type: boolean
+                  description: True if user is administrator
+                  default: false
+                permissions:
+                  type: integer
+                  description: User's permissions
+                  default: ''
+      responses: 
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserIdApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 1, "error": "name not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                admin:
+                  description: Requires administrator privileges.
+                  value: { "ok": false, "status": 403, "error": "Permission denied." }
+                root:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 8, "error": "Only root user can add admin user." }
