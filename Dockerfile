@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 RUN cd ~ && \
     curl -L "https://github.com/webmproject/libwebp/archive/refs/tags/v1.4.0.tar.gz" -o libwebp.tar.gz && \
     tar -xzvf libwebp.tar.gz && \
-    cd libwebp-1.4.0 && \
+    cd libwebp-1.4.0 && mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
     -DWEBP_LINK_STATIC=OFF -DCMAKE_INSTALL_PREFIX=/clib ../ && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
@@ -37,7 +37,7 @@ RUN cd ~ && \
     curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.1.tar.gz" -o ffmpeg.tar.gz && \
     tar -xzvf ffmpeg.tar.gz && \
     cd FFmpeg-n7.1 && \
-    ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
+    PKG_CONFIG_PATH=/clib/lib/pkgconfig ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
     --enable-gpl --enable-version3 --disable-doc --disable-ffplay \
     --disable-network --disable-autodetect --enable-zlib \
     --disable-encoders --enable-encoder=mjpeg,libwebp \
