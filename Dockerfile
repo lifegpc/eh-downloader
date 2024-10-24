@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+COPY ./patch ~/patch
+
 RUN cd ~ && \
     curl -L "https://github.com/webmproject/libwebp/archive/refs/tags/v1.4.0.tar.gz" -o libwebp.tar.gz && \
     tar -xzvf libwebp.tar.gz && \
@@ -36,7 +38,7 @@ RUN cd ~ && \
 RUN cd ~ && \
     curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.1.tar.gz" -o ffmpeg.tar.gz && \
     tar -xzvf ffmpeg.tar.gz && \
-    cd FFmpeg-n7.1 && \
+    cd FFmpeg-n7.1 && patch libavutil/imgutils.c ~/patch/ffmpeg/imgutils.patch && \
     PKG_CONFIG_PATH=/clib/lib/pkgconfig ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
     --enable-gpl --enable-version3 --disable-doc --disable-ffplay \
     --disable-network --disable-autodetect --enable-zlib \

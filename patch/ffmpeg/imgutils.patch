@@ -1,0 +1,11 @@
+--- imgutils.ori.c	2024-10-24 18:59:25.612400714 +0800
++++ imgutils.c	2024-10-24 19:01:00.905336596 +0800
+@@ -298,7 +298,7 @@
+         stride = 8LL*w;
+     stride += 128*8;
+ 
+-    if (w==0 || h==0 || w > INT32_MAX || h > INT32_MAX || stride >= INT_MAX || stride*(h + 128ULL) >= INT_MAX) {
++    if (w==0 || h==0 || w > INT32_MAX || h > INT32_MAX || stride >= INT_MAX || stride*(h + 128ULL) >= INT64_MAX) {
+         av_log(&imgutils, AV_LOG_ERROR, "Picture size %ux%u is invalid\n", w, h);
+         return AVERROR(EINVAL);
+     }
