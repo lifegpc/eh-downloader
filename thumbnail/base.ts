@@ -1,6 +1,7 @@
 import { join } from "@std/path";
 import { filterFilename } from "../utils.ts";
 import type { EhFile } from "../db.ts";
+import { ThumbnailFormat } from "../config.ts";
 
 export enum ThumbnailGenMethod {
     Unknown,
@@ -26,13 +27,17 @@ export type ThumbnailConfig = {
     input?: { width: number; height: number };
 };
 
-export function gen_thumbnail_config_params(cfg: ThumbnailConfig) {
+export function gen_thumbnail_config_params(
+    cfg: ThumbnailConfig,
+    fmt: ThumbnailFormat,
+) {
     return {
         width: cfg.width.toString(),
         height: cfg.height.toString(),
         quality: cfg.quality.toString(),
         method: cfg.method.toString(),
         align: cfg.align.toString(),
+        fmt: fmt.toString(),
     };
 }
 
@@ -69,10 +74,12 @@ export function generate_filename(
     base: string,
     f: EhFile,
     cfg: ThumbnailConfig,
+    fmt: ThumbnailFormat,
 ) {
     let method = "";
     let balign = "";
     let align = "";
+    const ext = fmt == ThumbnailFormat.JPEG ? "jpg" : "webp";
     switch (cfg.align) {
         case ThumbnailAlign.Left:
             balign = "-left";
@@ -100,7 +107,7 @@ export function generate_filename(
     return join(
         base,
         filterFilename(
-            `${f.id}-${f.token}-${cfg.width}x${cfg.height}-q${cfg.quality}${method}${align}.jpg`,
+            `${f.id}-${f.token}-${cfg.width}x${cfg.height}-q${cfg.quality}${method}${align}.${ext}`,
         ),
     );
 }

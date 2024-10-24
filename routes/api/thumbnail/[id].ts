@@ -11,7 +11,7 @@ import {
     ThumbnailGenMethod,
 } from "../../../thumbnail/base.ts";
 import { compareNum, isNumNaN, parseBigInt, sure_dir } from "../../../utils.ts";
-import { ThumbnailMethod } from "../../../config.ts";
+import { ThumbnailFormat, ThumbnailMethod } from "../../../config.ts";
 import { fb_generate_thumbnail } from "../../../thumbnail/ffmpeg_binary.ts";
 import {
     get_file_response,
@@ -130,7 +130,11 @@ export const handler: Handlers = {
                 );
             }
         }
-        const output = generate_filename(b, f, cfg);
+        let fmt = m.cfg.thumbnail_format;
+        if (method == ThumbnailMethod.FFMPEG_API) {
+            fmt = ThumbnailFormat.JPEG;
+        }
+        const output = generate_filename(b, f, cfg, fmt);
         if (!(await exists(output))) {
             if (method === ThumbnailMethod.FFMPEG_BINARY) {
                 cfg.input = {
@@ -142,6 +146,7 @@ export const handler: Handlers = {
                     f.path,
                     output,
                     cfg,
+                    fmt,
                 );
                 if (!re) {
                     return new Response("Failed to generate thumbnail.", {
@@ -171,7 +176,7 @@ export const handler: Handlers = {
             const verify = u.searchParams.get("verify");
             if (verify === null) {
                 const bs = new SortableURLSearchParams(
-                    gen_thumbnail_config_params(cfg),
+                    gen_thumbnail_config_params(cfg, fmt),
                     ["verify"],
                 );
                 const tverify = encode(
@@ -188,8 +193,9 @@ export const handler: Handlers = {
                 const b = new URLSearchParams(bs.toString());
                 b.append("verify", tverify);
                 if (m.cfg.use_path_based_img_url) {
+                    const ext = fmt == ThumbnailFormat.WEBP ? "webp" : "jpg";
                     return Response.redirect(
-                        `${get_host(req)}/thumbnail/${b}/${f.id}.jpg`,
+                        `${get_host(req)}/thumbnail/${b}/${f.id}.${ext}`,
                     );
                 }
                 return Response.redirect(

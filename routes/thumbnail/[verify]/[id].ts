@@ -49,6 +49,7 @@ export const handler: Handlers = {
         const quality = await parse_int(search.get("quality"), null);
         const method = await parse_int(search.get("method"), null);
         const align = await parse_int(search.get("align"), null);
+        const fmt = await parse_int(search.get("fmt"), 0);
         if (
             width === null || height === null || quality === null ||
             method === null || align === null
@@ -66,7 +67,7 @@ export const handler: Handlers = {
             method,
             align,
         };
-        const output = generate_filename(b, f, cfg);
+        const output = generate_filename(b, f, cfg, fmt);
         if (!(await exists(output))) {
             return new Response("file not exists.", { status: 500 });
         }

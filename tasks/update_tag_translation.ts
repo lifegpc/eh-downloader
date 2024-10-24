@@ -37,7 +37,10 @@ export async function update_tag_translation(
     }
     sendEvent();
     const file = isDocker() ? "/tmp/utt.lock" : "./utt.lock";
-    await Deno.writeTextFile(file, "", { create: true, signal: manager.aborts });
+    await Deno.writeTextFile(file, "", {
+        create: true,
+        signal: manager.aborts,
+    });
     for (const d of f.data) {
         await asyncForEach(Object.getOwnPropertyNames(d.data), async (name) => {
             const tag = `${d.namespace}:${name}`;

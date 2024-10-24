@@ -40,11 +40,17 @@ export type ConfigType = {
     import_method: ImportMethod;
     max_import_img_count: number;
     enable_server_timing: boolean;
+    thumbnail_format: ThumbnailFormat;
 };
 
 export enum ThumbnailMethod {
     FFMPEG_BINARY,
     FFMPEG_API,
+}
+
+export enum ThumbnailFormat {
+    JPEG,
+    WEBP,
 }
 
 export enum ImportMethod {
@@ -173,6 +179,11 @@ export class Config {
     get thumbnail_dir() {
         return this._return_string("thumbnail_dir") || "./thumbnails";
     }
+    get thumbnail_format() {
+        const n = this._return_number("thumbnail_format") || 0;
+        if (n < 0 || n > 1) return ThumbnailFormat.JPEG;
+        return n as ThumbnailFormat;
+    }
     get remove_previous_gallery() {
         return this._return_bool("remove_previous_gallery") || false;
     }
@@ -282,6 +293,7 @@ export class Config {
             import_method: this.import_method,
             max_import_img_count: this.max_import_img_count,
             enable_server_timing: this.enable_server_timing,
+            thumbnail_format: this.thumbnail_format,
         };
     }
 }

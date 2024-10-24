@@ -1,3 +1,4 @@
+import { ThumbnailFormat } from "../config.ts";
 import { ThumbnailAlign } from "./base.ts";
 import { type ThumbnailConfig, ThumbnailGenMethod } from "./base.ts";
 
@@ -45,8 +46,10 @@ export async function fb_generate_thumbnail(
     i: string,
     o: string,
     cfg: ThumbnailConfig,
+    fmt: ThumbnailFormat,
 ) {
     let add = "";
+    const codec = fmt == ThumbnailFormat.WEBP ? "libwebp" : "mjpeg";
     if (cfg.method == ThumbnailGenMethod.Cover) {
         const size = cfg.input ?? await fb_get_size(i);
         if (!size) return false;
@@ -90,6 +93,8 @@ export async function fb_generate_thumbnail(
         "-n",
         "-i",
         i,
+        "-c",
+        codec,
         "-vf",
         add,
         "-qmin",

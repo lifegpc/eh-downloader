@@ -188,6 +188,8 @@ components:
         enable_server_timing:
           type: boolean
           description: Whether to enable server time tracking
+        thumbnail_format:
+          $ref: "#/components/schemas/ThumbnailFormat"
     Config:
       allOf:
         - $ref: "#/components/schemas/ConfigOptional"
@@ -223,6 +225,7 @@ components:
         - import_method
         - max_import_img_count
         - enable_server_timing
+        - thumbnail_format
     ConfigUpdated:
       description: result of updateConfig
       type: object
@@ -1004,6 +1007,16 @@ components:
           const: 4
         - title: UpdateTagTranslation
           const: 5
+    ThumbnailFormat:
+      description: Thumbnail format
+      type: integer
+      oneOf: 
+        - title: JPEG
+          const: 0
+          description: MJPEG
+        - title: WEBP
+          const: 1
+          description: WEBP
     ThumbnailMethod:
       description: Thumbnail method
       type: integer

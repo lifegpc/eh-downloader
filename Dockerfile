@@ -25,22 +25,32 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cd ~ && \
-    curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.0.1.tar.gz" -o ffmpeg.tar.gz && \
+    curl -L "https://github.com/webmproject/libwebp/archive/refs/tags/v1.4.0.tar.gz" -o libwebp.tar.gz && \
+    tar -xzvf libwebp.tar.gz && \
+    cd libwebp-1.4.0 && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
+    -DWEBP_LINK_STATIC=OFF -DCMAKE_INSTALL_PREFIX=/clib ../ && \
+    make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
+    cd ~ && rm -rf libwebp-1.4.0 libwebp.tar.gz
+
+RUN cd ~ && \
+    curl -L "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n7.1.tar.gz" -o ffmpeg.tar.gz && \
     tar -xzvf ffmpeg.tar.gz && \
-    cd FFmpeg-n7.0.1 && \
+    cd FFmpeg-n7.1 && \
     ./configure --enable-pic --prefix=/clib --enable-shared --disable-static \
     --enable-gpl --enable-version3 --disable-doc --disable-ffplay \
     --disable-network --disable-autodetect --enable-zlib \
-    --disable-encoders --enable-encoder=mjpeg \
+    --disable-encoders --enable-encoder=mjpeg,libwebp \
     --disable-muxers --enable-muxer=image2,image2pipe \
     --disable-decoders --enable-decoder=mjpeg,png,gif \
     --disable-demuxers --enable-demuxer=image_jpeg_pipe,image_png_pipe,image_gif_pipe \
     --disable-parsers --enable-parser=h264,png,gif \
     --disable-bsfs --enable-bsf=dts2pts,null \
     --disable-protocols --enable-protocol=async,concat,concatf,data,fd,file,md5,pipe,subfile \
-    --disable-devices --disable-filters --enable-filter=crop,pad,scale && \
+    --disable-devices --disable-filters --enable-filter=crop,pad,scale \
+    --enable-libwebp && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
-    cd ~ && rm -rf FFmpeg-n7.0.1 ffmpeg.tar.gz
+    cd ~ && rm -rf FFmpeg-n7.1 ffmpeg.tar.gz
 
 RUN cd ~ && \
     curl -L "https://github.com/curl/curl/releases/download/curl-8_8_0/curl-8.8.0.tar.gz" -o curl-8.8.0.tar.gz && \
