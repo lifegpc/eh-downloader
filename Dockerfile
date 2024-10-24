@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./patch ~/patch
+COPY ./patch /root/patch
 
 RUN cd ~ && \
     curl -L "https://github.com/webmproject/libwebp/archive/refs/tags/v1.4.0.tar.gz" -o libwebp.tar.gz && \
