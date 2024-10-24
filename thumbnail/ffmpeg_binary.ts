@@ -101,8 +101,13 @@ export async function fb_generate_thumbnail(
         `${cfg.quality}`,
         "-qmax",
         `${cfg.quality}`,
-        o,
+        "-f",
+        "image2",
     ];
+    if (fmt == ThumbnailFormat.WEBP) {
+        args.push("-quality", "100");
+    }
+    args.push(o);
     const cmd = new Deno.Command(p, { args, stdout: "null", stderr: "piped" });
     const c = cmd.spawn();
     const s = await c.output();
