@@ -7,6 +7,7 @@ export class SortableURLSearchParams extends URLSearchParams {
         super(init);
         this.excludes = excludes;
     }
+    // @ts-ignore Fuck
     entries(): IterableIterator<[string, string]> {
         this.sort();
         const a: [string, string][] = [];
@@ -15,6 +16,7 @@ export class SortableURLSearchParams extends URLSearchParams {
         }
         return a.values();
     }
+    // @ts-ignore Fuck
     forEach(
         callbackfn: (value: string, key: string, parent: this) => void,
         thisArg?: unknown,
@@ -23,6 +25,7 @@ export class SortableURLSearchParams extends URLSearchParams {
             callbackfn.apply(thisArg, [v, k, this]);
         }
     }
+    // @ts-ignore Fuck
     keys(): IterableIterator<string> {
         this.sort();
         const a: string[] = [];
@@ -31,6 +34,7 @@ export class SortableURLSearchParams extends URLSearchParams {
         }
         return a.values();
     }
+    // @ts-ignore Fuck
     toString(): string {
         return Array.from(this.entries()).map((v) =>
             `${encodeURIComponent(v[0])}=${encodeURIComponent(v[1])}`
@@ -40,6 +44,7 @@ export class SortableURLSearchParams extends URLSearchParams {
         const s = this.toString();
         return s.length ? `?${s}` : "";
     }
+    // @ts-ignore Fuck
     values(): IterableIterator<string> {
         return Array.from(this.entries()).map((v) => v[1]).values();
     }

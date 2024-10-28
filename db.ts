@@ -1081,19 +1081,19 @@ export class EhDb {
     }
     async flock() {
         if (!this.#file) return;
-        await eval(`Deno.flock(${this.#file.rid}, true);`);
+        await this.#file.lock();
     }
     dblock() {
         if (!this.#dblock) return;
-        eval(`Deno.flockSync(${this.#dblock.rid}, true);`);
+        this.#dblock.lockSync();
     }
     async funlock() {
         if (!this.#file) return;
-        await eval(`Deno.funlock(${this.#file.rid});`);
+        await this.#file.unlock();
     }
     dbunlock() {
         if (!this.#dblock) return;
-        eval(`Deno.funlockSync(${this.#dblock.rid});`);
+        this.#dblock.unlockSync();
     }
     get_client_config(uid: number | bigint, client: string, name: string) {
         const d = this.db.queryEntries<ClientConfig>(

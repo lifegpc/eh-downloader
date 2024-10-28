@@ -35,5 +35,5 @@
         },
         "exclude": ["_fresh", "static/sw.js"]
     },
-    "unstable": ["ffi", "fs"]
+    "unstable": ["ffi"]
 }
