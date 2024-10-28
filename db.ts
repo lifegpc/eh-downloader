@@ -1401,6 +1401,15 @@ export class EhDb {
         );
         return s.length ? s[0] : undefined;
     }
+    get_token_by_id(id: number | bigint) {
+        const s = this.convert_token(
+            this.db.queryEntries<TokenRaw>(
+                "SELECT * FROM token WHERE id = ?;",
+                [id],
+            ),
+        );
+        return s.length ? s[0] : undefined;
+    }
     get_user(id: number | bigint) {
         const s = this.convert_user(
             this.db.queryEntries<UserRaw>(

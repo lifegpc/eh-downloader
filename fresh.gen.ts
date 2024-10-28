@@ -33,6 +33,7 @@ import * as $api_task_export_zip_cfg from "./routes/api/task/export_zip_cfg.ts";
 import * as $api_task_import_cfg from "./routes/api/task/import_cfg.ts";
 import * as $api_thumbnail_id_ from "./routes/api/thumbnail/[id].ts";
 import * as $api_token from "./routes/api/token.ts";
+import * as $api_token_manage from "./routes/api/token/manage.ts";
 import * as $api_user from "./routes/api/user.ts";
 import * as $api_user_change_name from "./routes/api/user/change_name.ts";
 import * as $api_user_change_password from "./routes/api/user/change_password.ts";
@@ -82,6 +83,7 @@ const manifest = {
         "./routes/api/task/import_cfg.ts": $api_task_import_cfg,
         "./routes/api/thumbnail/[id].ts": $api_thumbnail_id_,
         "./routes/api/token.ts": $api_token,
+        "./routes/api/token/manage.ts": $api_token_manage,
         "./routes/api/user.ts": $api_user,
         "./routes/api/user/change_name.ts": $api_user_change_name,
         "./routes/api/user/change_password.ts": $api_user_change_password,
