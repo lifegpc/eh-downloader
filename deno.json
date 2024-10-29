@@ -21,7 +21,11 @@
             "static/sw.js",
             "static/sw.meta.json",
             "_fresh",
-            "extensions/build"
+            "extensions/build",
+            "api.yml",
+            "docker-compose.yml",
+            ".github/workflows/deno.yml",
+            ".github/workflows/docker.yaml"
         ]
     },
     "compilerOptions": {

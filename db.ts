@@ -346,7 +346,6 @@ function escape_fields(fields: string, namespace: string) {
 export class EhDb {
     // @ts-ignore Ignore
     db: Db;
-    #flock_enabled: boolean = eval('typeof Deno.flock !== "undefined"');
     #file: Deno.FsFile | undefined;
     #dblock: Deno.FsFile | undefined;
     #exist_table: Set<string> = new Set();
@@ -372,7 +371,7 @@ export class EhDb {
             this.db = new DB(this.#db_path);
         }
         if (!this.#check_database()) this.#create_table();
-        if (!this.#use_ffi && this.#flock_enabled) {
+        if (!this.#use_ffi) {
             this.#lock_file = join(this.#base_path, "db.lock");
             this.#dblock_file = join(this.#base_path, "eh.locked");
             this.#file = Deno.openSync(this.#lock_file, {
@@ -384,11 +383,6 @@ export class EhDb {
                 write: true,
             });
             this.dblock();
-        } else if (!this.#use_ffi) {
-            console.log(
-                "%cFile locking is disabled. Use --unstable to enable file locking.",
-                "color: yellow;",
-            );
         }
         this.remove_expired_token();
     }
@@ -1409,6 +1403,32 @@ export class EhDb {
             ),
         );
         return s.length ? s[0] : undefined;
+    }
+    get_tokens(
+        offset: number | bigint | null = 0,
+        limit: number | bigint | null = 20,
+        uid: number | bigint | null = null,
+    ) {
+        let sql = "";
+        const args = [];
+        if (uid !== null) {
+            sql = " WHERE uid = ?";
+            args.push(uid);
+        }
+        if (limit !== null) {
+            sql += " LIMIT ?";
+            args.push(limit);
+        }
+        if (offset !== null) {
+            sql += " OFFSET ?";
+            args.push(offset);
+        }
+        return this.convert_token(
+            this.db.queryEntries<TokenRaw>(
+                `SELECT * FROM token${sql};`,
+                args,
+            ),
+        );
     }
     get_user(id: number | bigint) {
         const s = this.convert_user(

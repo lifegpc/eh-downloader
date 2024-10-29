@@ -1029,8 +1029,27 @@ components:
           description: ffmpeg BINARY
     Token:
       description: Token information
+      allOf: 
+        - $ref: "#/components/schemas/TokenWithoutToken"
+        - type: object
+          required: [token]
+          properties:
+            token:
+              type: string
+              description: Token
+    TokenApiResult:
+      description: Api response for createToken
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/Token'
+    TokenWithoutToken:
+      description: Token information
       type: object
-      required: [id, uid, token, expired, http_only, secure, last_used]
+      required: [id, uid, expired, http_only, secure, last_used]
       properties:
         id:
           type: integer
@@ -1038,9 +1057,6 @@ components:
         uid:
           type: integer
           description: User id
-        token:
-          type: string
-          description: Token
         expired:
           type: string
           format: date-time
@@ -1067,15 +1083,20 @@ components:
         client_platform:
           type: string
           description: Client platform
-    TokenApiResult:
-      description: Api response for createToken
+    TokenWithoutTokenList:
+      description: A list of tokens
+      type: array
+      items:
+        $ref: "#/components/schemas/TokenWithoutToken"
+    TokenWithoutTokenListApiResult:
+      description: Api response for listTokens
       allOf: 
         - $ref: "#/components/schemas/ApiResponse"
         - type: object
           required: [data]
           properties:
             data:
-              $ref: '#/components/schemas/Token'
+              $ref: '#/components/schemas/TokenWithoutTokenList'
     TokenWithUserInfo:
       description: Token information with user information
       type: object
@@ -3377,6 +3398,76 @@ paths:
                   value: { "ok": false, "status": 404, "error": "User not found." }
                 token:
                   value: { "ok": false, "status": 404, "error": "Token not found." }
+    get:
+      operationId: listTokens
+      summary: List user's tokens
+      parameters: 
+        - name: uid
+          in: query
+          description: User id
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Page offset
+        - name: limit
+          in: query
+          schema: 
+            type: integer
+          description: Page size
+        - name: all_user
+          in: query
+          schema: 
+            type: boolean
+            default: false
+          description: Return all users' tokens
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenWithoutTokenListApiResult"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 2, "error": "User id not specified." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                admin:
+                  description: Requires administrator privileges.
+                  value: { "ok": false, "status": 403, "error": "Permission denied." }
+                root:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 3, "error": "Only root user can delete admin user's token." }
+                all_user:
+                  description: Requires root user.
+                  value: { "ok": false, "status": 4, "error": "Only root user can get all user's tokens." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 404, "error": "User not found." }
   /user:
     delete:
       operationId: deleteUser

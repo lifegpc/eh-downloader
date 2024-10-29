@@ -47,7 +47,7 @@ import * as $thumbnail_verify_id_ from "./routes/thumbnail/[verify]/[id].ts";
 import * as $thumbnail_middleware from "./routes/thumbnail/_middleware.ts";
 import * as $upload from "./routes/upload.tsx";
 import * as $Upload from "./islands/Upload.tsx";
-import { type Manifest } from "$fresh/server.ts";
+import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
     routes: {
