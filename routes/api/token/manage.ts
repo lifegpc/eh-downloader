@@ -50,6 +50,9 @@ export const handler: Handlers = {
         const offset = await parse_big_int(data.get("offset"), null);
         const limit = await parse_big_int(data.get("limit"), null);
         const all_user = await parse_bool(data.get("all_user"), false);
+        if (all_user) {
+            uid = null;
+        }
         const m = get_task_manager();
         if (user) {
             if (!all_user && uid === null) uid = user.id;
