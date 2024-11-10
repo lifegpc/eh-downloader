@@ -44,9 +44,9 @@ RUN cd ~ && \
     --disable-network --disable-autodetect --enable-zlib \
     --disable-encoders --enable-encoder=mjpeg,libwebp \
     --disable-muxers --enable-muxer=image2,image2pipe \
-    --disable-decoders --enable-decoder=mjpeg,png,gif \
-    --disable-demuxers --enable-demuxer=image_jpeg_pipe,image_png_pipe,image_gif_pipe \
-    --disable-parsers --enable-parser=h264,png,gif \
+    --disable-decoders --enable-decoder=mjpeg,png,gif,webp \
+    --disable-demuxers --enable-demuxer=image_jpeg_pipe,image_png_pipe,image_gif_pipe,image_webp_pipe \
+    --disable-parsers --enable-parser=h264,png,gif,webp \
     --disable-bsfs --enable-bsf=dts2pts,null \
     --disable-protocols --enable-protocol=async,concat,concatf,data,fd,file,md5,pipe,subfile \
     --disable-devices --disable-filters --enable-filter=crop,pad,scale \
