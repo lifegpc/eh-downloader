@@ -1046,6 +1046,9 @@ export class EhDb {
             if (count === 0 || count === 0n) this.delete_files(token);
         }
     }
+    delete_shared_token(token: string) {
+        this.db.query("DELETE FROM shared_token WHERE token = ?;", [token]);
+    }
     delete_task(task: Task) {
         return this.transaction(() => {
             this.db.query("DELETE FROM task WHERE id = ?;", [task.id]);

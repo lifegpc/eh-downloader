@@ -2531,6 +2531,54 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseTrue"
   /shared_token:
+    delete: 
+      operationId: deleteSharedToken
+      summary: Delete shared token
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [gallery]
+                  description: Shared token type
+                token:
+                  type: string
+                  description: Token to identify the shared token to delete.
+                  default: ''
+              required: [token, type]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "token not specfied." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
     get: 
       operationId: getSharedToken
       summary: Get information for shared token

@@ -15,6 +15,33 @@ import {
 import { get_host, return_data, return_error } from "../../server/utils.ts";
 
 export const handler: Handlers = {
+    async DELETE(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        let form: FormData | undefined;
+        try {
+            form = await req.formData();
+        } catch (_) {
+            return return_error(400, "Bad Request");
+        }
+        const typ = await get_string(form.get("type"));
+        const token = await get_string(form.get("token"));
+        if (!token) {
+            return return_error(2, "token not specfied.");
+        }
+        if (typ == "gallery") {
+            if (
+                user && !user.is_admin &&
+                !(Number(user.permissions) & UserPermission.ShareGallery)
+            ) {
+                return return_error(403, "Permission denied.");
+            }
+            const m = get_task_manager();
+            m.db.delete_shared_token(token);
+            return return_data(true);
+        } else {
+            return return_error(1, "Unknown type");
+        }
+    },
     GET(_req, ctx) {
         const st = <SharedToken | undefined> ctx.state.shared_token;
         if (!st) return return_error(1, "No token.");
