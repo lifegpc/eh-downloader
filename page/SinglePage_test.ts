@@ -33,15 +33,10 @@ Deno.test({
     const re2 = await client.fetchSignlePage(2028320, "1f48eb617e", 19);
     assertEquals(re2.currentIndex, 19);
     assertEquals(re2.gid, 2028320);
-    if (re2.is_original) {
-        assertEquals(re2.xres, 4893);
-        assertEquals(re2.yres, 3446);
-        assertEquals(re2.name, "18.png");
-    } else {
-        assertEquals(re2.name, "18.jpg");
-        assertEquals(re2.origin_xres, 4893);
-        assertEquals(re2.origin_yres, 3446);
-    }
+    assertEquals(re2.name, "18.png");
+    assertEquals(re2.is_original, false);
+    assertEquals(re2.origin_xres, 4893);
+    assertEquals(re2.origin_yres, 3446);
     console.log(np.nl, re.nl, re2.nl);
     console.log(re2.img_url);
     const res = await client.request(re2.img_url, "GET");
