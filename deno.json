@@ -2,7 +2,7 @@
     "lock": false,
     "importMap": "./import_map.json",
     "tasks": {
-        "cache": "deno cache main.ts server-dev.ts",
+        "cache": "deno cache main.ts server-dev.ts server-run.ts",
         "server-dev": "deno run -A \"--watch=static/*.css,static/*.ts,static/*/,routes/,translation/\" server-dev.ts",
         "server": "deno run -A server-run.ts",
         "test": "deno test --allow-read --allow-net --allow-write --allow-ffi --allow-run=tasklist.exe --allow-env",
