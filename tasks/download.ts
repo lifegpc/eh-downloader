@@ -16,11 +16,12 @@ import {
     asyncFilter,
     promiseState,
     PromiseStatus,
+    replaceExtname,
     sleep,
     sure_dir,
     TimeoutError,
 } from "../utils.ts";
-import { join, resolve } from "@std/path";
+import { basename, extname, join, resolve } from "@std/path";
 import { exists } from "@std/fs/exists";
 import { ProgressReadable } from "../utils/progress_readable.ts";
 
@@ -160,6 +161,11 @@ class DownloadManager {
             d.speed = now == d.last_updated ? 0 : num / (now - d.last_updated);
             d.last_updated = now;
         }
+        this.#sendEvent();
+    }
+    set_details_name(index: number, name: string) {
+        const d = this.#progress.details.find((v) => v.index === index);
+        if (d) d.name = name;
         this.#sendEvent();
     }
     set_details_started(index: number) {
@@ -369,6 +375,20 @@ export async function download_task(
                         pr.addEventListener("progress", (e) => {
                             m.set_details_downloaded(i.index, e.detail);
                         });
+                        if (!download_original) {
+                            const ext = extname(path);
+                            const u = new URL(re.url);
+                            const uext = extname(u.pathname);
+                            if (ext != uext) {
+                                path = replaceExtname(path, uext);
+                                if (f) {
+                                    f.path = path;
+                                } else {
+                                    throw Error("Failed to get file.");
+                                }
+                                m.set_details_name(i.index, basename(path));
+                            }
+                        }
                         try {
                             const f = await Deno.open(path, {
                                 create: true,

@@ -14,6 +14,7 @@ import {
     parseBigInt,
     promiseState,
     PromiseStatus,
+    replaceExtname,
     sleep,
     sure_dir,
     toJSON,
@@ -227,4 +228,18 @@ Deno.test("getHashFromUrl_test", () => {
         ),
         "4038f0c078b59736aeaa5b1ce38a44b701238363",
     );
+    assertEquals(
+        getHashFromUrl(
+            "https://zurswtyclg.hath.network/om/160618900/ff92f8c044e42cdcadcc0bb35d4bc957d1b00c93-3221277-2419-3482-png/109caa716cd3ac3b8ccf4e1e6c1290cc40e72984-100408-2419-3482-wbp/2560/eoqq7x49z16j8q1jeha/12.webp",
+        ),
+        "109caa716cd3ac3b8ccf4e1e6c1290cc40e72984",
+    );
+});
+
+Deno.test("replaceExtname_test", () => {
+    assertEquals(replaceExtname("test.ts", "js"), "test.js");
+    assertEquals(replaceExtname("test", "js"), "test.js");
+    assertEquals(replaceExtname("test.ts", ""), "test");
+    assertEquals(replaceExtname("test", ""), "test");
+    assertEquals(replaceExtname("test", "."), "test.");
 });

@@ -335,25 +335,45 @@ export function compareNum(num1: number | bigint, num2: number | bigint) {
 
 const HASH_PATTERN = /^\/h\/([0-9a-f]+)/;
 const FHASH_PATTERN = /([0-9a-f]{40})-(\d+)-(\d+)-(\d+)-([^\/]+)/g;
+const EXT_MAP: Record<string, string> = {
+    ".jpg": "jpg",
+    ".png": "png",
+    ".webp": "wbp",
+};
 
 export function getHashFromUrl(url: string | URL) {
     const u = typeof url === "string" ? new URL(url) : url;
     const m = u.pathname.match(HASH_PATTERN);
     if (m) return m[1];
     if (u.pathname.startsWith("/om/")) {
+        const ext = EXT_MAP[extname(u.pathname)];
         const ma = Array.from(u.pathname.matchAll(FHASH_PATTERN));
         const comps = u.pathname.split("/");
         if (ma.length && comps.length > 3) {
-            const width = comps[comps.length - 3];
-            if (width == "0") {
+            const width = parseInt(comps[comps.length - 3]);
+            if (width === 0) {
                 return ma[0][1];
             }
             for (const f of ma) {
-                if (f[3] == width) {
+                if (parseInt(f[3]) <= width && f[5] == ext) {
                     return f[1];
                 }
             }
         }
     }
     throw Error(`URL ${url} not contains hash info.`);
+}
+
+/**
+ * Replaces the file extension of a given path with a new extension.
+ *
+ * @param path - The original file path from which the extension will be replaced.
+ * @param ext - The new extension to be used. If it does not start with a dot, one will be added.
+ * @returns The modified file path with the new extension.
+ */
+export function replaceExtname(path: string, ext: string) {
+    if (ext && !ext.startsWith(".")) {
+        ext = "." + ext;
+    }
+    return path.slice(0, path.length - extname(path).length) + ext;
 }
