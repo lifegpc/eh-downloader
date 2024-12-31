@@ -32,7 +32,10 @@ export function format_message(
     message: unknown[],
     options?: Deno.InspectOptions,
 ) {
-    return message.map((x) => Deno.inspect(x, options)).join(" ");
+    return message.map((x) => {
+        if (typeof x === "string") return x;
+        return Deno.inspect(x, options);
+    }).join(" ");
 }
 
 class BaseLogger {
