@@ -5,6 +5,7 @@ import { AlreadyClosedError, TaskManager } from "./task_manager.ts";
 import twindPlugin from "$fresh/plugins/twind.ts";
 import twindConfig from "./twind.config.ts";
 import { load_translation } from "./server/i18ns.ts";
+import { base_logger } from "./utils/logger.ts";
 
 let task_manager: TaskManager | undefined = undefined;
 let cfg_path: string | undefined = undefined;
@@ -29,6 +30,7 @@ const renderFn: RenderFunction = (ctx, render) => {
 export async function startServer(path: string) {
     cfg_path = path;
     const cfg = await load_settings(path);
+    await base_logger.init(cfg.db_path || cfg.base);
     task_manager = new TaskManager(cfg);
     await task_manager.init();
     task_manager.run(true).catch((e) => {

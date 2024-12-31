@@ -1,6 +1,9 @@
 /// <reference lib="deno.unstable" />
 import { Struct } from "pwn/mod.ts";
 import { ThumbnailAlign, ThumbnailConfig, ThumbnailGenMethod } from "./base.ts";
+import { base_logger } from "../utils/logger.ts";
+
+const logger = base_logger.get_logger("thumbnail-ffmpeg-api");
 
 let libSuffix = "";
 let libPrefix = "lib";
@@ -49,7 +52,7 @@ const _Result = new Struct({ e: "s32", fferr: "s32" });
 
 function get_error(fferr: Uint8Array) {
     const u = new Uint8Array(64);
-    lib.symbols.thumbnail_error(fferr, u, u.length);
+    lib.symbols.thumbnail_error(fferr, u, BigInt(u.length));
     let len = u.findIndex((i) => i === 0);
     if (len === -1) len = u.length;
     return (new TextDecoder()).decode(u.slice(0, len));
@@ -100,7 +103,7 @@ export async function fa_generate_thumbnail(
         cfg.quality,
     );
     if (re) {
-        console.error(re);
+        logger.error(re);
     }
     return re === undefined;
 }

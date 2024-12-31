@@ -7,6 +7,7 @@ import {
 import { sleep, toJSON } from "./utils.ts";
 import type { EhDb } from "./db.ts";
 import isEqual from "lodash/isEqual";
+import { base_logger } from "./utils/logger.ts";
 
 const GMetaSettings: Record<string, unknown> = {
     displayedAttributes: ["*"],
@@ -32,6 +33,7 @@ const GMetaSettings: Record<string, unknown> = {
     ],
     sortableAttributes: ["filecount", "filesize", "gid", "posted", "rating"],
 };
+const logger = base_logger.get_logger("meilisearch");
 
 export class MeiliSearchServer {
     client;
@@ -61,13 +63,13 @@ export class MeiliSearchServer {
     #gallery_remove(e: Event) {
         const ev = e as CustomEvent<number>;
         this.removeGallery(ev.detail).catch((e) => {
-            console.log(e);
+            logger.warn("Failed to remove gallery:", e);
         });
     }
     #gallery_update(e: Event) {
         const ev = e as CustomEvent<number>;
         this.updateGallery(ev.detail).catch((e) => {
-            console.log(e);
+            logger.warn("Failed to update gallery", e);
         });
     }
     async #updateGMetaSettings() {
@@ -82,7 +84,7 @@ export class MeiliSearchServer {
                 }
             });
             if (need_update) {
-                console.log(u);
+                logger.log(u);
                 await this.waitTask(this.#gmeta.updateSettings(u));
             }
         }
@@ -96,7 +98,7 @@ export class MeiliSearchServer {
             return await this.client.getIndex(uid);
         } catch (e) {
             if (e instanceof MeiliSearchApiError) {
-                if (e.code === "index_not_found") {
+                if (e.name === "index_not_found") {
                     await this.waitTask(
                         this.client.createIndex(uid, { primaryKey }),
                     );

@@ -1,4 +1,4 @@
-import { Db, QueryParameter } from "./utils/db_interface.ts";
+import { Db, QueryParameter, SqliteMaster } from "./utils/db_interface.ts";
 import {
     compare as compare_ver,
     format as format_ver,
@@ -19,14 +19,8 @@ import {
 import { Task, TaskType } from "./task.ts";
 import { generate as randomstring } from "randomstring";
 import type { GalleryMetadataSingle } from "./page/GalleryMetadata.ts";
+import { base_logger } from "./utils/logger.ts";
 
-type SqliteMaster = {
-    type: string;
-    name: string;
-    tbl_name: string;
-    rootpage: number;
-    sql: string;
-};
 export enum SqliteTransactionType {
     DEFERRED = "DEFERRED",
     IMMEDIATE = "IMMEDIATE",
@@ -335,6 +329,7 @@ const SHARED_TOKEN_TABLE = `CREATE TABLE shared_token (
     type INT,
     info TEXT
 );`;
+const logger = base_logger.get_logger("db");
 
 function escape_fields(fields: string, namespace: string) {
     const fs = fields.split(",");
@@ -470,7 +465,7 @@ export class EhDb {
                             this.add_file(g as EhFile, false);
                         } else {
                             try_remove_sync(f.path);
-                            console.log("Deleted ", f.path);
+                            logger.debug("Deleted ", f.path);
                         }
                     });
                     offset += files.length;
@@ -659,7 +654,7 @@ export class EhDb {
                 ofiles.forEach((o) => {
                     if (o.path !== f.path) {
                         try_remove_sync(o.path);
-                        console.log("Deleted ", o.path);
+                        logger.debug("Deleted ", o.path);
                     }
                 });
             }
@@ -1026,7 +1021,7 @@ export class EhDb {
         this.db.query("DELETE FROM filemeta WHERE token = ?;", [token]);
         files.forEach((f) => {
             try_remove_sync(f.path);
-            console.log("Deleted ", f.path);
+            logger.debug("Deleted ", f.path);
         });
     }
     delete_gallery(gid: number | bigint) {

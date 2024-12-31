@@ -12,6 +12,13 @@ export type QueryParameter =
 export type QueryParameterSet =
     | Record<string, QueryParameter>
     | Array<QueryParameter>;
+export type SqliteMaster = {
+    type: string;
+    name: string;
+    tbl_name: string;
+    rootpage: number;
+    sql: string;
+};
 
 export interface Db {
     close(force?: boolean): void;

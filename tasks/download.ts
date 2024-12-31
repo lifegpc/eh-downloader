@@ -24,6 +24,7 @@ import {
 import { basename, extname, join, resolve } from "@std/path";
 import { exists } from "@std/fs/exists";
 import { ProgressReadable } from "../utils/progress_readable.ts";
+import { base_logger } from "../utils/logger.ts";
 
 export type DownloadConfig = {
     max_download_img_count?: number;
@@ -37,6 +38,8 @@ export type DownloadConfig = {
 export const DEFAULT_DOWNLOAD_CONFIG: DownloadConfig = {};
 
 const PROGRESS_UPDATE_INTERVAL = 200;
+
+const logger = base_logger.get_logger("download-task");
 
 class DownloadManager {
     #abort: AbortSignal;
@@ -78,7 +81,7 @@ class DownloadManager {
             async (t) => {
                 const s = await promiseState(t);
                 if (s.status === PromiseStatus.Rejected) {
-                    if (!this.#force_abort.aborted) console.log(s.reason);
+                    if (!this.#force_abort.aborted) logger.log(s.reason);
                     this.#progress.failed_page += 1;
                     this.#sendEvent();
                 } else if (s.status === PromiseStatus.Fulfilled) {
@@ -219,7 +222,7 @@ export async function download_task(
     manager: TaskManager,
     dcfg: DownloadConfig,
 ) {
-    console.log("Started to download gallery", task.gid);
+    logger.log("Started to download gallery", task.gid);
     const gdatas = await client.fetchGalleryMetadataByAPI([
         task.gid,
         task.token,
@@ -288,7 +291,7 @@ export async function download_task(
                         }
                     }
                 }
-                console.log("Already download page", i.index);
+                logger.log("Already download page", i.index);
                 return;
             }
         }
@@ -301,7 +304,7 @@ export async function download_task(
                     if (load_times >= max_retry_count) reject(errors);
                     i.load().then(resolve).catch((e) => {
                         if (force_abort.aborted) {
-                            console.log("Aborted when loading image:", i);
+                            logger.log("Aborted when loading image:", i);
                             errors.push(e);
                             reject(errors);
                             return;
@@ -326,7 +329,7 @@ export async function download_task(
             );
             if (names[i.name] > 1) {
                 path = add_suffix_to_path(path, i.page_token);
-                console.log("Changed path to", path);
+                logger.debug("Changed path to", path);
             }
             const f = download_original
                 ? i.get_original_file(path)
@@ -428,12 +431,12 @@ export async function download_task(
                             try {
                                 hash = getHashFromUrl(url);
                             } catch (e) {
-                                console.warn(e);
+                                logger.warn(e);
                             }
                             if (hash) {
                                 const fhash = await calFileSha1(path);
                                 if (hash != fhash) {
-                                    console.warn(
+                                    logger.warn(
                                         `Hash not matched: file hash ${fhash}, original hash ${hash}, url ${url}`,
                                     );
                                     throw new HashError();
@@ -450,7 +453,7 @@ export async function download_task(
                         }
                         download().then(resolve).catch((e) => {
                             if (force_abort.aborted) {
-                                console.log(
+                                logger.log(
                                     "Aborted when downloading image:",
                                     i,
                                 );
@@ -495,7 +498,7 @@ export async function download_task(
                                 reject(e);
                                 return;
                             }
-                            console.log("Failed to download, retry: ", e);
+                            logger.warn("Failed to download, retry: ", e);
                             retry += 1;
                             if (retry >= max_retry_count) {
                                 reject(e);
@@ -512,7 +515,7 @@ export async function download_task(
                 }
                 function try2_() {
                     deal_with_img().then(resolve).catch((e) => {
-                        console.log("Failed to download, retry: ", e);
+                        logger.warn("Failed to download, retry: ", e);
                         retry += 1;
                         if (retry >= max_retry_count) {
                             reject(e);
@@ -584,7 +587,7 @@ export async function download_task(
         replaced_gallery.forEach((g) => {
             const gmeta = db.get_gmeta_by_gid(g.gid);
             if (!gmeta) return;
-            console.log("Remove gallery ", g.gid);
+            logger.debug("Remove gallery ", g.gid);
             if (manager.meilisearch) {
                 manager.meilisearch.target.dispatchEvent(
                     new CustomEvent("gallery_remove", { detail: gmeta.gid }),

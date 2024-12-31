@@ -1,6 +1,9 @@
 import { ThumbnailFormat } from "../config.ts";
 import { ThumbnailAlign } from "./base.ts";
 import { type ThumbnailConfig, ThumbnailGenMethod } from "./base.ts";
+import { base_logger } from "../utils/logger.ts";
+
+const logger = base_logger.get_logger("thumbnail-ffmpeg-binary");
 
 export async function check_ffmpeg_binary(p: string) {
     const cmd = new Deno.Command(p, {
@@ -114,9 +117,9 @@ export async function fb_generate_thumbnail(
     if (s.code !== 0) {
         try {
             const d = (new TextDecoder()).decode(s.stderr);
-            console.log(d);
+            logger.warn(d);
         } catch (_) {
-            console.log(s.stderr);
+            logger.warn(s.stderr);
         }
     }
     return s.code === 0;

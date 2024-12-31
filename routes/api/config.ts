@@ -10,6 +10,7 @@ import { return_json } from "../../server/utils.ts";
 import { ExitTarget } from "../../signal_handler.ts";
 import type { User } from "../../db.ts";
 import { toJSON } from "../../utils.ts";
+import { base_logger } from "../../utils/logger.ts";
 
 const UNSAFE_TYPE: (keyof ConfigType)[] = [
     "base",
@@ -21,6 +22,7 @@ const UNSAFE_TYPE: (keyof ConfigType)[] = [
     "meili_update_api_key",
 ];
 const UNSAFE_TYPE2 = UNSAFE_TYPE as string[];
+const logger = base_logger.get_logger("api-config");
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -56,7 +58,7 @@ export const handler: Handlers = {
                 };
                 socket.onerror = () => {
                     removeListener();
-                    console.error("WebSocket error.");
+                    logger.error("WebSocket error.");
                 };
                 socket.onmessage = (e) => {
                     try {

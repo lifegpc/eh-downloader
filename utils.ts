@@ -377,3 +377,8 @@ export function replaceExtname(path: string, ext: string) {
     }
     return path.slice(0, path.length - extname(path).length) + ext;
 }
+
+export function stackTrace(skip: number = 0) {
+    const err = new Error();
+    return err.stack?.split("\n").slice(2 + skip).join("\n");
+}

@@ -31,6 +31,7 @@ import {
     sleep,
     toJSON,
 } from "./utils.ts";
+import { base_logger } from "./utils/logger.ts";
 
 export class AlreadyClosedError extends Error {
 }
@@ -55,6 +56,8 @@ type RunningTask = {
     task: Promise<Task>;
     base: Task;
 };
+
+const logger = base_logger.get_logger("task_manager");
 
 export class TaskManager extends EventTarget {
     #closed = false;
@@ -122,7 +125,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
         if (otask !== undefined) {
-            console.log("The task is already in list.");
+            logger.log("The task is already in list.");
             return mark_already ? null : otask;
         }
         const task: Task = {
@@ -150,7 +153,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const otask = await this.db.check_fix_gallery_page_task();
         if (otask !== undefined) {
-            console.log("The task is already in list.");
+            logger.log("The task is already in list.");
             return otask;
         }
         const task: Task = {
@@ -172,7 +175,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const otask = await this.db.check_download_task(gid, token);
         if (otask !== undefined) {
-            console.log("The task is already in list.");
+            logger.log("The task is already in list.");
             return mark_already ? null : otask;
         }
         const task: Task = {
@@ -189,7 +192,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const otask = await this.db.check_update_meili_search_data_task(gid);
         if (otask !== undefined) {
-            console.log("The task is already in list.");
+            logger.log("The task is already in list.");
             return otask;
         }
         const task: Task = {
@@ -209,7 +212,7 @@ export class TaskManager extends EventTarget {
         this.#check_closed();
         const otask = await this.db.check_update_tag_translation_task();
         if (otask !== undefined) {
-            console.log("The task is already in list.");
+            logger.log("The task is already in list.");
             return mark_already ? null : otask;
         }
         const task: Task = {
@@ -258,7 +261,7 @@ export class TaskManager extends EventTarget {
                 this.dispatchEvent("task_finished", status.value);
             } else if (status.status == PromiseStatus.Rejected) {
                 if (status.reason && !this.aborted) {
-                    console.log(status.reason);
+                    logger.warn(status.reason);
                     const fatal = !(status.reason instanceof RecoverableError);
                     this.dispatchEvent("task_error", {
                         task: task.base,
@@ -279,7 +282,7 @@ export class TaskManager extends EventTarget {
     }
     close() {
         if (this.#closed) {
-            console.trace("Manager closed multiple times.");
+            logger.trace("Manager closed multiple times.");
             return;
         }
         this.#closed = true;

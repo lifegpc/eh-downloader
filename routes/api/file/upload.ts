@@ -8,6 +8,9 @@ import { sure_dir } from "../../../utils.ts";
 import mime from "mime";
 import { extname, join, resolve } from "@std/path";
 import { UserPermission } from "../../../db.ts";
+import { base_logger } from "../../../utils/logger.ts";
+
+const logger = base_logger.get_logger("api-file-upload");
 
 export const handler: Handlers = {
     async POST(req, ctx) {
@@ -76,7 +79,7 @@ export const handler: Handlers = {
                 throw e;
             }
         } catch (e) {
-            console.error(e);
+            logger.error(e);
             return return_error(500, "Internal Server Error.");
         }
     },

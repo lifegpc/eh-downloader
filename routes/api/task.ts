@@ -14,6 +14,9 @@ import { User, UserPermission } from "../../db.ts";
 import { toJSON } from "../../utils.ts";
 import { ImportConfig } from "../../tasks/import.ts";
 import { UpdateTagTranslationConfig } from "../../tasks/update_tag_translation.ts";
+import { base_logger } from "../../utils/logger.ts";
+
+const logger = base_logger.get_logger("api-task");
 
 export const handler: Handlers = {
     GET(req, ctx) {
@@ -61,7 +64,7 @@ export const handler: Handlers = {
         socket.onerror = () => {
             removeListener();
             clearInterval(interval);
-            console.error("WebSocket error.");
+            logger.error("WebSocket error.");
         };
         socket.onmessage = (e) => {
             try {

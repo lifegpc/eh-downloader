@@ -19,6 +19,7 @@ import { ImportMethod, ImportSize } from "../config.ts";
 import { fb_get_size } from "../thumbnail/ffmpeg_binary.ts";
 import { EhFile, PMeta } from "../db.ts";
 import type { ReadonlyZip } from "../utils/readonly_zip.ts";
+import { base_logger } from "../utils/logger.ts";
 
 export type ImportConfig = {
     max_import_img_count?: number;
@@ -40,6 +41,8 @@ interface Page {
 const VALID_EXTS = [".jpg", ".png", ".gif"];
 
 const PROGRESS_UPDATE_INTERVAL = 200;
+
+const logger = base_logger.get_logger("import-task");
 
 class ImportManager {
     #abort: AbortSignal;
@@ -78,7 +81,7 @@ class ImportManager {
             async (t) => {
                 const s = await promiseState(t);
                 if (s.status === PromiseStatus.Rejected) {
-                    if (!this.#force_abort.aborted) console.log(s.reason);
+                    if (!this.#force_abort.aborted) logger.log(s.reason);
                     this.#progress.failed_page += 1;
                     this.#sendEvent();
                 } else if (s.status === PromiseStatus.Fulfilled) {
@@ -262,7 +265,7 @@ class FileLoader {
 
 export async function import_task(task: Task, manager: TaskManager) {
     if (!task.details) throw Error("Task details are needed.");
-    console.log("Started to import gallery", task.gid);
+    logger.log("Started to import gallery", task.gid);
     const icfg: ImportConfig = JSON.parse(task.details);
     const cfg = manager.cfg;
     const client = manager.client;
@@ -331,12 +334,12 @@ export async function import_task(task: Task, manager: TaskManager) {
         async function import_img(i: Page) {
             const opath = f.get_file(i.name, i.index);
             if (!opath) {
-                console.log("File not found");
+                logger.log("File not found");
                 return;
             }
             const size = await fb_get_size(opath);
             if (!size) {
-                console.log("Failed to get file size for", opath);
+                logger.log("Failed to get file size for", opath);
                 throw Error("Failed to get file size.");
             }
             const ofiles = db.get_files(i.token);
@@ -373,7 +376,7 @@ export async function import_task(task: Task, manager: TaskManager) {
                             }
                         }
                     }
-                    console.log("Already has page", i.index);
+                    logger.log("Already has page", i.index);
                     return;
                 }
             }
@@ -394,7 +397,7 @@ export async function import_task(task: Task, manager: TaskManager) {
             let path = join(base_path, is_original ? i.name : i.sampled_name);
             if (import_method != ImportMethod.Keep && names[i.name] > 1) {
                 path = add_suffix_to_path(path, i.token);
-                console.log("Changed path to", path);
+                logger.debug("Changed path to", path);
             }
             if (import_method == ImportMethod.Move) {
                 await Deno.rename(opath, path);
@@ -406,7 +409,7 @@ export async function import_task(task: Task, manager: TaskManager) {
             if (cfg.check_file_hash && is_original) {
                 const sha = await calFileSha1(path);
                 if (sha.slice(0, i.token.length) != i.token) {
-                    console.warn(
+                    logger.warn(
                         `Hash not matched: file hash ${sha}, token ${i.token}`,
                     );
                     return;
@@ -429,7 +432,7 @@ export async function import_task(task: Task, manager: TaskManager) {
         async function import_zip_img(i: Page) {
             const opath = f.get_zip(i.name, i.index);
             if (!opath) {
-                console.log("File not found");
+                logger.log("File not found");
                 return;
             }
             const ofiles = db.get_files(i.token);
@@ -466,7 +469,7 @@ export async function import_task(task: Task, manager: TaskManager) {
                             }
                         }
                     }
-                    console.log("Already has page", i.index);
+                    logger.log("Already has page", i.index);
                     return;
                 }
             }
@@ -478,11 +481,11 @@ export async function import_task(task: Task, manager: TaskManager) {
             );
             if (names[i.name] > 1) {
                 path = add_suffix_to_path(path, i.token);
-                console.log("Changed path to", path);
+                logger.log("Changed path to", path);
             }
             const zf = f.open_zip_file(opath);
             if (!zf) {
-                console.log("File not found");
+                logger.log("File not found");
                 return;
             }
             try {
@@ -505,7 +508,7 @@ export async function import_task(task: Task, manager: TaskManager) {
             }
             const size = await fb_get_size(path);
             if (!size) {
-                console.log("Failed to get file size for", path);
+                logger.error("Failed to get file size for", path);
                 throw Error("Failed to get file size.");
             }
             const is_original = icfg.size == ImportSize.Original ||
@@ -514,7 +517,7 @@ export async function import_task(task: Task, manager: TaskManager) {
             if (cfg.check_file_hash && is_original) {
                 const sha = await calFileSha1(path);
                 if (sha.slice(0, i.token.length) != i.token) {
-                    console.warn(
+                    logger.warn(
                         `Hash not matched: file hash ${sha}, token ${i.token}`,
                     );
                     return;
@@ -574,7 +577,7 @@ export async function import_task(task: Task, manager: TaskManager) {
             replaced_gallery.forEach((g) => {
                 const gmeta = db.get_gmeta_by_gid(g.gid);
                 if (!gmeta) return;
-                console.log("Remove gallery ", g.gid);
+                logger.debug("Remove gallery ", g.gid);
                 if (manager.meilisearch) {
                     manager.meilisearch.target.dispatchEvent(
                         new CustomEvent("gallery_remove", {

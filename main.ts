@@ -7,6 +7,7 @@ import { sure_dir, try_remove_sync } from "./utils.ts";
 import { EhDb } from "./db.ts";
 import { load_eht_file, update_database_tag } from "./eh_translation.ts";
 import { get_abort_signal } from "./signal_handler.ts";
+import { base_logger } from "./utils/logger.ts";
 
 function show_help() {
     console.log("Usage: main.ts [options] Command");
@@ -73,6 +74,7 @@ if (cmd == CMD.Unknown) {
 }
 
 const settings = await load_settings(args.config);
+await base_logger.init(settings.db_path || settings.base);
 if (!check_file_permissions(settings.base)) {
     throw Error("Can not aceess download loaction.");
 }
