@@ -12,7 +12,7 @@ export type GalleryMetadataTorrentInfo = {
 export type GalleryMetadataSingle = {
     gid: number;
     token: string;
-    archiver_key: string;
+    archiver_key?: string;
     /// HTML escaped
     title: string;
     /// HTML escaped

@@ -351,7 +351,7 @@ export class EhDb {
     #base_path: string;
     #db_path: string;
     #use_ffi = false;
-    readonly version = parse_ver("1.0.0-14");
+    readonly version = parse_ver("1.0.0-15");
     constructor(base_path: string) {
         this.#base_path = base_path;
         this.#db_path = join(base_path, "data.db");
@@ -508,6 +508,10 @@ export class EhDb {
             }
             if (compare_ver(v, parse_ver("1.0.0-14")) === -1) {
                 this.db.execute(PMETA_INDEX);
+            }
+            if (compare_ver(v, parse_ver("1.0.0-15")) === -1) {
+                this.db.execute("DELETE FROM ehmeta;");
+                need_optimize = true;
             }
             this.#write_version();
             if (need_optimize) this.optimize();

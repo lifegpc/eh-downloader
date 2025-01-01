@@ -11,6 +11,7 @@ import {
     return_error,
 } from "../../../server/utils.ts";
 import { base_logger } from "../../../utils/logger.ts";
+import { unescape } from "@std/html";
 
 const logger = base_logger.get_logger("api-eh-metadata");
 
@@ -73,6 +74,9 @@ export const handler: Handlers = {
                     if (typeof v === "string") {
                         data[k.toString()] = gen_error(2, v);
                     } else {
+                        v.title = unescape(v.title);
+                        v.title_jpn = unescape(v.title_jpn);
+                        v.uploader = unescape(v.uploader);
                         data[k.toString()] = gen_data(v);
                         m.db.add_ehmeta(v);
                     }
