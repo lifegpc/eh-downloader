@@ -148,7 +148,8 @@ export const handler: Handlers = {
                 }
                 return return_data(task, 201);
             } catch (e) {
-                return return_error(500, e.message);
+                logger.error("Failed to add download task:", e);
+                return return_error(500, "Internal Server Error");
             }
         } else if (typ == "export_zip") {
             const gid = await parse_big_int(form.get("gid"), null);
@@ -168,7 +169,8 @@ export const handler: Handlers = {
                 const task = await t.add_export_zip_task(gid, dcfg);
                 return return_data(task, 201);
             } catch (e) {
-                return return_error(500, e.message);
+                logger.error("Failed to add export zip task:", e);
+                return return_error(500, "Internal Server Error");
             }
         } else if (typ == "update_meili_search_data") {
             const gid = await parse_big_int(form.get("gid"), 0);
@@ -176,7 +178,8 @@ export const handler: Handlers = {
                 const task = await t.add_update_meili_search_data_task(gid);
                 return return_data(task, 201);
             } catch (e) {
-                return return_error(500, e.message);
+                logger.error("Failed to add update meili search data task:", e);
+                return return_error(500, "Internal Server Error");
             }
         } else if (typ == "import") {
             const gid = await parse_big_int(form.get("gid"), null);
@@ -207,7 +210,8 @@ export const handler: Handlers = {
                 }
                 return return_data(task, 201);
             } catch (e) {
-                return return_error(500, e.message);
+                logger.error("Failed to add import task:", e);
+                return return_error(500, "Internal Server Error");
             }
         } else if (typ == "update_tag_translation") {
             const cfg = await get_string(form.get("cfg"));
@@ -229,7 +233,8 @@ export const handler: Handlers = {
                 }
                 return return_data(task, 201);
             } catch (e) {
-                return return_error(500, e.message);
+                logger.error("Failed to add update tag translation task:", e);
+                return return_error(500, "Internal Server Error");
             }
         } else {
             return return_error(5, "unknown type");
