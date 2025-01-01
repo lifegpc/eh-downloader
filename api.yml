@@ -808,6 +808,15 @@ components:
         stack:
           type: string
           description: Stack trace
+    LogEntryApiResult:
+      description: Api response for getLog
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/LogEntry"
     LogEntries:
       description: Log entries
       type: object
@@ -2652,6 +2661,90 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
+  /log/{id}:
+    parameters:
+      - name: id
+        in: path
+        schema:
+          type: integer
+          format: int64
+          default: ''
+        required: true
+        description: Log entry ID
+    delete: 
+      operationId: deleteLog
+      summary: Delete a log entry
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "id is required." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+    get:
+      operationId: getLog
+      summary: Get a log entry
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogEntryApiResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "id is required." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 404, "error": "log not found." }
   /shared_token:
     delete: 
       operationId: deleteSharedToken

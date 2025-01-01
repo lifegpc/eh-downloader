@@ -150,6 +150,41 @@ class BaseLogger {
             ],
         );
     }
+    clear(
+        type?: string | null,
+        min_level?: number | null,
+        max_level?: number | null,
+        deleted_level?: number[],
+        end_time?: Date | null,
+    ) {
+        if (!this.db) return;
+        const where = [];
+        const args: QueryParameterSet = [];
+        if (type) {
+            where.push("type = ?");
+            args.push(type);
+        }
+        if (min_level) {
+            where.push("level >= ?");
+            args.push(min_level);
+        }
+        if (max_level) {
+            where.push("level <= ?");
+            args.push(max_level);
+        }
+        if (deleted_level) {
+            where.push(
+                "level IN (" + deleted_level.map(() => "?").join(",") + ")",
+            );
+            args.push(...deleted_level);
+        }
+        if (end_time) {
+            where.push("time <= ?");
+            args.push(end_time.getTime());
+        }
+        const where_str = where.length ? " WHERE " + where.join(" AND ") : "";
+        this.db.query(`DELETE FROM log${where_str};`, args);
+    }
     close() {
         this.db?.close();
         this.db = undefined;
@@ -201,6 +236,10 @@ class BaseLogger {
     debug(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Debug, ...messages);
     }
+    delete_log(id: number | bigint) {
+        if (!this.db) return;
+        this.db.query("DELETE FROM log WHERE id = ?;", [id]);
+    }
     error(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Error, ...messages);
     }
@@ -239,6 +278,14 @@ class BaseLogger {
                 "\n" + stackTrace(3),
             );
         }
+    }
+    get_log(id: number | bigint) {
+        if (!this.db) return null;
+        const cur = this.#convert(this.db.queryEntries<LogEntryRaw>(
+            "SELECT * FROM log WHERE id = ?;",
+            [id],
+        ));
+        return cur.length ? cur[0] : null;
     }
     get_logger(type: string) {
         return new Logger(this, type);
