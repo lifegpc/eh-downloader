@@ -136,7 +136,8 @@ export enum UserPermission {
     DeleteGallery = 1 << 2,
     ManageTasks = 1 << 3,
     ShareGallery = 1 << 4,
-    All = ~(~0 << 5),
+    QueryLog = 1 << 5,
+    All = ~(~0 << 6),
 }
 export type User = {
     id: number | bigint;

@@ -1,7 +1,7 @@
 import { join } from "@std/path";
 import { format as format_ver, parse as parse_ver } from "@std/semver";
 import { parse_bool, stackTrace } from "../utils.ts";
-import { Db, SqliteMaster } from "./db_interface.ts";
+import { Db, QueryParameterSet, SqliteMaster } from "./db_interface.ts";
 
 const ALL_TABLES = [
     "version",
@@ -21,12 +21,32 @@ const LOG_TABLE = `CREATE TABLE log (
     stack TEXT
 );`;
 
-export const TRACE_LEVEL = 1;
-export const DEBUG_LEVEL = 2;
-export const LOG_LEVEL = 3;
-export const INFO_LEVEL = 4;
-export const WARN_LEVEL = 5;
-export const ERROR_LEVEL = 6;
+export type LogEntry = {
+    id: number | bigint;
+    time: Date;
+    message: string;
+    level: LogLevel;
+    type: string;
+    stack?: string;
+};
+
+export type LogEntryRaw = {
+    id: number | bigint;
+    time: number | bigint;
+    message: string;
+    level: number | bigint;
+    type: string;
+    stack: string | null;
+};
+
+export const enum LogLevel {
+    Trace = 1,
+    Debug = 2,
+    Log = 3,
+    Info = 4,
+    Warn = 5,
+    Error = 6,
+}
 
 export function format_message(
     message: unknown[],
@@ -115,10 +135,10 @@ class BaseLogger {
         this.#fallback(type, level, ...messages);
         if (!this.db) return;
         const message = format_message(messages);
-        const stack =
-            (level >= TRACE_LEVEL && level < DEBUG_LEVEL) || level >= WARN_LEVEL
-                ? stackTrace(2)
-                : undefined;
+        const stack = (level >= LogLevel.Trace && level < LogLevel.Debug) ||
+                level >= LogLevel.Warn
+            ? stackTrace(2)
+            : undefined;
         this.db.query(
             "INSERT INTO log (time, message, level, type, stack) VALUES (?, ?, ?, ?, ?);",
             [
@@ -134,40 +154,80 @@ class BaseLogger {
         this.db?.close();
         this.db = undefined;
     }
+    #convert(d: LogEntryRaw[]): LogEntry[] {
+        return d.map((x) => {
+            return {
+                id: x.id,
+                time: new Date(Number(x.time)),
+                message: x.message,
+                level: Number(x.level),
+                type: x.type,
+                stack: x.stack === null ? undefined : x.stack,
+            };
+        });
+    }
+    count(type?: string | null, min_level?: number, allowed_level?: number[]) {
+        if (!this.db) return 0;
+        const where = [];
+        const args: QueryParameterSet = [];
+        if (type) {
+            where.push("type = ?");
+            args.push(type);
+        }
+        if (min_level) {
+            where.push("level >= ?");
+            args.push(min_level);
+        }
+        if (allowed_level) {
+            where.push(
+                "level IN (" + allowed_level.map(() => "?").join(",") + ")",
+            );
+            args.push(...allowed_level);
+        }
+        const where_str = where.length ? " WHERE " + where.join(" AND ") : "";
+        const cur = this.db.query<[number | bigint]>(
+            `SELECT COUNT(*) FROM log${where_str};`,
+            args,
+        );
+        for (const i of cur) {
+            return i[0];
+        }
+        return 0;
+    }
     debug(type: string, ...messages: unknown[]) {
-        this.add(type, DEBUG_LEVEL, ...messages);
+        this.add(type, LogLevel.Debug, ...messages);
     }
     error(type: string, ...messages: unknown[]) {
-        this.add(type, ERROR_LEVEL, ...messages);
+        this.add(type, LogLevel.Error, ...messages);
     }
     #fallback(type: string, level: number, ...messages: unknown[]) {
         if (type === "default") {
-            if (level >= ERROR_LEVEL) {
+            if (level >= LogLevel.Error) {
                 console.error(...messages, "\n" + stackTrace(3));
-            } else if (level >= WARN_LEVEL) {
+            } else if (level >= LogLevel.Warn) {
                 console.warn(...messages, "\n" + stackTrace(3));
-            } else if (level >= INFO_LEVEL) {
+            } else if (level >= LogLevel.Info) {
                 console.info(...messages);
-            } else if (level >= LOG_LEVEL) {
+            } else if (level >= LogLevel.Log) {
                 console.log(...messages);
-            } else if (level >= DEBUG_LEVEL) {
+            } else if (level >= LogLevel.Debug) {
                 console.debug(...messages);
-            } else if (level >= TRACE_LEVEL) {
+            } else if (level >= LogLevel.Trace) {
                 console.log("Trace:", ...messages, "\n" + stackTrace(3));
             }
             return;
         }
-        if (level >= ERROR_LEVEL) {
+        if (level >= LogLevel.Error) {
             console.error(type + ":", ...messages, "\n" + stackTrace(3));
-        } else if (level >= WARN_LEVEL) {
+        } else if (level >= LogLevel.Warn) {
             console.warn(type + ":", ...messages, "\n" + stackTrace(3));
-        } else if (level >= INFO_LEVEL) {
+        } else if (level >= LogLevel.Info) {
             console.info(type + ":", ...messages);
-        } else if (level >= LOG_LEVEL) {
+        } else if (level >= LogLevel.Log) {
             console.log(type + ":", ...messages);
-        } else if (level >= DEBUG_LEVEL) {
+        } else if (level >= LogLevel.Debug) {
             console.debug(type + ":", ...messages);
-        } else if (level >= TRACE_LEVEL) {
+        } else if (level >= LogLevel.Trace) {
             console.log(
                 "Trace:",
                 type + ":",
@@ -180,16 +240,80 @@ class BaseLogger {
         return new Logger(this, type);
     }
     info(type: string, ...messages: unknown[]) {
-        this.add(type, INFO_LEVEL, ...messages);
+        this.add(type, LogLevel.Info, ...messages);
+    }
+    list(
+        offset: number = 0,
+        limit: number = 50,
+        type?: string | null,
+        min_level?: number,
+        allowed_level?: number[],
+    ) {
+        if (!this.db) return [];
+        const where = [];
+        const args: QueryParameterSet = [];
+        if (type) {
+            where.push("type = ?");
+            args.push(type);
+        }
+        if (min_level) {
+            where.push("level >= ?");
+            args.push(min_level);
+        }
+        if (allowed_level) {
+            where.push(
+                "level IN (" + allowed_level.map(() => "?").join(",") + ")",
+            );
+            args.push(...allowed_level);
+        }
+        args.push(limit, offset);
+        const where_str = where.length ? " WHERE " + where.join(" AND ") : "";
+        const cur = this.db.queryEntries<LogEntryRaw>(
+            `SELECT * FROM log${where_str} ORDER BY id DESC LIMIT ? OFFSET ?;`,
+            args,
+        );
+        return this.#convert(cur);
+    }
+    list_page(
+        page: number = 0,
+        page_size: number = 50,
+        type?: string | null,
+        min_level?: number,
+        allowed_level?: number[],
+    ) {
+        if (!this.db) return [];
+        const where = [];
+        const args: QueryParameterSet = [];
+        if (type) {
+            where.push("type = ?");
+            args.push(type);
+        }
+        if (min_level) {
+            where.push("level >= ?");
+            args.push(min_level);
+        }
+        if (allowed_level) {
+            where.push(
+                "level IN (" + allowed_level.map(() => "?").join(",") + ")",
+            );
+            args.push(...allowed_level);
+        }
+        args.push(page_size, (page - 1) * page_size);
+        const where_str = where.length ? " WHERE " + where.join(" AND ") : "";
+        const cur = this.db.queryEntries<LogEntryRaw>(
+            `SELECT * FROM log${where_str} ORDER BY id DESC LIMIT ? OFFSET ?;`,
+            args,
+        );
+        return this.#convert(cur);
     }
     log(type: string, ...messages: unknown[]) {
-        this.add(type, LOG_LEVEL, ...messages);
+        this.add(type, LogLevel.Log, ...messages);
     }
     trace(type: string, ...messages: unknown[]) {
-        this.add(type, TRACE_LEVEL, ...messages);
+        this.add(type, LogLevel.Trace, ...messages);
     }
     warn(type: string, ...messages: unknown[]) {
-        this.add(type, WARN_LEVEL, ...messages);
+        this.add(type, LogLevel.Warn, ...messages);
     }
 }
 
@@ -201,22 +325,22 @@ class Logger {
         this.#type = type;
     }
     debug(...messages: unknown[]) {
-        this.#base.add(this.#type, DEBUG_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Debug, ...messages);
     }
     error(...messages: unknown[]) {
-        this.#base.add(this.#type, ERROR_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Error, ...messages);
     }
     info(...messages: unknown[]) {
-        this.#base.add(this.#type, INFO_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Info, ...messages);
     }
     log(...messages: unknown[]) {
-        this.#base.add(this.#type, LOG_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Log, ...messages);
     }
     trace(...messages: unknown[]) {
-        this.#base.add(this.#type, TRACE_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Trace, ...messages);
     }
     warn(...messages: unknown[]) {
-        this.#base.add(this.#type, WARN_LEVEL, ...messages);
+        this.#base.add(this.#type, LogLevel.Warn, ...messages);
     }
 }
 
