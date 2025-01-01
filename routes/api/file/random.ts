@@ -8,6 +8,9 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import { encodeBase64 as encode } from "@std/encoding/base64";
 import { return_data } from "../../../server/utils.ts";
 import { extname } from "@std/path";
+import { base_logger } from "../../../utils/logger.ts";
+
+const logger = base_logger.get_logger("api-file-random");
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -102,7 +105,8 @@ export const handler: Handlers = {
                     gids?.add(d.gid);
                 });
             } catch (e) {
-                return new Response(e.message, { status: 400 });
+                logger.error("Failed to search with meilisearch:", e);
+                return new Response("Search failed.", { status: 400 });
             }
         }
         const f = m.db.get_random_file(is_nsfw, is_ad, gids);

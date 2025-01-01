@@ -10,6 +10,9 @@ import {
     return_data,
     return_error,
 } from "../../../server/utils.ts";
+import { base_logger } from "../../../utils/logger.ts";
+
+const logger = base_logger.get_logger("api-eh-metadata");
 
 export const handler: Handlers = {
     async GET(req, ctx) {
@@ -75,9 +78,11 @@ export const handler: Handlers = {
                     }
                 }
             } catch (e) {
+                logger.error("Failed to fetch metadata:", e);
+                const mes = e instanceof Error ? e.message : e;
                 return return_error(
                     4,
-                    `Failed to fetch metadata: ${e.message}`,
+                    `Failed to fetch metadata: ${mes}`,
                 );
             }
         }

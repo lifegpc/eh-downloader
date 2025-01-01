@@ -7,6 +7,9 @@ import pbkdf2Hmac from "pbkdf2-hmac";
 import isEqual from "lodash/isEqual";
 import type { Token, User } from "../../db.ts";
 import { Mutex } from "async/mutex.ts";
+import { base_logger } from "../../utils/logger.ts";
+
+const logger = base_logger.get_logger("api-token");
 
 const USER_PASSWORD_ERROR = "Incorrect username or password.";
 
@@ -189,7 +192,8 @@ export const handler: Handlers = {
                 ),
             );
         } catch (e) {
-            return return_error(500, e.message);
+            logger.error("Failed to update token:", e);
+            return return_error(500, "Internal server error");
         }
     },
 };
