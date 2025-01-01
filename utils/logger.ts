@@ -166,7 +166,11 @@ class BaseLogger {
             };
         });
     }
-    count(type?: string | null, min_level?: number, allowed_level?: number[]) {
+    count(
+        type?: string | null,
+        min_level?: number | null,
+        allowed_level?: number[],
+    ) {
         if (!this.db) return 0;
         const where = [];
         const args: QueryParameterSet = [];
@@ -246,7 +250,7 @@ class BaseLogger {
         offset: number = 0,
         limit: number = 50,
         type?: string | null,
-        min_level?: number,
+        min_level?: number | null,
         allowed_level?: number[],
     ) {
         if (!this.db) return [];
@@ -278,7 +282,7 @@ class BaseLogger {
         page: number = 0,
         page_size: number = 50,
         type?: string | null,
-        min_level?: number,
+        min_level?: number | null,
         allowed_level?: number[],
     ) {
         if (!this.db) return [];

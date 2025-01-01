@@ -666,7 +666,6 @@ components:
       required: 
         - gid
         - token
-        - archiver_key
         - title
         - title_jpn
         - category
@@ -784,6 +783,70 @@ components:
           const: 2
         - title: Keep
           const: 3
+    LogEntry:
+      description: Log entry
+      type: object
+      required: [id, time, message, level, type]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Log entry ID
+        time:
+          type: string
+          format: date-time
+          description: Time of the log entry
+          example: '2025-01-01T00:00:00.000Z'
+        message:
+          type: string
+          description: Log message
+        level:
+          $ref: "#/components/schemas/LogLevel"
+        type:
+          type: string
+          description: Log type
+        stack:
+          type: string
+          description: Stack trace
+    LogEntries:
+      description: Log entries
+      type: object
+      required: [datas]
+      properties:
+        datas:
+          type: array
+          description: Log entries
+          items:
+            $ref: "#/components/schemas/LogEntry"
+        count:
+          type: integer
+          format: int64
+          description: Total counts of log entries. Only available when pagination is requested.
+    LogEntriesApiResult:
+      description: Api response for queryLog
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/LogEntries"
+    LogLevel:
+      description: Log level
+      type: integer
+      oneOf:
+      - title: Trace
+        const: 1
+      - title: Debug
+        const: 2
+      - title: Log
+        const: 3
+      - title: Info
+        const: 4
+      - title: Warn
+        const: 5
+      - title: Error
+        const: 6
     SharedToken:
       description: Shared token
       type: object
@@ -2530,6 +2593,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseTrue"
+  /log:
+    get:
+      operationId: queryLog
+      summary: Query log
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          description: Number of entries per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+          description: Offset for pagination
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Log type filter
+        - name: min_level
+          in: query
+          schema:
+            $ref: "#/components/schemas/LogLevel"
+          description: Minimum log level filter
+        - name: allowed_level
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+          description: List of allowed log levels
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogEntriesApiResult"
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
   /shared_token:
     delete: 
       operationId: deleteSharedToken

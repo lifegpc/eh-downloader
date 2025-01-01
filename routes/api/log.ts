@@ -19,13 +19,16 @@ export const handler: Handlers = {
         const limit = await parse_int(params.get("limit"), 50);
         const offset = await parse_int(params.get("offset"), 0);
         const type = params.get("type");
-        const min_level = await parse_int(
+        let min_level = await parse_int(
             params.get("min_level"),
-            LogLevel.Log,
+            null,
         );
         const allowed_level = params.get("allowed_level")?.split(",").map((x) =>
             parseInt(x)
         ).filter((x) => !isNaN(x));
+        if (!allowed_level && min_level === null) {
+            min_level = LogLevel.Log;
+        }
         const datas = page === null
             ? base_logger.list(offset, limit, type, min_level, allowed_level)
             : base_logger.list_page(
