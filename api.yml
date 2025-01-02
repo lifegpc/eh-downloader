@@ -2603,6 +2603,68 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseTrue"
   /log:
+    delete: 
+      operationId: clearLog
+      summary: Clear log
+      parameters: 
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Log type filter
+        - name: min_level
+          in: query
+          schema:
+            $ref: "#/components/schemas/LogLevel"
+          description: Minimum log level filter
+        - name: max_level
+          in: query
+          schema:
+            $ref: "#/components/schemas/LogLevel"
+          description: Maximum log level filter
+        - name: deleted_level
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+          description: List of log levels to delete
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time for log deletion
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTrue"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 1, "error": "Failed to parse end_time." }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
     get:
       operationId: queryLog
       summary: Query log

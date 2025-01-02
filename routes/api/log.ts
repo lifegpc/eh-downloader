@@ -1,10 +1,41 @@
 import { Handlers } from "$fresh/server.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import { User, UserPermission } from "../../db.ts";
-import { parse_int } from "../../server/parse_form.ts";
+import { get_string, parse_int } from "../../server/parse_form.ts";
 import { base_logger, LogLevel } from "../../utils/logger.ts";
 
 export const handler: Handlers = {
+    async DELETE(req, ctx) {
+        const user = <User | undefined> ctx.state.user;
+        if (
+            user && !user.is_admin &&
+            !(Number(user.permissions) & UserPermission.QueryLog)
+        ) {
+            return return_error(403, "Permission denied.");
+        }
+        let form: FormData | undefined;
+        try {
+            form = await req.formData();
+        } catch (_) {
+            return return_error(400, "Bad Request");
+        }
+        const typ = await get_string(form.get("type"));
+        const min_level = await parse_int(form.get("min_level"), null);
+        const max_level = await parse_int(form.get("max_level"), null);
+        const deleted_level = (await get_string(form.get("deleted_level")))
+            ?.split(",")?.map((x) => parseInt(x))?.filter((x) => !isNaN(x));
+        const end = await get_string(form.get("end_time"));
+        const endt = parseInt(end ?? "");
+        let end_time: Date | null;
+        try {
+            end_time = end === null ? null : new Date(isNaN(endt) ? end : endt);
+        } catch (e) {
+            base_logger.log("Failed to parse end_time:", e);
+            return return_error(1, "Failed to parse end_time.");
+        }
+        base_logger.clear(typ, min_level, max_level, deleted_level, end_time);
+        return return_data(true);
+    },
     async GET(req, ctx) {
         const user = <User | undefined> ctx.state.user;
         if (
