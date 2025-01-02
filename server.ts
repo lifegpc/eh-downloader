@@ -30,7 +30,7 @@ const renderFn: RenderFunction = (ctx, render) => {
 export async function startServer(path: string) {
     cfg_path = path;
     const cfg = await load_settings(path);
-    await base_logger.init(cfg.db_path || cfg.base);
+    await base_logger.init(cfg);
     task_manager = new TaskManager(cfg);
     await task_manager.init();
     task_manager.run(true).catch((e) => {

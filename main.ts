@@ -74,7 +74,7 @@ if (cmd == CMD.Unknown) {
 }
 
 const settings = await load_settings(args.config);
-await base_logger.init(settings.db_path || settings.base);
+await base_logger.init(settings);
 if (!check_file_permissions(settings.base)) {
     throw Error("Can not aceess download loaction.");
 }

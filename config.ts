@@ -41,6 +41,8 @@ export type ConfigType = {
     max_import_img_count: number;
     enable_server_timing: boolean;
     thumbnail_format: ThumbnailFormat;
+    /** Enable logging stack for all log levels */
+    logging_stack: boolean;
 };
 
 export enum ThumbnailMethod {
@@ -254,6 +256,9 @@ export class Config {
     get enable_server_timing() {
         return this._return_bool("enable_server_timing") ?? false;
     }
+    get logging_stack() {
+        return this._return_bool("logging_stack") ?? false;
+    }
     to_json(): ConfigType {
         return {
             cookies: typeof this.cookies === "string",
@@ -294,6 +299,7 @@ export class Config {
             max_import_img_count: this.max_import_img_count,
             enable_server_timing: this.enable_server_timing,
             thumbnail_format: this.thumbnail_format,
+            logging_stack: this.logging_stack,
         };
     }
 }

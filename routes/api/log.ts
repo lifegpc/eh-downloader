@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { return_data, return_error } from "../../server/utils.ts";
 import { User, UserPermission } from "../../db.ts";
-import { get_string, parse_int } from "../../server/parse_form.ts";
+import { get_string, parse_bool, parse_int } from "../../server/parse_form.ts";
 import { base_logger, LogLevel } from "../../utils/logger.ts";
 
 export const handler: Handlers = {
@@ -33,7 +33,9 @@ export const handler: Handlers = {
             base_logger.log("Failed to parse end_time:", e);
             return return_error(1, "Failed to parse end_time.");
         }
+        const optimize = await parse_bool(form.get("optimize"), true);
         base_logger.clear(typ, min_level, max_level, deleted_level, end_time);
+        if (optimize) base_logger.optimize();
         return return_data(true);
     },
     async GET(req, ctx) {

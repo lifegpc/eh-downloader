@@ -1,5 +1,6 @@
 import { join } from "@std/path";
 import { format as format_ver, parse as parse_ver } from "@std/semver";
+import type { Config } from "../config.ts";
 import { parse_bool, stackTrace } from "../utils.ts";
 import { Db, QueryParameterSet, SqliteMaster } from "./db_interface.ts";
 
@@ -60,10 +61,13 @@ export function format_message(
 
 class BaseLogger {
     db?: Db;
+    #cfg?: Config;
     #exist_table: Set<string> = new Set();
     #use_ffi = false;
     readonly version = parse_ver("1.0.0-0");
-    async init(base_path: string) {
+    async init(cfg: Config) {
+        this.#cfg = cfg;
+        const base_path = cfg.db_path || cfg.base;
         const db_path = join(base_path, "logs.db");
         this.#use_ffi = parse_bool(Deno.env.get("DB_USE_FFI") ?? "false");
         if (this.#use_ffi) {
@@ -133,9 +137,10 @@ class BaseLogger {
     }
     add(type: string, level: number, ...messages: unknown[]) {
         this.#fallback(type, level, ...messages);
-        if (!this.db) return;
+        if (!this.db || !this.#cfg) return;
         const message = format_message(messages);
-        const stack = (level >= LogLevel.Trace && level < LogLevel.Debug) ||
+        const stack = this.#cfg.logging_stack ||
+                (level >= LogLevel.Trace && level < LogLevel.Debug) ||
                 level >= LogLevel.Warn
             ? stackTrace(2)
             : undefined;
@@ -359,6 +364,10 @@ class BaseLogger {
     }
     log(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Log, ...messages);
+    }
+    optimize() {
+        if (!this.db) return;
+        this.db.query("VACUUM;");
     }
     trace(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Trace, ...messages);

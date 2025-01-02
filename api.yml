@@ -2635,6 +2635,12 @@ paths:
             type: string
             format: date-time
           description: End time for log deletion
+        - name: optimize
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Whether to optimize the log after clearing
       responses:
         "200":
           description: OK
