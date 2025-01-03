@@ -59,7 +59,11 @@ export function format_message(
     }).join(" ");
 }
 
-class BaseLogger {
+type EventMap = {
+    new_log: LogEntry;
+};
+
+class BaseLogger extends EventTarget {
     db?: Db;
     #cfg?: Config;
     #exist_table: Set<string> = new Set();
@@ -144,16 +148,36 @@ class BaseLogger {
                 level >= LogLevel.Warn
             ? stackTrace(2)
             : undefined;
-        this.db.query(
-            "INSERT INTO log (time, message, level, type, stack) VALUES (?, ?, ?, ?, ?);",
+        const now = new Date();
+        const result = this.db.query<[number | bigint]>(
+            "INSERT INTO log (time, message, level, type, stack) VALUES (?, ?, ?, ?, ?) RETURNING id;",
             [
-                Date.now(),
+                now.getTime(),
                 message,
                 level,
                 type,
                 stack === undefined ? null : stack,
             ],
         );
+        if (result) {
+            const entry: LogEntry = {
+                id: result[0][0],
+                time: now,
+                message,
+                level,
+                type,
+                stack,
+            };
+            this.dispatchEvent("new_log", entry);
+        }
+    }
+    // @ts-ignore Better type inference
+    addEventListener<T extends keyof EventMap>(
+        type: T,
+        callback: (e: CustomEvent<EventMap[T]>) => void | Promise<void>,
+        options?: boolean | AddEventListenerOptions,
+    ): void {
+        super.addEventListener(type, <EventListener> callback, options);
     }
     clear(
         type?: string | null,
@@ -244,6 +268,13 @@ class BaseLogger {
     delete_log(id: number | bigint) {
         if (!this.db) return;
         this.db.query("DELETE FROM log WHERE id = ?;", [id]);
+    }
+    // @ts-ignore Different parameters
+    dispatchEvent<T extends keyof EventMap>(
+        type: T,
+        detail: EventMap[T],
+    ): boolean {
+        return super.dispatchEvent(new CustomEvent(type, { detail }));
     }
     error(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Error, ...messages);
@@ -368,6 +399,18 @@ class BaseLogger {
     optimize() {
         if (!this.db) return;
         this.db.query("VACUUM;");
+    }
+    // @ts-ignore Better type inference
+    removeEventListener<T extends keyof EventMap>(
+        type: T,
+        callback: (e: CustomEvent<EventMap[T]>) => void | Promise<void>,
+        options?: boolean | EventListenerOptions,
+    ): void {
+        super.removeEventListener(
+            type,
+            <EventListener> callback,
+            options,
+        );
     }
     trace(type: string, ...messages: unknown[]) {
         this.add(type, LogLevel.Trace, ...messages);

@@ -6,6 +6,7 @@ import twindPlugin from "$fresh/plugins/twind.ts";
 import twindConfig from "./twind.config.ts";
 import { load_translation } from "./server/i18ns.ts";
 import { base_logger } from "./utils/logger.ts";
+import { ExitTarget } from "./signal_handler.ts";
 
 let task_manager: TaskManager | undefined = undefined;
 let cfg_path: string | undefined = undefined;
@@ -37,15 +38,19 @@ export async function startServer(path: string) {
         if (!(e instanceof AlreadyClosedError)) throw e;
     });
     await load_translation(task_manager.aborts);
-    setInterval(() => {
+    const tasks: number[] = [];
+    tasks.push(setInterval(() => {
         task_manager?.db.remove_expired_token();
-    }, 86_400_000);
-    setInterval(() => {
+    }, 86_400_000));
+    tasks.push(setInterval(() => {
         if (!task_manager) return;
         task_manager.db.remove_expired_ehmeta(
             task_manager.cfg.eh_metadata_cache_time,
         );
-    }, 3600_000);
+    }, 3600_000));
+    ExitTarget.addEventListener("close", () => {
+        for (const t of tasks) clearInterval(t);
+    });
     return start(manifest, {
         signal: task_manager.aborts,
         plugins: [twindPlugin(twindConfig)],

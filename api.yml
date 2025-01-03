@@ -190,6 +190,9 @@ components:
           description: Whether to enable server time tracking
         thumbnail_format:
           $ref: "#/components/schemas/ThumbnailFormat"
+        logging_stack:
+          type: boolean
+          description: Enable logging stack for all log levels
     Config:
       allOf:
         - $ref: "#/components/schemas/ConfigOptional"
@@ -226,6 +229,7 @@ components:
         - max_import_img_count
         - enable_server_timing
         - thumbnail_format
+        - logging_stack
     ConfigUpdated:
       description: result of updateConfig
       type: object

@@ -24,6 +24,7 @@ import * as $api_gallery_meta_gids_ from "./routes/api/gallery/meta/[gids].ts";
 import * as $api_health_check from "./routes/api/health_check.ts";
 import * as $api_log from "./routes/api/log.ts";
 import * as $api_log_id_ from "./routes/api/log/[id].ts";
+import * as $api_log_realtime from "./routes/api/log/realtime.ts";
 import * as $api_shared_token from "./routes/api/shared_token.ts";
 import * as $api_shared_token_list from "./routes/api/shared_token/list.ts";
 import * as $api_status from "./routes/api/status.ts";
@@ -76,6 +77,7 @@ const manifest = {
         "./routes/api/health_check.ts": $api_health_check,
         "./routes/api/log.ts": $api_log,
         "./routes/api/log/[id].ts": $api_log_id_,
+        "./routes/api/log/realtime.ts": $api_log_realtime,
         "./routes/api/shared_token.ts": $api_shared_token,
         "./routes/api/shared_token/list.ts": $api_shared_token_list,
         "./routes/api/status.ts": $api_status,
