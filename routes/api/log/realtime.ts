@@ -1,13 +1,27 @@
 import { Handlers } from "$fresh/server.ts";
 import { return_error } from "../../../server/utils.ts";
 import { User, UserPermission } from "../../../db.ts";
-import { base_logger, LogEntry } from "../../../utils/logger.ts";
+import { base_logger, LogEntry, LogLevel } from "../../../utils/logger.ts";
 import { ExitTarget } from "../../../signal_handler.ts";
-import { toJSON } from "../../../utils.ts";
+import { DiscriminatedUnion, toJSON } from "../../../utils.ts";
+
+export type LogFilterOptions = {
+    min_level?: number;
+    type?: string;
+    allowed_level?: number[];
+};
+
+type Detail<T extends Record<PropertyKey, unknown>> = {
+    [P in keyof T]: { detail: T[P] };
+};
+
+type ClientMap = {
+    log_options: LogFilterOptions;
+};
 
 export type LogRealtimeClientData = { type: "ping" } | { type: "close" } | {
     type: "pong";
-};
+} | DiscriminatedUnion<"type", Detail<ClientMap>>;
 
 export const handler: Handlers = {
     GET(req, ctx) {
@@ -19,11 +33,34 @@ export const handler: Handlers = {
             return return_error(403, "Permission denied.");
         }
         const { socket, response } = Deno.upgradeWebSocket(req);
+        let options: LogFilterOptions = {
+            min_level: LogLevel.Info,
+        };
         const handle = (
             e: CustomEvent<LogEntry>,
         ) => {
             if (socket.readyState === socket.OPEN) {
-                socket.send(toJSON({ type: e.type, detail: e.detail }));
+                if (e.type == "new_log") {
+                    if (
+                        options.min_level &&
+                        e.detail.level < options.min_level
+                    ) {
+                        return;
+                    }
+                    if (
+                        options.type &&
+                        e.detail.type != options.type
+                    ) {
+                        return;
+                    }
+                    if (
+                        options.allowed_level &&
+                        !options.allowed_level.includes(e.detail.level)
+                    ) {
+                        return;
+                    }
+                    socket.send(toJSON({ type: e.type, detail: e.detail }));
+                }
             }
         };
         const close_handle = () => {
@@ -54,6 +91,8 @@ export const handler: Handlers = {
                     socket.close();
                 } else if (d.type == "ping") {
                     sendMessage({ type: "pong" });
+                } else if (d.type == "log_options") {
+                    options = d.detail;
                 }
             } catch (_) {
                 null;
