@@ -49,6 +49,11 @@ export const enum LogLevel {
     Error = 6,
 }
 
+export type LoggerOptions = {
+    /// Whether to record stack traces for logs.
+    stack?: boolean | null;
+};
+
 export function format_message(
     message: unknown[],
     options?: Deno.InspectOptions,
@@ -139,15 +144,19 @@ class BaseLogger extends EventTarget {
             ]);
         });
     }
-    add(type: string, level: number, ...messages: unknown[]) {
+    add(
+        type: string,
+        level: number,
+        options?: LoggerOptions,
+        ...messages: unknown[]
+    ) {
         this.#fallback(type, level, ...messages);
         if (!this.db || !this.#cfg) return;
         const message = format_message(messages);
-        const stack = this.#cfg.logging_stack ||
-                (level >= LogLevel.Trace && level < LogLevel.Debug) ||
-                level >= LogLevel.Warn
-            ? stackTrace(2)
-            : undefined;
+        const enable_stack = options?.stack ?? (this.#cfg.logging_stack ||
+            (level >= LogLevel.Trace && level < LogLevel.Debug) ||
+            level >= LogLevel.Warn);
+        const stack = enable_stack ? stackTrace(2) : undefined;
         const now = new Date();
         const result = this.db.query<[number | bigint]>(
             "INSERT INTO log (time, message, level, type, stack) VALUES (?, ?, ?, ?, ?) RETURNING id;",
@@ -263,7 +272,7 @@ class BaseLogger extends EventTarget {
         return 0;
     }
     debug(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Debug, ...messages);
+        this.add(type, LogLevel.Debug, undefined, ...messages);
     }
     delete_log(id: number | bigint) {
         if (!this.db) return;
@@ -277,7 +286,7 @@ class BaseLogger extends EventTarget {
         return super.dispatchEvent(new CustomEvent(type, { detail }));
     }
     error(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Error, ...messages);
+        this.add(type, LogLevel.Error, undefined, ...messages);
     }
     #fallback(type: string, level: number, ...messages: unknown[]) {
         if (type === "default") {
@@ -323,11 +332,11 @@ class BaseLogger extends EventTarget {
         ));
         return cur.length ? cur[0] : null;
     }
-    get_logger(type: string) {
-        return new Logger(this, type);
+    get_logger(type: string, options?: LoggerOptions) {
+        return new Logger(this, type, options);
     }
     info(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Info, ...messages);
+        this.add(type, LogLevel.Info, undefined, ...messages);
     }
     list(
         offset: number = 0,
@@ -394,7 +403,7 @@ class BaseLogger extends EventTarget {
         return this.#convert(cur);
     }
     log(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Log, ...messages);
+        this.add(type, LogLevel.Log, undefined, ...messages);
     }
     optimize() {
         if (!this.db) return;
@@ -413,37 +422,39 @@ class BaseLogger extends EventTarget {
         );
     }
     trace(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Trace, ...messages);
+        this.add(type, LogLevel.Trace, undefined, ...messages);
     }
     warn(type: string, ...messages: unknown[]) {
-        this.add(type, LogLevel.Warn, ...messages);
+        this.add(type, LogLevel.Warn, undefined, ...messages);
     }
 }
 
 class Logger {
     #base: BaseLogger;
     #type: string;
-    constructor(base: BaseLogger, type: string) {
+    #options?: LoggerOptions;
+    constructor(base: BaseLogger, type: string, options?: LoggerOptions) {
         this.#base = base;
         this.#type = type;
+        this.#options = options;
     }
     debug(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Debug, ...messages);
+        this.#base.add(this.#type, LogLevel.Debug, this.#options, ...messages);
     }
     error(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Error, ...messages);
+        this.#base.add(this.#type, LogLevel.Error, this.#options, ...messages);
     }
     info(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Info, ...messages);
+        this.#base.add(this.#type, LogLevel.Info, this.#options, ...messages);
     }
     log(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Log, ...messages);
+        this.#base.add(this.#type, LogLevel.Log, this.#options, ...messages);
     }
     trace(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Trace, ...messages);
+        this.#base.add(this.#type, LogLevel.Trace, this.#options, ...messages);
     }
     warn(...messages: unknown[]) {
-        this.#base.add(this.#type, LogLevel.Warn, ...messages);
+        this.#base.add(this.#type, LogLevel.Warn, this.#options, ...messages);
     }
 }
 

@@ -11,11 +11,12 @@ import { i18n_get_lang } from "../server/i18ns.ts";
 import { SharedTokenType } from "../db.ts";
 import { initDOMParser } from "../utils.ts";
 import { DOMParser } from "deno_dom/wasm-noinit";
-import { get_host } from "../server/utils.ts";
+import { get_host, return_error } from "../server/utils.ts";
+import { base_logger } from "../utils/logger.ts";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
 
-export async function handler(req: Request, ctx: FreshContext) {
+async function default_handler(req: Request, ctx: FreshContext) {
     const url = new URL(req.url);
     const m = get_task_manager();
     const enable_server_timing = m.cfg.enable_server_timing;
@@ -184,3 +185,30 @@ export async function handler(req: Request, ctx: FreshContext) {
     }
     return res;
 }
+
+// Disable error stack
+const unhandle_error_logger = base_logger.get_logger("unhandle_error", {
+    stack: false,
+});
+
+async function handleError(req: Request, ctx: FreshContext) {
+    try {
+        return await ctx.next();
+    } catch (e) {
+        unhandle_error_logger.error(e);
+        try {
+            const u = new URL(req.url);
+            const is_api = u.pathname.startsWith("/api");
+            return is_api
+                ? return_error(500, "Internal Server Error")
+                : new Response("Internal Server Error", { status: 500 });
+        } catch (_) {
+            return new Response("Internal Server Error", { status: 500 });
+        }
+    }
+}
+
+export const handler = [
+    handleError,
+    default_handler,
+];
