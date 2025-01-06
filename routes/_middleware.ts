@@ -1,5 +1,5 @@
 import { FreshContext } from "$fresh/server.ts";
-import { join } from "@std/path";
+import { basename, join } from "@std/path";
 import {
     get_file_response,
     GetFileResponseOptions,
@@ -13,8 +13,11 @@ import { initDOMParser } from "../utils.ts";
 import { DOMParser } from "deno_dom/wasm-noinit";
 import { get_host, return_error } from "../server/utils.ts";
 import { base_logger } from "../utils/logger.ts";
+import { parse as parseYaml } from "@std/yaml/parse";
 
 const STATIC_FILES = ["/common.css", "/scrollBar.css", "/sw.js", "/sw.js.map"];
+
+const logger = base_logger.get_logger("middleware");
 
 async function default_handler(req: Request, ctx: FreshContext) {
     const url = new URL(req.url);
@@ -170,6 +173,80 @@ async function default_handler(req: Request, ctx: FreshContext) {
         opts.if_modified_since = req.headers.get("If-Modified-Since");
         opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
         return await get_file_response(p, opts);
+    }
+    if (url.pathname == "/swagger" || url.pathname.startsWith("/swagger/")) {
+        let swagger_base = import.meta.resolve("../static/swagger").slice(7);
+        if (Deno.build.os === "windows") {
+            swagger_base = swagger_base.slice(1);
+        }
+        const u = new URL(req.url);
+        let p = join(swagger_base, u.pathname.slice(9));
+        if (basename(p) == "swagger-initializer.js") {
+            p = join(swagger_base, "../swagger-initializer.js");
+        }
+        if (!(await exists(p)) || p === swagger_base) {
+            p = join(swagger_base, "/index.html");
+        }
+        if (basename(p) == "index.html") {
+            const html = await Deno.readTextFile(p);
+            await initDOMParser();
+            try {
+                const dom = (new DOMParser()).parseFromString(
+                    html,
+                    "text/html",
+                );
+                const doc = dom.documentElement!;
+                const head = doc.querySelector("head");
+                if (!head) {
+                    throw new Error("head not found");
+                }
+                const base = dom.createElement("base");
+                base.setAttribute("href", "/swagger/");
+                head?.append(base);
+                const css_links = doc.querySelectorAll("link[rel=stylesheet]");
+                for (const link of css_links) {
+                    const href = link.getAttribute("href");
+                    if (href) {
+                        if (href.startsWith("/")) continue;
+                        link.setAttribute("href", `/swagger/${href}`);
+                    }
+                }
+                return new Response(
+                    "<!DOCTYPE html>\n" + doc.outerHTML,
+                    {
+                        headers: {
+                            "Content-Type": "text/html; charset=UTF-8",
+                        },
+                    },
+                );
+            } catch (e) {
+                logger.warn("Failed to handle swagger index.html:", e);
+                if (u.pathname == "/swagger") {
+                    return Response.redirect(
+                        `${get_host(req)}/swagger/index.html`,
+                        302,
+                    );
+                }
+            }
+        }
+        const opts: GetFileResponseOptions = {};
+        opts.range = req.headers.get("range");
+        opts.if_modified_since = req.headers.get("If-Modified-Since");
+        opts.if_unmodified_since = req.headers.get("If-Unmodified-Since");
+        return await get_file_response(p, opts);
+    }
+    if (url.pathname == "/api.json") {
+        let filepath = import.meta.resolve("../api.yml").slice(7);
+        if (Deno.build.os === "windows") {
+            filepath = filepath.slice(1);
+        }
+        const data = <Record<string, unknown>> parseYaml(
+            await Deno.readTextFile(filepath),
+        );
+        data["servers"] = [{ url: "/api", description: "API Server" }];
+        return new Response(JSON.stringify(data), {
+            headers: { "Content-Type": "application/json" },
+        });
     }
     const res = await ctx.next();
     if (enable_server_timing) {

@@ -12,7 +12,8 @@
         "gen_meili_server_key": "deno run --allow-net scripts/gen_meili_server_key.ts",
         "server-build": "deno run -A server-dev.ts build",
         "prebuild": "deno run -A scripts/prebuild.ts",
-        "download_ffi": "deno run --allow-read=./ --allow-write=./lib --allow-net scripts/download_ffi.ts"
+        "download_ffi": "deno run --allow-read=./ --allow-write=./lib --allow-net scripts/download_ffi.ts",
+        "download_swagger": "deno run --allow-read=./ --allow-net --allow-write=./static/swagger scripts/download_swagger.ts"
     },
     "fmt": {
         "indentWidth": 4,
@@ -25,7 +26,8 @@
             "api.yml",
             "docker-compose.yml",
             ".github/workflows/deno.yml",
-            ".github/workflows/docker.yaml"
+            ".github/workflows/docker.yaml",
+            "static/swagger-initializer.js"
         ]
     },
     "compilerOptions": {
@@ -37,7 +39,7 @@
         "rules": {
             "tags": ["fresh", "recommended"]
         },
-        "exclude": ["_fresh", "static/sw.js"]
+        "exclude": ["_fresh", "static/sw.js", "static/swagger-initializer.js"]
     },
     "unstable": ["ffi"]
 }

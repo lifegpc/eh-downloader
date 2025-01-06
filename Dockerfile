@@ -117,6 +117,7 @@ COPY ./static/*.css ./static/
 COPY ./static/*.ts ./static/
 COPY ./static/*.ico ./static/
 COPY ./static/*.svg ./static/
+COPY ./static/*.js ./static/
 COPY ./tasks ./tasks
 COPY ./thumbnail ./thumbnail
 COPY ./translation ./translation
@@ -126,6 +127,7 @@ COPY ./deno.json ./
 COPY ./import_map.json ./
 COPY ./LICENSE ./
 COPY ./docker_entrypoint.sh ./
+COPY ./api.yml ./
 
 ENV LD_LIBRARY_PATH=/app/lib
 ENV PATH=/app/bin:$PATH
@@ -136,7 +138,8 @@ ENV DENO_SQLITE_PATH=/app/lib/libsqlite3.so
 ENV DENO_LIBZIP_PATH=/app/lib/libzip.so
 ENV LC_ALL=C.utf8
 
-RUN deno task server-build && deno task prebuild && \
+RUN deno task download_swagger && \
+    deno task server-build && deno task prebuild && \
     deno task cache && rm -rf ~/.cache && \
     mkdir -p ./thumbnails && chmod 777 ./thumbnails && \
     mkdir -p ./downloads && chmod 777 ./downloads && \

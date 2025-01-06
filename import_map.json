@@ -8,6 +8,7 @@
         "@std/jsonc": "jsr:/@std/jsonc@1.0.1",
         "@std/path": "jsr:/@std/path@1.0.7",
         "@std/semver": "jsr:/@std/semver@1.0.3",
+        "@std/yaml/": "jsr:/@std/yaml@1.0.5/",
         "deno_dom/": "jsr:/@b-fuze/deno-dom@0.1.48/",
         "sqlite/": "https://deno.land/x/sqlite@v3.9.1/",
         "zipjs/": "https://deno.land/x/zipjs@v2.7.53/",
