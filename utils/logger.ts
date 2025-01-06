@@ -1,7 +1,7 @@
 import { join } from "@std/path";
 import { format as format_ver, parse as parse_ver } from "@std/semver";
 import type { Config } from "../config.ts";
-import { parse_bool, stackTrace } from "../utils.ts";
+import { parse_bool, stackTrace, sure_dir_sync } from "../utils.ts";
 import { Db, QueryParameterSet, SqliteMaster } from "./db_interface.ts";
 
 const ALL_TABLES = [
@@ -78,6 +78,7 @@ class BaseLogger extends EventTarget {
         this.#cfg = cfg;
         const base_path = cfg.db_path || cfg.base;
         const db_path = join(base_path, "logs.db");
+        sure_dir_sync(base_path);
         this.#use_ffi = parse_bool(Deno.env.get("DB_USE_FFI") ?? "false");
         if (this.#use_ffi) {
             const DB = (await import("./db_ffi.ts")).DbFfi;
