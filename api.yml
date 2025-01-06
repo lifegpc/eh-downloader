@@ -2610,41 +2610,39 @@ paths:
     delete: 
       operationId: clearLog
       summary: Clear log
-      parameters: 
-        - name: type
-          in: query
-          schema:
-            type: string
-          description: Log type filter
-        - name: min_level
-          in: query
-          schema:
-            $ref: "#/components/schemas/LogLevel"
-          description: Minimum log level filter
-        - name: max_level
-          in: query
-          schema:
-            $ref: "#/components/schemas/LogLevel"
-          description: Maximum log level filter
-        - name: deleted_level
-          in: query
-          schema:
-            type: array
-            items:
-              type: integer
-          description: List of log levels to delete
-        - name: end_time
-          in: query
-          schema:
-            type: string
-            format: date-time
-          description: End time for log deletion
-        - name: optimize
-          in: query
-          schema:
-            type: boolean
-            default: true
-          description: Whether to optimize the log after clearing
+      requestBody: 
+        content: 
+          application/x-www-form-urlencoded:
+            schema: 
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: Log type filter
+                  default: ''
+                min_level:
+                  $ref: "#/components/schemas/LogLevel"
+                  description: Minimum log level filter
+                  default: ''
+                max_level:
+                  $ref: "#/components/schemas/LogLevel"
+                  description: Maximum log level filter
+                  default: ''
+                deleted_level:
+                  type: array
+                  items:
+                    type: integer
+                  description: List of log levels to delete
+                  default: []
+                end_time:
+                  type: string
+                  format: date-time
+                  description: End time for log deletion
+                  default: ''
+                optimize:
+                  type: boolean
+                  default: true
+                  description: Whether to optimize the log after clearing
       responses:
         "200":
           description: OK

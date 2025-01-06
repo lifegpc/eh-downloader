@@ -7,7 +7,10 @@ curl -L "https://github.com/lifegpc/eh-downloader/raw/master/docker-compose.yml"
 docker compose up -d
 ```
 
-API Document is available [here](https://ehapi.lifegpc.com/).
+Now dashboard is available at `http://localhost:8000`. API Document is available
+at `http://localhost:8000/swagger`
+
+API Document is also available [here](https://ehapi.lifegpc.com/).
 
 ## Official Frontend
 
