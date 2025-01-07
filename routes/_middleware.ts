@@ -1,5 +1,5 @@
 import { FreshContext } from "$fresh/server.ts";
-import { basename, join } from "@std/path";
+import { basename, join, normalize } from "@std/path";
 import {
     get_file_response,
     GetFileResponseOptions,
@@ -55,12 +55,11 @@ async function default_handler(req: Request, ctx: FreshContext) {
         } else {
             flutter_base = m.cfg.flutter_frontend;
         }
-        const u = new URL(req.url);
-        let p = join(flutter_base, u.pathname.slice(8));
-        if (!(await exists(p)) || p === flutter_base) {
+        let p = join(flutter_base, url.pathname.slice(8));
+        if (!(await exists(p)) || normalize(p) === normalize(flutter_base)) {
             p = join(flutter_base, "/index.html");
         }
-        if (u.pathname == "/flutter/manifest.json") {
+        if (url.pathname == "/flutter/manifest.json") {
             const lang = i18n_get_lang(req, ["zh-cn"]);
             if (lang !== "en") {
                 const tp = join(flutter_base, `/manifest.${lang}.json`);
@@ -70,10 +69,10 @@ async function default_handler(req: Request, ctx: FreshContext) {
             }
         }
         if (
-            u.pathname.startsWith("/flutter/gallery/") &&
-            u.searchParams.has("share")
+            url.pathname.startsWith("/flutter/gallery/") &&
+            url.searchParams.has("share")
         ) {
-            const token = u.searchParams.get("share")!;
+            const token = url.searchParams.get("share")!;
             const st = m.db.get_shared_token(token);
             const now = Date.now();
             if (
@@ -82,7 +81,9 @@ async function default_handler(req: Request, ctx: FreshContext) {
             ) {
                 const b = `/flutter/gallery/${st.info.gid}`;
                 const g = m.db.get_gmeta_by_gid(st.info.gid);
-                if ((u.pathname == b || u.pathname.startsWith(b + "/")) && g) {
+                if (
+                    (url.pathname == b || url.pathname.startsWith(b + "/")) && g
+                ) {
                     const html = await Deno.readTextFile(p);
                     await initDOMParser();
                     try {
@@ -166,8 +167,7 @@ async function default_handler(req: Request, ctx: FreshContext) {
         } else {
             flutter_base = m.cfg.flutter_frontend;
         }
-        const u = new URL(req.url);
-        const p = join(flutter_base, "canvaskit", u.pathname.slice(11));
+        const p = join(flutter_base, "canvaskit", url.pathname.slice(11));
         const opts: GetFileResponseOptions = {};
         opts.range = req.headers.get("range");
         opts.if_modified_since = req.headers.get("If-Modified-Since");
@@ -179,12 +179,11 @@ async function default_handler(req: Request, ctx: FreshContext) {
         if (Deno.build.os === "windows") {
             swagger_base = swagger_base.slice(1);
         }
-        const u = new URL(req.url);
-        let p = join(swagger_base, u.pathname.slice(9));
+        let p = join(swagger_base, url.pathname.slice(9));
         if (basename(p) == "swagger-initializer.js") {
             p = join(swagger_base, "../swagger-initializer.js");
         }
-        if (!(await exists(p)) || p === swagger_base) {
+        if (!(await exists(p)) || normalize(p) === normalize(swagger_base)) {
             p = join(swagger_base, "/index.html");
         }
         if (basename(p) == "index.html") {
@@ -221,7 +220,7 @@ async function default_handler(req: Request, ctx: FreshContext) {
                 );
             } catch (e) {
                 logger.warn("Failed to handle swagger index.html:", e);
-                if (u.pathname == "/swagger") {
+                if (url.pathname == "/swagger") {
                     return Response.redirect(
                         `${get_host(req)}/swagger/index.html`,
                         302,
