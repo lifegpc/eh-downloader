@@ -11,7 +11,12 @@ export async function check_ffmpeg_binary(p: string) {
         stderr: "null",
         args: ["-h"],
     });
-    const c = cmd.spawn();
+    let c: Deno.ChildProcess | undefined;
+    try {
+        c = cmd.spawn();
+    } catch (_) {
+        return false;
+    }
     const o = await c.output();
     return o.code === 0;
 }
