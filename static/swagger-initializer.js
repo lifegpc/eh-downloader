@@ -15,6 +15,7 @@ window.onload = function() {
     ],
     layout: "StandaloneLayout",
     validatorUrl: null,
+    tagsSorter: 'alpha',
   });
 
   //</editor-fold>

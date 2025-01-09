@@ -1422,7 +1422,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /config:
     get:
-      tags: [config, admin]
+      tags: [config, admin, websocket]
       operationId: getConfig
       summary: Get server's configuration
       parameters:
@@ -2842,6 +2842,29 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 404, "error": "log not found." }
+  /log/realtime:
+    get:
+      tags: [logs, websocket]
+      summary: Create a websocket connection to receive real-time log
+      operationId: getRealtimeLogs
+      responses:
+        "101":
+          description: Switching Protocols to websocket
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example:
+                { "ok": false, "status": 403, "error": "Permission denied." }
   /shared_token:
     delete: 
       tags: [token]
@@ -3202,7 +3225,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /task:
     get:
-      tags: [task]
+      tags: [task, websocket]
       operationId: createTaskConnection
       summary: Create a websocket connection to receive task event
       responses: 
