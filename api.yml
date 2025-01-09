@@ -1271,6 +1271,7 @@ security:
 paths:
   /client/config:
     delete:
+      tags: [client, config, user]
       operationId: deleteClientConfig
       summary: Delete client configuration
       requestBody:
@@ -1317,6 +1318,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     get:
+      tags: [client, config, user]
       operationId: getClientConfig
       summary: Get client configuration
       parameters:
@@ -1369,6 +1371,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example: { "ok": false, "status": 404, "error": "Not found" }
     put:
+      tags: [client, config, user]
       operationId: putClientConfig
       summary: Create/Update client configuration
       requestBody:
@@ -1419,6 +1422,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /config:
     get:
+      tags: [config, admin]
       operationId: getConfig
       summary: Get server's configuration
       parameters:
@@ -1454,6 +1458,7 @@ paths:
             text/plain:
               example: Permission denied
     post:
+      tags: [config, admin]
       operationId: updateConfig
       summary: Update server's configuration
       requestBody:
@@ -1487,6 +1492,7 @@ paths:
               example: Permission denied
   /deploy_id:
     get: 
+      tags: [version]
       operationId: getDeployId
       summary: Get deployment id
       responses: 
@@ -1510,6 +1516,7 @@ paths:
               example: { "ok": false, "status": 401, "error": "Unauthorized" }
   /eh/image_limit:
     get:
+      tags: [eh, task]
       operationId: getEhImageLimit
       summary: Get E-Hentai image limits
       responses:
@@ -1544,6 +1551,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /eh/metadata:
     get:
+      tags: [eh, task]
       operationId: getEhMetadata
       summary: Get gallery metadata from E-Hentai api
       parameters: 
@@ -1596,6 +1604,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /exit:
     post: 
+      tags: [admin]
       operationId: closeServer
       summary: Close Server
       requestBody:
@@ -1636,6 +1645,7 @@ paths:
           type: integer
           format: int64
     get:
+      tags: [gallery, export]
       operationId: exportGalleryZip
       summary: Export gallery as Zip file
       security:
@@ -1692,6 +1702,7 @@ paths:
         schema: 
           type: integer
     get: 
+      tags: [file]
       operationId: getFile
       summary: Get file data/information
       security:
@@ -1762,6 +1773,7 @@ paths:
               example: File not found.
   /file/random:
     get: 
+      tags: [file]
       operationId: getRandomFile
       summary: Get random file
       security:
@@ -1870,6 +1882,7 @@ paths:
               example: File not found.
   /file/upload:
     post: 
+      tags: [file]
       operationId: uploadFile
       summary: Upload image file
       requestBody:
@@ -1939,6 +1952,7 @@ paths:
                 { "ok": false, "status": 500, "error": "Internal Server Error." }
   /filemeta:
     get: 
+      tags: [file]
       operationId: getFilemeta
       summary: Get metadata for a image
       parameters: 
@@ -1987,6 +2001,7 @@ paths:
               example:
                 { "ok": false, "status": 404, "error": "file not found." }
     post:
+      tags: [file]
       operationId: updateFilemeta
       summary: Update metadata for images
       requestBody: 
@@ -2110,6 +2125,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     put:
+      tags: [file]
       operationId: setFilemeta
       summary: Set metadata for images
       requestBody: 
@@ -2242,6 +2258,7 @@ paths:
         schema: 
           type: string
     get:
+      tags: [file]
       operationId: getFilemeta2
       summary: Get metedata for a image
       responses:
@@ -2293,6 +2310,7 @@ paths:
           items:
             type: string
     get:
+      tags: [file]
       operationId: getFiles
       summary: Get files from tokens
       responses:
@@ -2336,6 +2354,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /fs/list:
     get:
+      tags: [task]
       operationId: getFSList
       summary: Get file list of a directory on server
       parameters: 
@@ -2388,6 +2407,7 @@ paths:
           type: integer
           format: int64
     get:
+      tags: [gallery]
       operationId: getGallery
       summary: Get gallery information
       responses:
@@ -2430,6 +2450,7 @@ paths:
                 { "ok": false, "status": 404, "error": "Gallery not found." }
   /gallery/list:
     get: 
+      tags: [gallery]
       operationId: listGalleries
       summary: Get a list of galleries
       parameters: 
@@ -2538,6 +2559,7 @@ paths:
         required: true
         description: List of gallery ids
     get:
+      tags: [gallery]
       operationId: getGalleriesMeta
       summary: Get galleries' metadata
       responses:
@@ -2596,6 +2618,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /health_check:
     get:
+      tags: [health_check]
       operationId: checkHealth
       security: []
       summary: Check server's health
@@ -2608,6 +2631,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseTrue"
   /log:
     delete: 
+      tags: [logs]
       operationId: clearLog
       summary: Clear log
       requestBody: 
@@ -2674,6 +2698,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     get:
+      tags: [logs]
       operationId: queryLog
       summary: Query log
       parameters:
@@ -2742,6 +2767,7 @@ paths:
         required: true
         description: Log entry ID
     delete: 
+      tags: [logs]
       operationId: deleteLog
       summary: Delete a log entry
       responses:
@@ -2775,6 +2801,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     get:
+      tags: [logs]
       operationId: getLog
       summary: Get a log entry
       responses:
@@ -2817,6 +2844,7 @@ paths:
                 { "ok": false, "status": 404, "error": "log not found." }
   /shared_token:
     delete: 
+      tags: [token]
       operationId: deleteSharedToken
       summary: Delete shared token
       requestBody:
@@ -2865,6 +2893,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     get: 
+      tags: [token]
       operationId: getSharedToken
       summary: Get information for shared token
       responses:
@@ -2890,6 +2919,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example: { "ok": false, "status": 401, "error": "Unauthorized" }
     patch: 
+      tags: [token]
       operationId: updateSharedToken
       summary: Update shared token
       requestBody: 
@@ -2951,6 +2981,7 @@ paths:
               example:
                 { "ok": false, "status": 404, "error": "Not found" }
     put: 
+      tags: [token]
       operationId: createSharedToken
       summary: Create shared token
       requestBody: 
@@ -3006,6 +3037,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /shared_token/list:
     get: 
+      tags: [token]
       operationId: listSharedToken
       summary: Get a list of shared token
       parameters: 
@@ -3055,6 +3087,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /status:
     get: 
+      tags: [status]
       operationId: getStatus
       summary: Get server's status
       responses:
@@ -3079,6 +3112,7 @@ paths:
         required: true
         description: List of tag ids/names
     get: 
+      tags: [tag]
       operationId: getTags
       summary: Get information of tags
       responses:
@@ -3141,6 +3175,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /tag/rows:
     get: 
+      tags: [tag]
       operationId: getRowTags
       summary: Get a list of tags which namespace is row
       responses:
@@ -3167,6 +3202,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /task:
     get:
+      tags: [task]
       operationId: createTaskConnection
       summary: Create a websocket connection to receive task event
       responses: 
@@ -3188,6 +3224,7 @@ paths:
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
     put:
+      tags: [task]
       operationId: createTask
       summary: Create a new task
       requestBody: 
@@ -3259,6 +3296,7 @@ paths:
                 { "ok": false, "status": 500, "error": "Internal Server Error." }
   /task/download_cfg:
     get:
+      tags: [task, config]
       operationId: getDefaultDownloadConfig
       summary: Get default configuration for download task
       responses:
@@ -3296,6 +3334,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /task/export_zip_cfg:
     get: 
+      tags: [task, config]
       operationId: getDefaultExportZipConfig
       summary: Get default configuration for export as zip file task
       responses:
@@ -3329,6 +3368,7 @@ paths:
                 { "ok": false, "status": 403, "error": "Permission denied." }
   /task/import_cfg:
     get: 
+      tags: [task, config]
       operationId: getDefaultImportConfig
       summary: Get default configuration for import task
       responses:
@@ -3362,6 +3402,7 @@ paths:
         required: true
         description: File id
     get:
+      tags: [file, thumbnail]
       operationId: getThumbnail
       summary: Get thumbnail of file
       parameters: 
@@ -3441,6 +3482,7 @@ paths:
               example: Failed to generate thumbnail.
   /token:
     delete:
+      tags: [token]
       operationId: deleteToken
       summary: Delete token (logout)
       requestBody: 
@@ -3492,6 +3534,7 @@ paths:
               example:
                 { "ok": false, "status": 404, "error": "token not found." }
     get:
+      tags: [token]
       operationId: getToken
       summary: Get token information
       parameters: 
@@ -3534,6 +3577,7 @@ paths:
                 user:
                   value:  { "ok": false, "status": 404, "error": "user not found." }
     patch:
+      tags: [token]
       operationId: updateToken
       summary: Update token information
       requestBody: 
@@ -3600,6 +3644,7 @@ paths:
               example:
                 { "ok": false, "status": 500, "error": "Internal Server Error." }
     put:
+      tags: [token]
       operationId: createToken
       summary: Create token (login)
       security: []
@@ -3672,6 +3717,7 @@ paths:
                 { "ok": false, "status": 2, "error": "Failed to decode password with base64." }
   /token/manage:
     delete: 
+      tags: [token, admin]
       operationId: deleteTokenById
       summary: Delete a token by token id
       requestBody: 
@@ -3732,6 +3778,7 @@ paths:
                 token:
                   value: { "ok": false, "status": 404, "error": "Token not found." }
     get:
+      tags: [token, admin]
       operationId: listTokens
       summary: List user's tokens
       parameters: 
@@ -3803,6 +3850,7 @@ paths:
               example: { "ok": false, "status": 404, "error": "User not found." }
   /user:
     delete:
+      tags: [user, admin]
       operationId: deleteUser
       summary: Delete a user
       description: If both user id and user name are provided, user id will be used
@@ -3868,6 +3916,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example: { "ok": false, "status": 404, "error": "User not found." }
     get:
+      tags: [user, admin]
       operationId: getUser
       summary: Get a user's information
       description: If both user id and user name are provided, user id will be used. If both user id and user name are empty, current authorizated user will be used.
@@ -3918,6 +3967,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example: { "ok": false, "status": 404, "error": "User not found." }
     patch:
+      tags: [user, admin]
       operationId: updateUser
       summary: Update a user's information
       description: If both user id and user name are provided, user id will be used and provided user name will become user's new user name. If both user id and user name are empty, current authorizated user will be used.
@@ -3997,6 +4047,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example: { "ok": false, "status": 404, "error": "User not found." }
     put:
+      tags: [user, admin]
       operationId: createUser
       summary: Create user
       requestBody: 
@@ -4059,6 +4110,7 @@ paths:
                   value: { "ok": false, "status": 8, "error": "Only root user can add admin user." }
   /user/change_name:
     post:
+      tags: [user]
       operationId: changeUserName
       summary: Change current user's name
       requestBody: 
@@ -4102,6 +4154,7 @@ paths:
               example: { "ok": false, "status": 403, "error": "Permission denied." }
   /user/change_password:
     post: 
+      tags: [user]
       operationId: changeUserPassword
       summary: Change current user's password
       externalDocs: 
@@ -4159,6 +4212,7 @@ paths:
               example: { "ok": false, "status": 403, "error": "Permission denied." }
   /user/list:
     get: 
+      tags: [user, admin]
       operationId: getUsers
       summary: Get a list of users
       parameters: 
