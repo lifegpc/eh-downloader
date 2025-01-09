@@ -113,7 +113,6 @@ COPY ./page ./page
 COPY ./routes ./routes
 COPY ./scripts ./scripts
 COPY ./server ./server
-COPY ./static/*.css ./static/
 COPY ./static/*.ts ./static/
 COPY ./static/*.ico ./static/
 COPY ./static/*.svg ./static/

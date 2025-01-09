@@ -291,7 +291,7 @@ export async function download_task(
                         }
                     }
                 }
-                logger.log("Already download page", i.index);
+                logger.debug("Already download page", i.index);
                 return;
             }
         }

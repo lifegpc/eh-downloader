@@ -64,7 +64,6 @@ export const handler: Handlers = {
         socket.onerror = () => {
             removeListener();
             clearInterval(interval);
-            logger.error("WebSocket error.");
         };
         socket.onmessage = (e) => {
             try {
