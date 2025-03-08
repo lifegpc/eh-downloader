@@ -573,6 +573,25 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/GalleryList"
+    GalleryThumbnailApiResult:
+      description: Api response for getGalleriesThumbnail
+      allOf: 
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              additionalProperties:
+                oneOf:
+                  - allOf:
+                      - $ref: "#/components/schemas/ApiResponse"
+                      - type: object
+                        required: [data]
+                        properties:
+                          data:
+                            $ref: "#/components/schemas/ExtendedPMeta"
+                  - $ref: "#/components/schemas/ApiResponseError"
     GMeta:
       description: Gallery metadata
       allOf: 
@@ -2616,6 +2635,68 @@ paths:
                 $ref: "#/components/schemas/ApiResponseError"
               example:
                 { "ok": false, "status": 403, "error": "Permission denied." }
+  /gallery/thumbnail/{gids}:
+    parameters: 
+      - name: gids
+        in: path
+        schema: 
+          type: array
+          items:
+            type: integer
+            format: int64
+        required: true
+        description: List of gallery ids
+    get:
+      tags: [gallery]
+      operationId: getGalleriesThumbnail
+      summary: Get gallery thumbnail information
+      description: Get the first page's extended metadata for specified galleries, commonly used to retrieve thumbnails
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryThumbnailApiResult'
+              example: {
+                "ok": true,
+                "status": 0,
+                "data": {
+                  "1467583": {
+                    "ok": true,
+                    "status": 0,
+                    "data": {
+                      "gid": 1467583,
+                      "token": "fb8be3ee60",
+                      "index": 1,
+                      "name": "00.jpg",
+                      "width": 1280,
+                      "height": 1807,
+                      "is_nsfw": false,
+                      "is_ad": false
+                    }
+                  },
+                  "1": {
+                    "ok": false,
+                    "status": 404,
+                    "error": "Not found"
+                  }
+                }
+              }
+        "401":
+          description: Authorization information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 401, "error": "Unauthorized" }
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              example: { "ok": false, "status": 403, "error": "Permission denied." }
   /health_check:
     get:
       tags: [health_check]

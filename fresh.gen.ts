@@ -21,6 +21,7 @@ import * as $api_fs_list from "./routes/api/fs/list.ts";
 import * as $api_gallery_gid_ from "./routes/api/gallery/[gid].ts";
 import * as $api_gallery_list from "./routes/api/gallery/list.ts";
 import * as $api_gallery_meta_gids_ from "./routes/api/gallery/meta/[gids].ts";
+import * as $api_gallery_thumbnail_gids_ from "./routes/api/gallery/thumbnail/[gids].ts";
 import * as $api_health_check from "./routes/api/health_check.ts";
 import * as $api_log from "./routes/api/log.ts";
 import * as $api_log_id_ from "./routes/api/log/[id].ts";
@@ -74,6 +75,8 @@ const manifest = {
         "./routes/api/gallery/[gid].ts": $api_gallery_gid_,
         "./routes/api/gallery/list.ts": $api_gallery_list,
         "./routes/api/gallery/meta/[gids].ts": $api_gallery_meta_gids_,
+        "./routes/api/gallery/thumbnail/[gids].ts":
+            $api_gallery_thumbnail_gids_,
         "./routes/api/health_check.ts": $api_health_check,
         "./routes/api/log.ts": $api_log,
         "./routes/api/log/[id].ts": $api_log_id_,

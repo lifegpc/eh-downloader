@@ -1134,6 +1134,15 @@ export class EhDb {
             [token],
         ));
     }
+    get_first_extended_pmeta(gid: number | bigint) {
+        const d = this.convert_extended_pmeta(
+            this.db.queryEntries<ExtendedPMetaRaw>(
+                "SELECT pmeta.*, filemeta.is_nsfw, filemeta.is_ad FROM pmeta LEFT JOIN filemeta ON filemeta.token = pmeta.token WHERE gid = ? ORDER BY pmeta.\"index\" ASC LIMIT 1;",
+                [gid],
+            )
+        );
+        return d.length ? d[0] : null;
+    }
     get_gallery_count() {
         return this.db.query<[number | bigint]>(
             "SELECT COUNT(*) FROM gmeta;",
