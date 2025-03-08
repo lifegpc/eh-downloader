@@ -76,12 +76,12 @@ RUN cd ~ && \
     cd ~ && rm -rf curl-8.8.0 curl-8.8.0.tar.gz
 
 RUN cd ~ && \
-    curl -L "https://www.sqlite.org/snapshot/sqlite-snapshot-202401231504.tar.gz" -o sqlite-snapshot-202401231504.tar.gz && \
-    tar -xzvf sqlite-snapshot-202401231504.tar.gz && \
-    cd sqlite-snapshot-202401231504 && \
+    curl -L "https://www.sqlite.org/2025/sqlite-autoconf-3490100.tar.gz" -o sqlite-autoconf-3490100.tar.gz && \
+    tar -xzvf sqlite-autoconf-3490100.tar.gz && \
+    cd sqlite-autoconf-3490100 && \
     ./configure --prefix=/clib --enable-shared --disable-static --disable-static-shell && \
     make -j$(grep -c ^processor /proc/cpuinfo) && make install && \
-    cd ~ && rm -rf sqlite-snapshot-202401231504 sqlite-snapshot-202401231504.tar.gz
+    cd ~ && rm -rf sqlite-autoconf-3490100 sqlite-autoconf-3490100.tar.gz
 
 RUN cd ~ && \
     curl -L "https://libzip.org/download/libzip-1.10.1.tar.gz" -o libzip-1.10.1.tar.gz && \
