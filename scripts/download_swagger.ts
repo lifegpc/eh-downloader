@@ -20,7 +20,7 @@ async function get_download_url() {
     return `https://github.com/swagger-api/swagger-ui/archive/refs/tags/${version}.zip`;
 }
 
-const DIST = /swagger-ui-[1-9\.]+\/dist/;
+const DIST = /swagger-ui-[0-9\.]+\/dist/;
 
 async function unzip(url: string) {
     const zip_reader = new ZipReader(new HttpReader(url));
