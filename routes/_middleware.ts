@@ -186,7 +186,7 @@ async function default_handler(req: Request, ctx: FreshContext) {
         if (!(await exists(p)) || normalize(p) === normalize(swagger_base)) {
             p = join(swagger_base, "/index.html");
         }
-        if (basename(p) == "index.html") {
+        if (basename(p) == "index.html" && await exists(p)) {
             const html = await Deno.readTextFile(p);
             await initDOMParser();
             try {
