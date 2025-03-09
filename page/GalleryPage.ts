@@ -177,10 +177,9 @@ class GalleryPage {
     }
     async #get_imagelist() {
         function load_image(doc: Element): Page[] {
-            const eles = doc.querySelectorAll("#gdt > div[class^=gdt]");
+            const eles = doc.querySelectorAll("#gdt > a");
             return map(eles, (e) => {
-                const b = e as Element;
-                const a = b.querySelector("a");
+                const a = e as Element;
                 if (!a) throw Error("Link not found.");
                 const href = a.getAttribute("href");
                 if (!href) throw Error("Link not found.");
@@ -190,14 +189,14 @@ class GalleryPage {
                 }
                 const token = u.token;
                 const index = u.index;
-                const img = b.querySelector("img");
+                const img = a.querySelector("div");
                 if (!img) throw Error("Image not found.");
-                const thumbnail = img.getAttribute("src");
+                const thumbnail = img.getAttribute("style")?.match(/url\((.*)\)/i);
                 if (!thumbnail) throw Error("Image source not found");
                 const name = img.getAttribute("title")?.match(/page \d+: (.*)/i)
                     ?.at(1);
                 if (!name) throw Error("name not found");
-                return { name, token, thumbnail, index };
+                return { name, token, thumbnail: thumbnail[1], index };
             });
         }
         let b = load_image(this.doc);
